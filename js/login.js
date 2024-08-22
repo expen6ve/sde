@@ -1,7 +1,7 @@
 // Import the functions you need from the SDKs you need
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js";
 import { getAuth, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js";
-import { getDatabase, ref } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-database.js";  // Correct import for database functions
+import { getDatabase} from "https://www.gstatic.com/firebasejs/10.13.0/firebase-database.js";  // Correct import for database functions
 
 // Your web app's Firebase configuration
 const firebaseConfig = {
@@ -44,10 +44,12 @@ loginButton.addEventListener("click", async (e) => {
      passInput.value = '';
 
     // Optionally, redirect the user to a different page after successful login
-    // window.location.href = 'home.html'; // Change 'dashboard.html' to your desired page
+    window.location.href = 'home.html'; // Change 'dashboard.html' to your desired page
   } catch (error) {
     console.error("Error logging in:", error);
-    alert("Failed to log in: " + error.message);
+    // Show the error modal
+    const errorModal = new bootstrap.Modal(document.getElementById('errorModal'));
+    errorModal.show();
      passInput.value = '';
   }
 });

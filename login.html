@@ -4,36 +4,55 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Eco-Reads</title>
+    <link rel="stylesheet" href="css/bootstrap.min.css">
     <link rel="stylesheet" href="css/login.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Bona+Nova+SC&display=swap" rel="stylesheet">
     <script type="module" src="js/login.js"></script>
+    <script defer src="js/bootstrap.bundle.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 </head>
 <body>
-    <div class="login-wrapper">
-        <div class="login-title-container">
-            <div class="login-title">
-                <h1>Welcome to Eco-Reads</h1>
-            </div>
-            <div class="login-logo">
-                <img src="images/logo.png" alt="Eco-Reads Logo">
-            </div>
+    <div class="container d-flex flex-column justify-content-center align-items-center min-vh-100">
+        <div class="text-center mb-4">
+            <h1 class="display-4 text-muted">Welcome to Eco-Reads<img src="images/logo.png" alt="Eco-Reads Logo" class="mb-3" style="width: 100px; height: auto;"></h1>
         </div>
-        <div class="login-form">
+        <div class="card p-4 w-50 w-md-50 w-lg-25">
             <form id="loginForm">
-                <input type="email" placeholder="Email" id="emailInput" required>
-                <input type="password" placeholder="Password" id="passInput" required>
-                <button id="loginButton" type="submit">Login</button>
-
-                <div class="forgot-password">
-                    <a href="#">Forgot password?</a>
+                <div class="mb-3">
+                    <input type="email" class="form-control form-control-lg" placeholder="Email" id="emailInput" required>
                 </div>
-                <div class="signup-link">
-                    <p>Don't have an account? <a href="signup.html">Sign Up</a></p>
+                <div class="mb-3">
+                    <input type="password" class="form-control form-control-lg" placeholder="Password" id="passInput" required>
+                </div>
+                <button type="submit" id="loginButton" class="btn btn-dark btn-lg w-100">Login</button>
+                <div class="d-flex justify-content-end mt-3">
+                    <a href="#" class="text-muted">Forgot password?</a>
+                </div>
+                <div class="text-center mt-3">
+                    <p class="mb-0">Don't have an account? <a href="signup.html" class="text-success fw-bold">Sign Up</a></p>
                 </div>
             </form>
         </div>
     </div>
+    <!-- Error Modal -->
+<div class="modal fade" id="errorModal" tabindex="-1" role="dialog" aria-labelledby="errorModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="errorModalLabel">Login Error</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                There was an error with your login attempt. Please check your email and password.
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 </body>
 </html>
