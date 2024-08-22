@@ -17,6 +17,7 @@ const app = initializeApp(firebaseConfig);
 
 // Initialize Firebase Authentication
 const auth = getAuth();
+const db = getDatabase();
 
 // Wait for the DOM to load before accessing elements
 document.addEventListener("DOMContentLoaded", () => {

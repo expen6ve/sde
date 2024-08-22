@@ -5,22 +5,26 @@ body {
     height: 100vh;
     margin: 0;
     display: flex;
+    font-family: "Bona Nova SC", serif;
+    font-weight: 400;
 }
 
-.signup-wrapper {
+.login-wrapper {
     display: flex;
     flex-direction: column;
     align-items: center;
     gap: 20px; 
 }
 
-.signup-title-container {
+.login-title-container {
     display: flex;
     align-items: center;
     gap: 15px; 
 }
-
-.signup-title {
+.login-title h1 {
+    margin: 0 0 40px 0;
+}
+.login-title {
     font-family: "Bona Nova SC", serif;
     font-weight: 400;
     font-size: 2.5em;
@@ -28,24 +32,25 @@ body {
     color: dimgray;
 }
 
-.signup-logo img {
+.login-logo img {
     width: 100px; 
     height: auto;
+    margin: 0 0 40px 0;
 }
 
-.signup-form {
+.login-form {
     background-color: white;
     padding: 40px 30px 30px 30px;
     border-radius: 10px;
-    width: 400px;
+    width: 600px;
 }
 
 input {
     display: block;
     border-radius: 5px;
-    font-size: 16px;
+    font-size: 2em;
     background: white;
-    width: 380px;
+    width: 580px;
     border: 0;
     padding: 10px 10px;
     margin: 15px 0;
@@ -54,7 +59,7 @@ input {
 button {
     cursor: pointer;
     color: #fff;
-    font-size: 16px;
+    font-size: 1.5em;
     text-transform: uppercase;
     width: 100%;
     border: 0;
@@ -65,3 +70,31 @@ button {
     font-family: "Bona Nova SC", serif;
     font-weight: 400;
 }
+.forgot-password {
+    margin-top: 15px;
+    text-align: right;
+}
+
+.forgot-password a {
+    text-decoration: none;
+    color: dimgray;
+    font-size: 20px;
+    font-weight: 400;
+}
+
+.signup-link {
+    margin-top: 20px;
+    text-align: center;
+}
+
+.signup-link p {
+    font-size: 20px;
+    color: dimgray;
+}
+
+.signup-link a {
+    text-decoration: none;
+    color: #1f7724;
+    font-weight: 600;
+}
+
