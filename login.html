@@ -8,7 +8,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Bona+Nova+SC&display=swap" rel="stylesheet">
-    <script type="module" src="login.js"></script>
+    <script type="module" src="js/login.js"></script>
 </head>
 <body>
     <div class="login-wrapper">
@@ -21,10 +21,10 @@
             </div>
         </div>
         <div class="login-form">
-            <form>
-                <input type="email" placeholder="Email" id="email" required>
-                <input type="password" placeholder="Password" id="password" required>
-                <button id="submit" type="submit">Login</button>
+            <form id="loginForm">
+                <input type="email" placeholder="Email" id="emailInput" required>
+                <input type="password" placeholder="Password" id="passInput" required>
+                <button id="loginButton" type="submit">Login</button>
 
                 <div class="forgot-password">
                     <a href="#">Forgot password?</a>

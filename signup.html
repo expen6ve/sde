@@ -10,8 +10,9 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Bona+Nova+SC&display=swap" rel="stylesheet">
-    <script defer src="js/bootstrap.bundle.min.js"></script>
     <script type="module" src="js/signup.js"></script>
+    <script defer src="js/bootstrap.bundle.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 </head>
 
 <body>
@@ -90,6 +91,13 @@
                                                 <label class="form-label" for="phone-number">Phone Number (+63)</label>
                                             </div>
                                         </div>
+                                        <!-- Replace the duplicate phone number input with an email input -->
+                                        <div class="mb-4 pb-2">
+                                            <div class="form-outline">
+                                                <input type="email" id="email" class="form-control form-control-lg" required />
+                                                <label class="form-label" for="email">Email</label>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
 
@@ -151,6 +159,24 @@
             </div>
         </div>
     </section>
+        <!-- Success Modal -->
+    <div class="modal fade" id="successModal" tabindex="-1" role="dialog" aria-labelledby="successModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+            <h5 class="modal-title" id="successModalLabel">Registration Successful</h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+            </button>
+            </div>
+            <div class="modal-body">
+            You have successfully registered!
+            </div>
+            <div class="modal-footer">
+            <button type="button" class="btn btn-primary" id="continueButton">Continue</button>
+            </div>
+        </div>
+        </div>
+    </div>       
 </body>
-
 </html>
