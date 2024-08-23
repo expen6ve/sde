@@ -1,11 +1,12 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js";
 import { getAuth, signInWithEmailAndPassword, sendPasswordResetEmail } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js";
-import { getDatabase } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-database.js";
+import { getDatabase, ref, get } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-database.js";
 
 // Your web app's Firebase configuration
 const firebaseConfig = {
   apiKey: "AIzaSyCN8NcVQNRjAF_A86a8NfxC9Audivokuso",
   authDomain: "sde-ecoread.firebaseapp.com",
+  databaseURL: "https://sde-ecoread-default-rtdb.asia-southeast1.firebasedatabase.app",
   projectId: "sde-ecoread",
   storageBucket: "sde-ecoread.appspot.com",
   messagingSenderId: "137637739158",
@@ -39,13 +40,30 @@ loginButton.addEventListener("click", async (e) => {
     const userCredential = await signInWithEmailAndPassword(auth, email, password);
     const user = userCredential.user;
     console.log('User logged in:', user);
-    
-    // Clear the input fields
-    emailInput.value = '';
-    passInput.value = '';
 
-    // Optionally, redirect the user to a different page after successful login
-    window.location.href = 'home.html'; // Change 'home.html' to your desired page
+    // Fetch the user's role from the database
+    const userRef = ref(db, 'users/' + user.uid + '/role');
+    const snapshot = await get(userRef);
+    
+    if (snapshot.exists()) {
+      const role = snapshot.val();
+      // Clear the input fields
+      emailInput.value = '';
+      passInput.value = '';
+
+      // Redirect based on role
+      if (role === 'buyer') {
+        window.location.href = 'buyerhome.html'; // Redirect to Buyer home
+      } else if (role === 'seller') {
+        window.location.href = 'sellerhome.html'; // Redirect to Seller home
+      } else {
+        console.error('Unknown role:', role);
+        alert('Unknown user role. Please contact support.');
+      }
+    } else {
+      console.error('No role found for user');
+      alert('No role found for the user. Please contact support.');
+    }
   } catch (error) {
     console.error("Error logging in:", error);
     // Show the error modal

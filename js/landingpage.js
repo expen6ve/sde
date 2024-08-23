@@ -34,8 +34,8 @@ window.onload = function() {
 };
 
 // Listen for the user's choice
-buyerLink.addEventListener("click", () => setRoleAndRedirect("Buyer"));
-sellerLink.addEventListener("click", () => setRoleAndRedirect("Seller"));
+buyerLink.addEventListener("click", () => setRoleAndRedirect("buyer"));
+sellerLink.addEventListener("click", () => setRoleAndRedirect("seller"));
 
 // Function to set role in Firebase and redirect to the login page
 function setRoleAndRedirect(role) {
