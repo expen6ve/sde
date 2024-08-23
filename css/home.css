@@ -1,0 +1,25 @@
+body {
+    background-color: antiquewhite;
+    font-family: "Bona Nova SC", serif;
+}
+.navbar {
+    background-color: #e0dccf;
+}
+.text-hidden {
+    height: 80px; /* Adjust this height as needed */
+    overflow: hidden;
+    position: relative;
+}
+
+.read-more {
+    display: block;
+    color: #007bff;
+    text-decoration: none;
+    cursor: pointer;
+    margin-top: 10px;
+}
+
+.text-expanded {
+    height: auto;
+}
+

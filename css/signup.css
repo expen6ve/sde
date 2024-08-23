@@ -1,7 +1,29 @@
+input,
+textarea,
+select,
+button {
+    font-family: Arial, sans-serif;
+    font-size: 1rem;
+}
+
+.form-control {
+    font-family: Arial, sans-serif;
+    font-size: 1em;
+}
+
 body {
+    background-color: antiquewhite;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    margin: 0;
+    display: flex;
     font-family: "Bona Nova SC", serif;
     font-weight: 400;
 }
+
+
+
 
 @media (min-width: 1025px) {
     .h-custom {

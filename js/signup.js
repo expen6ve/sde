@@ -89,7 +89,7 @@ registerButton.addEventListener("click", (e) => {
 
 // Redirect to login.html when the "Continue" button is clicked
 continueButton.addEventListener("click", () => {
-    window.location.href = "login.html";
+    window.location.href = "landingpage.html";
 });
 
 // Function to get the selected gender

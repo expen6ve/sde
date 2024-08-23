@@ -33,10 +33,11 @@
                                         <h3 class="fw-normal mb-5  text-center" style="color: #85848e;">Personal Information</h3>
 
                                         <div class="row">
+                                            <!-- Email input replacing Username -->
                                             <div class="col-md-6 mb-4 pb-2">
                                                 <div class="form-outline">
-                                                    <input type="text" id="username" class="form-control form-control-lg" />
-                                                    <label class="form-label" for="username">Username</label>
+                                                    <input type="email" id="email" class="form-control form-control-lg" required />
+                                                    <label class="form-label" for="email">Email</label>
                                                 </div>
                                             </div>
                                             <div class="col-md-6 mb-4 pb-2">
@@ -87,15 +88,8 @@
 
                                         <div class="mb-4 pb-2">
                                             <div class="form-outline">
-                                                <input type="tel" id="phone-number" class="form-control form-control-lg" />
+                                                <input type="tel" id="phone-number" placeholder="+63" class="form-control form-control-lg" />
                                                 <label class="form-label" for="phone-number">Phone Number (+63)</label>
-                                            </div>
-                                        </div>
-                                        <!-- Replace the duplicate phone number input with an email input -->
-                                        <div class="mb-4 pb-2">
-                                            <div class="form-outline">
-                                                <input type="email" id="email" class="form-control form-control-lg" required />
-                                                <label class="form-label" for="email">Email</label>
                                             </div>
                                         </div>
                                     </div>
@@ -159,23 +153,24 @@
             </div>
         </div>
     </section>
-        <!-- Success Modal -->
+
+    <!-- Success Modal -->
     <div class="modal fade" id="successModal" tabindex="-1" role="dialog" aria-labelledby="successModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-            <h5 class="modal-title" id="successModalLabel">Registration Successful</h5>
-                <span aria-hidden="true">&times;</span>
-            </button>
-            </div>
-            <div class="modal-body">
-            You have successfully registered!
-            </div>
-            <div class="modal-footer">
-            <button type="button" class="btn btn-primary" id="continueButton">Continue</button>
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="successModalLabel">Registration Successful</h5>
+                    <span aria-hidden="true">&times;</span>
+                </div>
+                <div class="modal-body">
+                    You have successfully registered!
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" id="continueButton">Continue</button>
+                </div>
             </div>
         </div>
-        </div>
-    </div>       
+    </div>
 </body>
+
 </html>
