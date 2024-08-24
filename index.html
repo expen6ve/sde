@@ -10,7 +10,7 @@
     <link href="css/bootstrap.min.css" rel="stylesheet" />
     <link href="css/buyerhome.css" rel="stylesheet" />
     <script defer src="js/bootstrap.bundle.min.js"></script>
-    <script type="module" src="js/buyerhome.js"></script>
+    <script type="module" src="js/index.js"></script>
 </head>
 <body>
 <!-- Responsive navbar -->
@@ -26,7 +26,7 @@
         <div class="collapse navbar-collapse" id="navbarSupportedContent">
             <ul class="navbar-nav ms-auto mb-2 mb-lg-0 d-flex align-items-center">
                 <li class="nav-item">
-                    <a class="nav-link active" aria-current="page" href="#!">Booksfeed</a>
+                    <a class="nav-link" aria-current="page" href="#!">Booksfeed</a>
                 </li>
                 <li class="nav-item">
                     <a class="nav-link" href="#!">About</a>
@@ -34,17 +34,9 @@
                 <li class="nav-item">
                     <a class="nav-link" href="#!">Messages</a>
                 </li>
-                <li class="nav-item dropdown">
-                    <a class="nav-link dropdown-toggle" href="#" id="profileDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                        <img src="images/profileicon.svg" alt="profileicon" style="width: 30px; height: auto; object-fit: contain; border-radius: 50%">
-                    </a>                    
-                    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="profileDropdown">
-                        <li><a class="dropdown-item" href="manage-account.html">Manage Account</a></li>
-                        <li><a class="dropdown-item" href="purchases.html">Purchases</a></li>
-                        <li><hr class="dropdown-divider"></li>
-                        <li><a class="dropdown-item" href="#" id="signOut">Sign Out</a></li>
-                    </ul>
-                </li>                
+                <li class="nav-item">
+                    <a class="nav-link" href="login.html">Sign In</a>
+                </li>             
             </ul>
         </div>
     </div>

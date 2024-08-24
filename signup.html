@@ -13,6 +13,21 @@
     <script type="module" src="js/signup.js"></script>
     <script defer src="js/bootstrap.bundle.min.js"></script>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <style>
+        .profile-preview {
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            object-fit: cover;
+            margin-bottom: 20px;
+            display: block;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        .form-section {
+            margin-bottom: 20px;
+        }
+    </style>
 </head>
 
 <body>
@@ -20,7 +35,7 @@
         <div class="container py-5 h-100">
             <div class="row d-flex justify-content-center align-items-center h-100">
                 <div class="col-12">
-                    <div class="d-flex justify-content-center align-items-center mb-4">
+                    <div class="d-flex justify-content-center align-items-center">
                         <h1 class="h1 fw-bold text-center mb-0">Eco-Reads</h1>
                         <img src="images/logo.png" alt="Eco-Reads Logo" class="img-fluid" style="width: 100px; height: auto;">
                     </div>                    
@@ -29,33 +44,42 @@
                             <div class="row g-0">
                                 <!-- Personal Information Section -->
                                 <div class="col-lg-6">
-                                    <div class="p-5">
-                                        <h3 class="fw-normal mb-5  text-center" style="color: #85848e;">Personal Information</h3>
+                                    <div class="p-5 pb-0">
+                                        <h3 class="fw-normal mb-5 text-center" style="color: #85848e;">Personal Information</h3>
+
+                                        <!-- Profile Picture Upload and Preview -->
+                                        <div class="text-center">
+                                            <img id="profilePreview" src="images/default-avatar.png" alt="Profile Preview" class="profile-preview">
+                                        </div>
+                                        <div class="mb-4 form-section text-center">
+                                            <label for="profilePicture" class="form-label small">Upload Profile Picture:</label>
+                                            <input type="file" id="profilePicture" class="form-control form-control-sm" accept="image/*" />
+                                        </div>                                        
 
                                         <div class="row">
-                                            <!-- Email input replacing Username -->
-                                            <div class="col-md-6 mb-4 pb-2">
+                                            <!-- Email input -->
+                                            <div class="col-md-6 mb-4 form-section">
                                                 <div class="form-outline">
                                                     <input type="email" id="email" class="form-control form-control-lg" required />
                                                     <label class="form-label" for="email">Email</label>
                                                 </div>
                                             </div>
-                                            <div class="col-md-6 mb-4 pb-2">
+                                            <div class="col-md-6 mb-4 form-section">
                                                 <div class="form-outline">
-                                                    <input type="password" id="password" class="form-control form-control-lg" />
+                                                    <input type="password" id="password" class="form-control form-control-lg" required />
                                                     <label class="form-label" for="password">Password</label>
                                                 </div>
                                             </div>
                                         </div>
 
                                         <div class="row">
-                                            <div class="col-md-6 mb-4 pb-2">
+                                            <div class="col-md-6 mb-4 form-section">
                                                 <div class="form-outline">
                                                     <input type="text" id="first-name" class="form-control form-control-lg" />
                                                     <label class="form-label" for="first-name">First Name</label>
                                                 </div>
                                             </div>
-                                            <div class="col-md-6 mb-4 pb-2">
+                                            <div class="col-md-6 mb-4 form-section">
                                                 <div class="form-outline">
                                                     <input type="text" id="last-name" class="form-control form-control-lg" />
                                                     <label class="form-label" for="last-name">Last Name</label>
@@ -64,13 +88,13 @@
                                         </div>
 
                                         <div class="row">
-                                            <div class="col-md-6 mb-4 pb-2">
+                                            <div class="col-md-6 mb-4 form-section">
                                                 <div class="form-outline">
                                                     <input type="number" id="age" class="form-control form-control-lg" />
                                                     <label class="form-label" for="age">Age</label>
                                                 </div>
                                             </div>
-                                            <div class="col-md-6 d-flex align-items-center">
+                                            <div class="col-md-6 d-flex align-items-center form-section">
                                                 <div class="form-check form-check-inline">
                                                     <input class="form-check-input" type="radio" name="gender" id="male" value="male" checked>
                                                     <label class="form-check-label" for="male">Male</label>
@@ -86,7 +110,7 @@
                                             </div>
                                         </div>
 
-                                        <div class="mb-4 pb-2">
+                                        <div class="mb-4 form-section">
                                             <div class="form-outline">
                                                 <input type="tel" id="phone-number" placeholder="+63" class="form-control form-control-lg" />
                                                 <label class="form-label" for="phone-number">Phone Number (+63)</label>
@@ -98,7 +122,7 @@
                                 <!-- Contact Details Section -->
                                 <div class="col-lg-6 bg-indigo text-white">
                                     <div class="p-5">
-                                        <h3 class="fw-normal mb-5 text-center" >Address</h3>
+                                        <h3 class="fw-normal mb-5 text-center">Address</h3>
 
                                         <div class="mb-4 pb-2">
                                             <div class="form-outline form-white">
@@ -137,7 +161,7 @@
                                         </div>
 
                                         <div class="form-check d-flex justify-content-start mb-4 pb-3">
-                                            <input class="form-check-input me-3" type="checkbox" value="" id="terms" />
+                                            <input class="form-check-input me-3" type="checkbox" value="" id="terms" required />
                                             <label class="form-check-label text-white" for="terms">
                                                 I accept the <a href="#!" class="text-white"><u>Terms and Conditions</u></a>.
                                             </label>

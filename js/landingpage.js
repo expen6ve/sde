@@ -22,17 +22,6 @@ const auth = getAuth(app);
 const buyerLink = document.getElementById("buyer-link");
 const sellerLink = document.getElementById("seller-link");
 
-// Check if the role is already selected
-window.onload = function() {
-    if (sessionStorage.getItem('roleSelected')) {
-        // If role is already selected, redirect to login
-        window.location.href = "login.html";
-    }
-
-    // Replace the current history state to prevent back navigation
-    history.replaceState(null, "", "login.html");
-};
-
 // Listen for the user's choice
 buyerLink.addEventListener("click", () => setRoleAndRedirect("buyer"));
 sellerLink.addEventListener("click", () => setRoleAndRedirect("seller"));
