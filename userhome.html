@@ -8,15 +8,15 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Bona+Nova+SC&display=swap" rel="stylesheet">
     <link href="css/bootstrap.min.css" rel="stylesheet" />
-    <link href="css/buyerhome.css" rel="stylesheet" />
+    <link href="css/userhome.css" rel="stylesheet" />
     <script defer src="js/bootstrap.bundle.min.js"></script>
-    <script type="module" src="js/buyerhome.js"></script>
+    <script type="module" src="js/userhome.js"></script>
 </head>
 <body>
 <!-- Responsive navbar -->
 <nav class="navbar navbar-expand-lg">
     <div class="container px-5">
-        <a class="navbar-brand fs-2 text-muted d-flex align-items-center" href="buyerhome.html">
+        <a class="navbar-brand fs-2 text-muted d-flex align-items-center" href="userhome.html">
             Eco-Reads
             <img src="images/logo.png" alt="Eco-Reads Logo" class="ms-2" style="width: 50px; height: auto;">
         </a>
@@ -26,24 +26,41 @@
         <div class="collapse navbar-collapse" id="navbarSupportedContent">
             <ul class="navbar-nav ms-auto mb-2 mb-lg-0 d-flex align-items-center">
                 <li class="nav-item">
-                    <a class="nav-link active" aria-current="page" href="#!">Booksfeed</a>
+                    <a class="nav-link active" aria-current="page" href="userhome.html">Booksfeed</a>
                 </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="#!">About</a>
-                </li>
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                      Genre
+                    </a>
+                    <ul class="dropdown-menu">
+                      <li><a class="dropdown-item" href="#">Action</a></li>
+                      <li><hr class="dropdown-divider"></li>
+                      <li><a class="dropdown-item" href="#">Romance</a></li>
+                      <li><hr class="dropdown-divider"></li>
+                      <li><a class="dropdown-item" href="#">Horror</a></li>
+                    </ul>
+                  </li>
                 <li class="nav-item">
                     <a class="nav-link" href="#!">Messages</a>
                 </li>
+                <form class="d-flex" role="search">
+                    <input class="form-control me-2" type="search" placeholder="Search" aria-label="Search">
+                    <button class="btn btn-outline-success custom-hover-btn" type="submit">Search</button>
+                </form>
+                <li class="nav-item">
+                    <a class="nav-link" href="sellingform.html">SELL A BOOK</a>
+                </li>   
                 <li class="nav-item dropdown">
                     <a class="nav-link dropdown-toggle" href="#" id="profileDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                         <img src="images/profileicon.svg" alt="profileicon" style="width: 30px; height: 35px; object-fit: cover; border-radius: 50%">
                     </a>                    
-                    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="profileDropdown">
+                    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="profileDropdown" id="profileDropdownMenu">
                         <li><a class="dropdown-item" href="manage-account.html">Manage Account</a></li>
-                        <li><a class="dropdown-item" href="purchases.html">Purchases</a></li>
+                        <!-- Placeholder for dynamic role-based items -->
+                        <li id="roleBasedItem"></li>
                         <li><hr class="dropdown-divider"></li>
                         <li><a class="dropdown-item" href="#" id="signOut">Sign Out</a></li>
-                    </ul>
+                    </ul>                    
                 </li>                
             </ul>
         </div>
@@ -122,39 +139,6 @@
                 </div>
             </div>
         </div>
-        <!-- Sub Nav -->
-        <nav class="navbar navbar-expand-lg bg-body-tertiary mb-4">
-            <div class="container-fluid">
-              <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarTogglerDemo03" aria-controls="navbarTogglerDemo03" aria-expanded="false" aria-label="Toggle navigation">
-                <span class="navbar-toggler-icon"></span>
-              </button>
-              <a class="navbar-brand" href="#">I'm Feeling Lucky!</a>
-              <div class="collapse navbar-collapse" id="navbarTogglerDemo03">
-                <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-                  <li class="nav-item">
-                    <a class="nav-link active" aria-current="page" href="#">Favorites</a>
-                  </li>
-                  <li class="nav-item dropdown">
-                    <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                      Genre
-                    </a>
-                    <ul class="dropdown-menu">
-                      <li><a class="dropdown-item" href="#">Action</a></li>
-                      <li><a class="dropdown-item" href="#">Another action</a></li>
-                      <li><hr class="dropdown-divider"></li>
-                      <li><a class="dropdown-item" href="#">Something else here</a></li>
-                    </ul>
-                  </li>
-                </ul>
-                <form class="d-flex" role="search">
-                    <input class="form-control me-2" type="search" placeholder="Search" aria-label="Search">
-                    <button class="btn btn-outline-success custom-hover-btn" type="submit">Search</button>
-                </form>                                            
-              </div>
-            </div>
-          </nav>
-        
-
 
 </body>
 </html>

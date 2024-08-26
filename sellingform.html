@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+    <title>Home</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Bona+Nova+SC&display=swap" rel="stylesheet">
+    <link href="css/bootstrap.min.css" rel="stylesheet" />
+    <link href="css/userhome.css" rel="stylesheet" />
+    <script defer src="js/bootstrap.bundle.min.js"></script>
+    <script type="module" src="js/userhome.js"></script>
+</head>
+<body>
+<!-- Responsive navbar -->
+<nav class="navbar navbar-expand-lg">
+    <div class="container px-5">
+        <a class="navbar-brand fs-2 text-muted d-flex align-items-center" href="userhome.html">
+            Eco-Reads
+            <img src="images/logo.png" alt="Eco-Reads Logo" class="ms-2" style="width: 50px; height: auto;">
+        </a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarSupportedContent">
+            <ul class="navbar-nav ms-auto mb-2 mb-lg-0 d-flex align-items-center">
+                <li class="nav-item">
+                    <a class="nav-link active" aria-current="page" href="userhome.html">Booksfeed</a>
+                </li>
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                      Genre
+                    </a>
+                    <ul class="dropdown-menu">
+                      <li><a class="dropdown-item" href="#">Action</a></li>
+                      <li><hr class="dropdown-divider"></li>
+                      <li><a class="dropdown-item" href="#">Romance</a></li>
+                      <li><hr class="dropdown-divider"></li>
+                      <li><a class="dropdown-item" href="#">Horror</a></li>
+                    </ul>
+                  </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#!">Messages</a>
+                </li>
+                <form class="d-flex" role="search">
+                    <input class="form-control me-2" type="search" placeholder="Search" aria-label="Search">
+                    <button class="btn btn-outline-success custom-hover-btn" type="submit">Search</button>
+                </form>
+                <li class="nav-item">
+                    <a class="nav-link" href="sellingform.html">SELL A BOOK</a>
+                </li>   
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" id="profileDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        <img src="images/profileicon.svg" alt="profileicon" style="width: 30px; height: 35px; object-fit: cover; border-radius: 50%">
+                    </a>                    
+                    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="profileDropdown" id="profileDropdownMenu">
+                        <li><a class="dropdown-item" href="manage-account.html">Manage Account</a></li>
+                        <!-- Placeholder for dynamic role-based items -->
+                        <li id="roleBasedItem"></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item" href="#" id="signOut">Sign Out</a></li>
+                    </ul>                    
+                </li>                
+            </ul>
+        </div>
+    </div>
+</nav>
+ <!-- Form Fill-Up Section -->
+<section class="h-100 h-custom gradient-custom-2">
+    <div class="container py-5 h-100">
+        <div class="row d-flex justify-content-center align-items-center h-100">
+            <div class="col-12">                  
+                <div class="card card-registration" style="border-radius: 15px;">
+                    <div class="card-body p-0">
+                        <div class="row g-0">
+                            <!-- Personal Information Section -->
+                            <div class="col-lg-6">
+                                <div class="p-5">
+                                    <!-- Profile Picture Upload and Preview -->
+                                    <div class="text-center">
+                                        <img id="profilePreview" src="images/default-avatar.png" alt="Book Image Review" class="profile-preview">
+                                    </div>
+                                    <div class="mb-4 form-section text-center">
+                                        <label for="bookImage" class="form-label small">Upload Book Image:</label>
+                                        <input type="file" id="bookImage" class="form-control form-control-sm" accept="image/*" />
+                                    </div>
+                                    
+                                    <div class="mb-2 form-section">
+                                        <div class="form-outline">
+                                            <label class="form-label" for="book-title">Book Title</label>
+                                            <input type="text" id="book-title" class="form-control form-control-lg" placeholder="Enter the book title" required />
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="mb-2 form-section">
+                                        <div class="form-outline">
+                                            <label class="form-label" for="author">Author</label>
+                                            <input type="text" id="author" class="form-control form-control-lg" placeholder="Enter the author name" required />
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="mb-2 form-section">
+                                        <div class="form-outline">
+                                            <label class="form-label" for="genre">Genre</label>
+                                            <select id="genre" class="form-control form-control-lg" required>
+                                                <option value="" disabled selected>Select Genre</option>
+                                                <option value="Action">Action</option>
+                                                <option value="Romance">Romance</option>
+                                                <option value="Horror">Horror</option>
+                                            </select>
+                                        </div>
+                                    </div>                                                                        
+                                </div>
+                            </div>
+
+                            <!-- Form Continuation -->
+                            <div class="col-lg-6 bg-indigo text-white">
+                                <div class="p-5">
+                                    <div class="mb-4 pb-2">
+                                        <div class="form-outline">
+                                            <label class="form-label" for="book-condition">Book Condition</label>
+                                            <select id="book-condition" class="form-control form-control-lg" required>
+                                                <option value="" disabled selected>Select Condition</option>
+                                                <option value="New">New</option>
+                                                <option value="Good">Good</option>
+                                                <option value="Fair">Fair</option>
+                                                <option value="Poor">Poor</option>
+                                            </select>
+                                        </div>
+                                        <div class="form-outline">
+                                            <label class="form-label" for="book-description">Book Description</label>
+                                            <textarea id="book-description" class="form-control form-control-lg" rows="4" placeholder="Enter a description of the book" required></textarea>
+                                        </div>
+                                        <div class="form-outline">
+                                            <label class="form-label" for="book-price">Price</label>
+                                            <div class="input-group">
+                                                <span class="input-group-text" id="currency-symbol" style="font-family: Arial, Helvetica, sans-serif;">₱</span>
+                                                <input type="number" id="book-price" class="form-control form-control-lg" placeholder="Enter the price" min="0" step="0.01" required />
+                                            </div>
+                                        </div>                                        
+                                        <div class="m-4 form-section text-center">
+                                            <button type="submit" class="btn btn-light btn-lg">Submit</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+</body>
+</html>

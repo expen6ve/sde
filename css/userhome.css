@@ -1,3 +1,48 @@
+body {
+    background-color: antiquewhite;
+    font-family: "Bona Nova SC", serif;
+}
+.navbar {
+    background-color: #e0dccf;
+}
+.text-hidden {
+    height: 80px; /* Adjust this height as needed */
+    overflow: hidden;
+    position: relative;
+}
+
+.read-more {
+    display: block;
+    color: #007bff;
+    text-decoration: none;
+    cursor: pointer;
+    margin-top: 10px;
+}
+
+.text-expanded {
+    height: auto;
+}
+.custom-hover-btn {
+    border-color: #c6bab5; 
+    color: #c6bab5; 
+}
+
+.custom-hover-btn:hover {
+    background-color: #c6bab5;
+    border-color: #c6bab5; 
+    color: white; 
+}
+.form-control {
+    font-family: Arial, sans-serif !important; 
+    text-transform: none;
+}
+.dropdown-menu .dropdown-item:active,
+.dropdown-menu .dropdown-item:focus {
+    background-color: #28a745; /* Set this to the green color you want */
+    color: white; /* Change the text color to white for better contrast */
+    outline: none; /* Remove the outline */
+}
+
 input,
 textarea,
 select,
@@ -10,21 +55,9 @@ button {
     font-family: Arial, sans-serif;
     font-size: 1em;
 }
-
-body {
-    background-color: antiquewhite;
-    justify-content: center;
-    align-items: center;
-    height: 100vh;
-    margin: 0;
-    display: flex;
-    font-family: "Bona Nova SC", serif;
-    font-weight: 400;
-}
 .profile-preview {
-    width: 150px;
-    height: 150px;
-    border-radius: 50%;
+    width: 200px;
+    height: 200px;
     object-fit: cover;
     margin-bottom: 20px;
     display: block;

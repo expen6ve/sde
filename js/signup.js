@@ -127,6 +127,14 @@ registerButton.addEventListener("click", (e) => {
     });
 });
 
+// "Go Back" button reference
+const goBackButton = document.getElementById("goBackButton");
+
+// Redirect to login.html when the "Go Back" button is clicked
+goBackButton.addEventListener("click", () => {
+    window.location.href = "login.html";
+});
+
 // Redirect to login.html when the "Continue" button is clicked
 continueButton.addEventListener("click", () => {
     window.location.href = "landingpage.html";

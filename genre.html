@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+    <title>Home</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Bona+Nova+SC&display=swap" rel="stylesheet">
+    <link href="css/bootstrap.min.css" rel="stylesheet" />
+    <link href="css/buyerhome.css" rel="stylesheet" />
+    <script defer src="js/bootstrap.bundle.min.js"></script>
+    <script type="module" src="js/buyerhome.js"></script>
+</head>
+<body>
+<!-- Responsive navbar -->
+<nav class="navbar navbar-expand-lg">
+    <div class="container px-5">
+        <a class="navbar-brand fs-2 text-muted d-flex align-items-center" href="buyerhome.html">
+            Eco-Reads
+            <img src="images/logo.png" alt="Eco-Reads Logo" class="ms-2" style="width: 50px; height: auto;">
+        </a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarSupportedContent">
+            <ul class="navbar-nav ms-auto mb-2 mb-lg-0 d-flex align-items-center">
+                <li class="nav-item">
+                    <a class="nav-link active" aria-current="page" href="#!">Booksfeed</a>
+                </li>
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                      Genre
+                    </a>
+                    <ul class="dropdown-menu">
+                      <li><a class="dropdown-item" href="#">Action</a></li>
+                      <li><hr class="dropdown-divider"></li>
+                      <li><a class="dropdown-item" href="#">Romance</a></li>
+                      <li><hr class="dropdown-divider"></li>
+                      <li><a class="dropdown-item" href="#">Horror</a></li>
+                    </ul>
+                  </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#!">Messages</a>
+                </li>
+                <form class="d-flex" role="search">
+                    <input class="form-control me-2" type="search" placeholder="Search" aria-label="Search">
+                    <button class="btn btn-outline-success custom-hover-btn" type="submit">Search</button>
+                </form>   
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" id="profileDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        <img src="images/profileicon.svg" alt="profileicon" style="width: 30px; height: 35px; object-fit: cover; border-radius: 50%">
+                    </a>                    
+                    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="profileDropdown">
+                        <li><a class="dropdown-item" href="manage-account.html">Manage Account</a></li>
+                        <li><a class="dropdown-item" href="purchases.html">Purchases</a></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item" href="#" id="signOut">Sign Out</a></li>
+                    </ul>
+                </li>                
+            </ul>
+        </div>
+    </div>
+</nav>
+
+    <!-- Page Content -->
+    <div class="container px-4 px-lg-5 mt-5">
+        <div class=" my-5 py-0 text-center">
+            <div class="card-body">
+                <p class="display-6 text-dark m-0">Genre</p>
+            </div>
+        </div>
+        <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
+            <!-- Search Form -->
+            <form class="d-flex me-3" role="search">
+                <input class="form-control me-2" type="search" placeholder="Search" aria-label="Search">
+            </form> 
+            <!-- Sort By Dropdown -->
+            <li class="nav-item dropdown">
+                <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                    Sort By
+                </a>
+                <ul class="dropdown-menu">
+                    <li><a class="dropdown-item" href="#">Lowest Price</a></li>
+                    <li><hr class="dropdown-divider"></li>
+                    <li><a class="dropdown-item" href="#">Highest Price</a></li>
+                    <li><hr class="dropdown-divider"></li>
+                    <li><a class="dropdown-item" href="#">Date Posted</a></li>
+                </ul>
+            </li>             
+        </ul>        
+        <!-- Content Row -->
+        <div class="row gx-4 gx-lg-5">
+            <!-- Column 1 -->
+            <div class="col-lg-3 col-md-6 mb-5">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-center">
+                            <img src="images/lotr-1.jpg" class="img-fluid" alt="Book Image One" style="height: 200px; object-fit: cover;">
+                        </div>
+                        <h4 class="card-title mt-3 fs-5">The Fellowship of the Ring Collector's Edition: Being the First Part of The Lord of the Rings</h4>
+                        <p class="card-text text-hidden m-0">
+                            Sauron, the Dark Lord, has gathered to him all the Rings of Power—the means by which he intends to rule Middle-earth. All he lacks in his plans for dominion is the One Ring—the ring that rules them all—which has fallen into the hands of the hobbit, Bilbo Baggins.
+                            In a sleepy village in the Shire, young Frodo Baggins finds himself faced with an immense task, as his elderly cousin Bilbo entrusts the Ring to his care. Frodo must leave his home and make a perilous journey across Middle-earth to the Cracks of Doom, there to destroy the Ring and foil the Dark Lord in his evil purpose.
+                        </p>
+                        <a href="javascript:void(0);" class="read-more m-0">Read More</a>
+                    </div>
+                </div>
+            </div>
+            <!-- Column 2 -->
+            <div class="col-lg-3 col-md-6 mb-5">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-center">
+                            <img src="images/lotr-1.jpg" class="img-fluid" alt="Book Image One" style="height: 200px; object-fit: cover;">
+                        </div>
+                        <h4 class="card-title mt-3 fs-5">The Fellowship of the Ring Collector's Edition: Being the First Part of The Lord of the Rings</h4>
+                        <p class="card-text text-hidden m-0">
+                            Sauron, the Dark Lord, has gathered to him all the Rings of Power—the means by which he intends to rule Middle-earth. All he lacks in his plans for dominion is the One Ring—the ring that rules them all—which has fallen into the hands of the hobbit, Bilbo Baggins.
+                            In a sleepy village in the Shire, young Frodo Baggins finds himself faced with an immense task, as his elderly cousin Bilbo entrusts the Ring to his care. Frodo must leave his home and make a perilous journey across Middle-earth to the Cracks of Doom, there to destroy the Ring and foil the Dark Lord in his evil purpose.
+                        </p>
+                        <a href="javascript:void(0);" class="read-more m-0">Read More</a>
+                    </div>
+                </div>
+            </div>
+            <!-- Column 3 -->
+            <div class="col-lg-3 col-md-6 mb-5">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-center">
+                            <img src="images/lotr-1.jpg" class="img-fluid" alt="Book Image One" style="height: 200px; object-fit: cover;">
+                        </div>
+                        <h4 class="card-title mt-3 fs-5">The Fellowship of the Ring Collector's Edition: Being the First Part of The Lord of the Rings</h4>
+                        <p class="card-text text-hidden m-0">
+                            Sauron, the Dark Lord, has gathered to him all the Rings of Power—the means by which he intends to rule Middle-earth. All he lacks in his plans for dominion is the One Ring—the ring that rules them all—which has fallen into the hands of the hobbit, Bilbo Baggins.
+                            In a sleepy village in the Shire, young Frodo Baggins finds himself faced with an immense task, as his elderly cousin Bilbo entrusts the Ring to his care. Frodo must leave his home and make a perilous journey across Middle-earth to the Cracks of Doom, there to destroy the Ring and foil the Dark Lord in his evil purpose.
+                        </p>
+                        <a href="javascript:void(0);" class="read-more m-0">Read More</a>
+                    </div>
+                </div>
+            </div>
+            <!-- Column 4 -->
+            <div class="col-lg-3 col-md-6 mb-5">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-center">
+                            <img src="images/lotr-1.jpg" class="img-fluid" alt="Book Image One" style="height: 200px; object-fit: cover;">
+                        </div>
+                        <h4 class="card-title mt-3 fs-5">The Fellowship of the Ring Collector's Edition: Being the First Part of The Lord of the Rings</h4>
+                        <p class="card-text text-hidden m-0">
+                            Sauron, the Dark Lord, has gathered to him all the Rings of Power—the means by which he intends to rule Middle-earth. All he lacks in his plans for dominion is the One Ring—the ring that rules them all—which has fallen into the hands of the hobbit, Bilbo Baggins.
+                            In a sleepy village in the Shire, young Frodo Baggins finds himself faced with an immense task, as his elderly cousin Bilbo entrusts the Ring to his care. Frodo must leave his home and make a perilous journey across Middle-earth to the Cracks of Doom, there to destroy the Ring and foil the Dark Lord in his evil purpose.
+                        </p>
+                        <a href="javascript:void(0);" class="read-more m-0">Read More</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
