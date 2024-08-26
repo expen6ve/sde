@@ -27,3 +27,7 @@ body {
 .text-success {
     color: #1f7724;
 }
+#emailInput {
+    font-family: Arial, sans-serif !important; 
+    text-transform: none;
+}

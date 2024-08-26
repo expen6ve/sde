@@ -22,4 +22,19 @@ body {
 .text-expanded {
     height: auto;
 }
+.custom-hover-btn {
+    border-color: #c6bab5; 
+    color: #c6bab5; 
+}
+
+.custom-hover-btn:hover {
+    background-color: #c6bab5;
+    border-color: #c6bab5; 
+    color: white; 
+}
+.form-control {
+    font-family: Arial, sans-serif !important; 
+    text-transform: none;
+}
+
 
