@@ -7,9 +7,6 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 });
 
-
-
-
 document.addEventListener('DOMContentLoaded', function () {
     const readMoreLinks = document.querySelectorAll('.read-more');
 

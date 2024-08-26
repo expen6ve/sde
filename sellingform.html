@@ -10,6 +10,7 @@
     <link href="css/bootstrap.min.css" rel="stylesheet" />
     <link href="css/userhome.css" rel="stylesheet" />
     <script defer src="js/bootstrap.bundle.min.js"></script>
+    <script type="module" src="js/sellingform.js"></script>
     <script type="module" src="js/userhome.js"></script>
 </head>
 <body>
@@ -74,18 +75,18 @@
                 <div class="card card-registration" style="border-radius: 15px;">
                     <div class="card-body p-0">
                         <div class="row g-0">
-                            <!-- Personal Information Section -->
+                            <!-- Form Elements Section -->
                             <div class="col-lg-6">
                                 <div class="p-5">
                                     <!-- Profile Picture Upload and Preview -->
                                     <div class="text-center">
-                                        <img id="profilePreview" src="images/default-avatar.png" alt="Book Image Review" class="profile-preview">
+                                        <img id="profilePreview" src="images/default-avatar.png" alt="Book Image Preview" class="profile-preview" />
                                     </div>
                                     <div class="mb-4 form-section text-center">
                                         <label for="bookImage" class="form-label small">Upload Book Image:</label>
                                         <input type="file" id="bookImage" class="form-control form-control-sm" accept="image/*" />
                                     </div>
-                                    
+
                                     <div class="mb-2 form-section">
                                         <div class="form-outline">
                                             <label class="form-label" for="book-title">Book Title</label>
@@ -140,7 +141,7 @@
                                             </div>
                                         </div>                                        
                                         <div class="m-4 form-section text-center">
-                                            <button type="submit" class="btn btn-light btn-lg">Submit</button>
+                                            <button type="button" class="btn btn-light btn-lg" id="openReviewModalBtn">Add Listing</button>
                                         </div>
                                     </div>
                                 </div>
@@ -152,5 +153,52 @@
         </div>
     </div>
 </section>
+<!-- Validation Modal -->
+<div class="modal fade" id="validationModal" tabindex="-1" aria-labelledby="validationModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="validationModalLabel">Incomplete Form</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          Please fill in all the required fields before proceeding.
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
+<!-- Modal for Form Review -->
+<div class="modal fade" id="formReviewModal" tabindex="-1" aria-labelledby="formReviewModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="formReviewModalLabel">Review Your Book Listing</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <h6>Book Details</h6>
+                <ul class="list-group">
+                    <li class="list-group-item">Book Title: <span id="reviewBookTitle"></span></li>
+                    <li class="list-group-item">Author: <span id="reviewAuthor"></span></li>
+                    <li class="list-group-item">Genre: <span id="reviewGenre"></span></li>
+                    <li class="list-group-item">Condition: <span id="reviewCondition"></span></li>
+                    <li class="list-group-item">Description: <span id="reviewDescription"></span></li>
+                    <li class="list-group-item">Price: <span id="reviewPrice"></span></li>
+                </ul>
+                <div class="mt-3 text-center">
+                    <img id="reviewBookImage" alt="Book Image Preview" style="max-width: 200px; border-radius: 8px;" />
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Go Back</button>
+                <button type="button" id="confirmSubmissionBtn" class="btn btn-primary">Continue</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 </body>
 </html>
