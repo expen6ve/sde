@@ -53,11 +53,11 @@ loginButton.addEventListener("click", async (e) => {
 
       // Redirect based on role
       if (role === 'buyer') {
-        window.location.href = '/buyerhome.html'; // Redirect to Buyer home
+        window.location.href = 'buyerhome.html'; // Redirect to Buyer home
       } else if (role === 'seller') {
-        window.location.href = '/sellerhome.html'; // Redirect to Seller home
+        window.location.href = 'sellerhome.html'; // Redirect to Seller home
       } else if (role === 'admin') {
-        window.location.href = '/admindashboard.html'; // Redirect to Seller home
+        window.location.href = 'admindashboard.html'; // Redirect to Seller home
       } else {
         console.error('Unknown role:', role);
         alert('Unknown user role. Please contact support.');
