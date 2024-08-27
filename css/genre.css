@@ -1,0 +1,25 @@
+.custom-btn {
+    background-color: #c6bab5; 
+    border: none;
+    color: white;
+    font-size: 0.75rem; 
+    padding: 0.25rem 0.5rem;
+  }
+  
+  .custom-btn:hover {
+    background-color: #b09f9a; 
+    border-color: #b09f9a; 
+  }
+  .card {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between; /* Pushes the button to the bottom */
+}
+
+.card-body {
+    flex: 1; /* Allows the card-body to take up available space */
+}
+
+.card-body .d-flex {
+    margin-top: auto; /* Pushes the button container to the bottom of the card-body */
+}

@@ -8,15 +8,17 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Bona+Nova+SC&display=swap" rel="stylesheet">
     <link href="css/bootstrap.min.css" rel="stylesheet" />
-    <link href="css/buyerhome.css" rel="stylesheet" />
+    <link href="css/userhome.css" rel="stylesheet" />
+    <link href="css/genre.css" rel="stylesheet" />
     <script defer src="js/bootstrap.bundle.min.js"></script>
-    <script type="module" src="js/buyerhome.js"></script>
+    <script type="module" src="js/userhome.js"></script>
+    <script type="module" src="js/genre.js"></script>
 </head>
 <body>
 <!-- Responsive navbar -->
 <nav class="navbar navbar-expand-lg">
     <div class="container px-5">
-        <a class="navbar-brand fs-2 text-muted d-flex align-items-center" href="buyerhome.html">
+        <a class="navbar-brand fs-2 text-muted d-flex align-items-center" href="userhome.html">
             Eco-Reads
             <img src="images/logo.png" alt="Eco-Reads Logo" class="ms-2" style="width: 50px; height: auto;">
         </a>
@@ -29,23 +31,22 @@
                     <a class="nav-link active" aria-current="page" href="#!">Booksfeed</a>
                 </li>
                 <li class="nav-item dropdown">
-                    <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                      Genre
+                    <a class="nav-link dropdown-toggle" href="#" id="genreDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        Genre
                     </a>
-                    <ul class="dropdown-menu">
-                      <li><a class="dropdown-item" href="#">Action</a></li>
-                      <li><hr class="dropdown-divider"></li>
-                      <li><a class="dropdown-item" href="#">Romance</a></li>
-                      <li><hr class="dropdown-divider"></li>
-                      <li><a class="dropdown-item" href="#">Horror</a></li>
+                    <ul class="dropdown-menu" aria-labelledby="genreDropdown">
+                        <li><a class="dropdown-item" href="#" data-genre="Action">Action</a></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item" href="#" data-genre="Romance">Romance</a></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item" href="#" data-genre="Horror">Horror</a></li>
                     </ul>
-                  </li>
-                <li class="nav-item">
+                </li>                
+                <li class="nav-item" id="messagesDropdown">
                     <a class="nav-link" href="#!">Messages</a>
                 </li>
                 <form class="d-flex" role="search">
                     <input class="form-control me-2" type="search" placeholder="Search" aria-label="Search">
-                    <button class="btn btn-outline-success custom-hover-btn" type="submit">Search</button>
                 </form>   
                 <li class="nav-item dropdown">
                     <a class="nav-link dropdown-toggle" href="#" id="profileDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
@@ -57,7 +58,10 @@
                         <li><hr class="dropdown-divider"></li>
                         <li><a class="dropdown-item" href="#" id="signOut">Sign Out</a></li>
                     </ul>
-                </li>                
+                </li>
+                <li class="nav-item">
+                    <button class="btn btn-outline-success custom-hover-btn" type="submit" id="signinbutton">Sign In</button>
+                </li>                 
             </ul>
         </div>
     </div>
@@ -67,7 +71,7 @@
     <div class="container px-4 px-lg-5 mt-5">
         <div class=" my-5 py-0 text-center">
             <div class="card-body">
-                <p class="display-6 text-dark m-0">Genre</p>
+                <p id="genreHeading" class="display-6 text-dark m-0">Genre</p>
             </div>
         </div>
         <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
@@ -96,14 +100,23 @@
                 <div class="card h-100">
                     <div class="card-body">
                         <div class="d-flex justify-content-center">
-                            <img src="images/lotr-1.jpg" class="img-fluid" alt="Book Image One" style="height: 200px; object-fit: cover;">
+                            <img src="images/default.jpg" class="img-fluid" alt="Book Image" style="height: 200px; object-fit: cover;">
                         </div>
-                        <h4 class="card-title mt-3 fs-5">The Fellowship of the Ring Collector's Edition: Being the First Part of The Lord of the Rings</h4>
-                        <p class="card-text text-hidden m-0">
-                            Sauron, the Dark Lord, has gathered to him all the Rings of Power—the means by which he intends to rule Middle-earth. All he lacks in his plans for dominion is the One Ring—the ring that rules them all—which has fallen into the hands of the hobbit, Bilbo Baggins.
-                            In a sleepy village in the Shire, young Frodo Baggins finds himself faced with an immense task, as his elderly cousin Bilbo entrusts the Ring to his care. Frodo must leave his home and make a perilous journey across Middle-earth to the Cracks of Doom, there to destroy the Ring and foil the Dark Lord in his evil purpose.
-                        </p>
-                        <a href="javascript:void(0);" class="read-more m-0">Read More</a>
+                        <!-- Add to Fave Button -->
+                        <div class="d-flex justify-content-center mt-3">
+                            <button class="btn custom-btn">Add to Favorites</button>
+                          </div>                          
+                        <!-- Book Details -->
+                        <h4 class="card-title mt-3 fs-5"></h4>
+                        <p class="card-text"><strong>Author:</strong></p>
+                        <p class="card-text"><strong>Seller:</strong></p>
+                        <p class="card-text"><strong>Condition:</strong></p>
+                        <p class="card-text"><strong>Price:</strong></p>
+
+                        <!-- Contact Button -->
+                        <div class="d-flex justify-content-between mt-3">
+                            <button class="btn btn-success">Contact Seller</button>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -112,14 +125,23 @@
                 <div class="card h-100">
                     <div class="card-body">
                         <div class="d-flex justify-content-center">
-                            <img src="images/lotr-1.jpg" class="img-fluid" alt="Book Image One" style="height: 200px; object-fit: cover;">
+                            <img src="images/default.jpg" class="img-fluid" alt="Book Image" style="height: 200px; object-fit: cover;">
                         </div>
-                        <h4 class="card-title mt-3 fs-5">The Fellowship of the Ring Collector's Edition: Being the First Part of The Lord of the Rings</h4>
-                        <p class="card-text text-hidden m-0">
-                            Sauron, the Dark Lord, has gathered to him all the Rings of Power—the means by which he intends to rule Middle-earth. All he lacks in his plans for dominion is the One Ring—the ring that rules them all—which has fallen into the hands of the hobbit, Bilbo Baggins.
-                            In a sleepy village in the Shire, young Frodo Baggins finds himself faced with an immense task, as his elderly cousin Bilbo entrusts the Ring to his care. Frodo must leave his home and make a perilous journey across Middle-earth to the Cracks of Doom, there to destroy the Ring and foil the Dark Lord in his evil purpose.
-                        </p>
-                        <a href="javascript:void(0);" class="read-more m-0">Read More</a>
+                        <!-- Add to Fave Button -->
+                        <div class="d-flex justify-content-center mt-3">
+                            <button class="btn custom-btn">Add to Favorites</button>
+                          </div>                          
+                        <!-- Book Details -->
+                        <h4 class="card-title mt-3 fs-5"></h4>
+                        <p class="card-text"><strong>Author:</strong></p>
+                        <p class="card-text"><strong>Seller:</strong></p>
+                        <p class="card-text"><strong>Condition:</strong></p>
+                        <p class="card-text"><strong>Price:</strong></p>
+
+                        <!-- Contact Button -->
+                        <div class="d-flex justify-content-between mt-3">
+                            <button class="btn btn-success">Contact Seller</button>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -128,14 +150,23 @@
                 <div class="card h-100">
                     <div class="card-body">
                         <div class="d-flex justify-content-center">
-                            <img src="images/lotr-1.jpg" class="img-fluid" alt="Book Image One" style="height: 200px; object-fit: cover;">
+                            <img src="images/default.jpg" class="img-fluid" alt="Book Image" style="height: 200px; object-fit: cover;">
                         </div>
-                        <h4 class="card-title mt-3 fs-5">The Fellowship of the Ring Collector's Edition: Being the First Part of The Lord of the Rings</h4>
-                        <p class="card-text text-hidden m-0">
-                            Sauron, the Dark Lord, has gathered to him all the Rings of Power—the means by which he intends to rule Middle-earth. All he lacks in his plans for dominion is the One Ring—the ring that rules them all—which has fallen into the hands of the hobbit, Bilbo Baggins.
-                            In a sleepy village in the Shire, young Frodo Baggins finds himself faced with an immense task, as his elderly cousin Bilbo entrusts the Ring to his care. Frodo must leave his home and make a perilous journey across Middle-earth to the Cracks of Doom, there to destroy the Ring and foil the Dark Lord in his evil purpose.
-                        </p>
-                        <a href="javascript:void(0);" class="read-more m-0">Read More</a>
+                        <!-- Add to Fave Button -->
+                        <div class="d-flex justify-content-center mt-3">
+                            <button class="btn custom-btn">Add to Favorites</button>
+                          </div>                          
+                        <!-- Book Details -->
+                        <h4 class="card-title mt-3 fs-5"></h4>
+                        <p class="card-text"><strong>Author:</strong></p>
+                        <p class="card-text"><strong>Seller:</strong></p>
+                        <p class="card-text"><strong>Condition:</strong></p>
+                        <p class="card-text"><strong>Price:</strong></p>
+
+                        <!-- Contact Button -->
+                        <div class="d-flex justify-content-between mt-3">
+                            <button class="btn btn-success">Contact Seller</button>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -144,18 +175,39 @@
                 <div class="card h-100">
                     <div class="card-body">
                         <div class="d-flex justify-content-center">
-                            <img src="images/lotr-1.jpg" class="img-fluid" alt="Book Image One" style="height: 200px; object-fit: cover;">
+                            <img src="images/default.jpg" class="img-fluid" alt="Book Image" style="height: 200px; object-fit: cover;">
                         </div>
-                        <h4 class="card-title mt-3 fs-5">The Fellowship of the Ring Collector's Edition: Being the First Part of The Lord of the Rings</h4>
-                        <p class="card-text text-hidden m-0">
-                            Sauron, the Dark Lord, has gathered to him all the Rings of Power—the means by which he intends to rule Middle-earth. All he lacks in his plans for dominion is the One Ring—the ring that rules them all—which has fallen into the hands of the hobbit, Bilbo Baggins.
-                            In a sleepy village in the Shire, young Frodo Baggins finds himself faced with an immense task, as his elderly cousin Bilbo entrusts the Ring to his care. Frodo must leave his home and make a perilous journey across Middle-earth to the Cracks of Doom, there to destroy the Ring and foil the Dark Lord in his evil purpose.
-                        </p>
-                        <a href="javascript:void(0);" class="read-more m-0">Read More</a>
+                        <!-- Add to Fave Button -->
+                        <div class="d-flex justify-content-center mt-3">
+                            <button class="btn custom-btn">Add to Favorites</button>
+                          </div>                          
+                        <!-- Book Details -->
+                        <h4 class="card-title mt-3 fs-5"></h4>
+                        <p class="card-text"><strong>Author:</strong></p>
+                        <p class="card-text"><strong>Seller:</strong></p>
+                        <p class="card-text"><strong>Condition:</strong></p>
+                        <p class="card-text"><strong>Price:</strong></p>
+
+                        <!-- Contact Button -->
+                        <div class="d-flex justify-content-between mt-3">
+                            <button class="btn btn-success">Contact Seller</button>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
+<script type="module">
+    import { checkAuth } from './auth.js';
+    
+    document.addEventListener('DOMContentLoaded', async () => {
+        const user = await checkAuth();
+    
+        // Redirect logged-in users from index.html or genre.html to a restricted page
+        if (user) {
+            window.location.href = 'index.html'; // Or any other page for logged-in users
+        }
+    });
+</script>  
 </body>
 </html>
