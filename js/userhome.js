@@ -18,6 +18,19 @@ const app = initializeApp(firebaseConfig);
 const database = getDatabase(app);
 const auth = getAuth(app);
 
+
+// Handle genre dropdown redirection
+const genreDropdownItems = document.querySelectorAll('#genreDropdown .dropdown-item');
+genreDropdownItems.forEach(item => {
+    item.addEventListener('click', (event) => {
+        event.preventDefault(); // Prevent default link behavior
+        const selectedGenre = event.target.getAttribute('data-genre');
+        if (selectedGenre) {
+            window.location.href = `genre.html?genre=${encodeURIComponent(selectedGenre)}`;
+        }
+    });
+});
+
 // Function to update profile icon and dropdown based on user role
 function updateProfile(user) {
     const profileIcon = document.querySelector('#profileDropdown img');

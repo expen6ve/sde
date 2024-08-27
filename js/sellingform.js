@@ -19,6 +19,7 @@ const database = getDatabase(app);
 const storage = getStorage(app);
 const auth = getAuth(app);
 
+
 document.addEventListener('DOMContentLoaded', () => {
     // Form Elements
     const bookTitleInput = document.getElementById('book-title');
