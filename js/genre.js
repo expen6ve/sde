@@ -1,5 +1,5 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js";
-import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-database.js";
+import { getDatabase, ref, onValue, query, orderByChild } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-database.js";
 import { checkAuth } from './auth.js';
 
 const firebaseConfig = {
@@ -16,6 +16,21 @@ const app = initializeApp(firebaseConfig);
 const database = getDatabase(app);
 
 document.addEventListener('DOMContentLoaded', async () => {
+    const user = await checkAuth();
+
+    const bookListContainer = document.querySelector('.row.gx-4.gx-lg-5');
+    const genreDropdownItems = document.querySelectorAll('#genreDropdown + .dropdown-menu .dropdown-item');
+    const sortLowestPrice = document.getElementById('sortLowestPrice');
+    const sortHighestPrice = document.getElementById('sortHighestPrice');
+    const sortMostRecent = document.getElementById('sortMostRecent');
+    const genreHeading = document.getElementById('genreHeading');
+    const logoLink = document.querySelector('.navbar-brand');
+    const profileDropdown = document.querySelector('#profileDropdown');
+    const messagesDropdown = document.querySelector('#messagesDropdown');
+    const sellBook = document.querySelector('#sellBook')
+    const booksFeedLink = document.getElementById('booksFeed');
+    const signInButton = document.getElementById('signinbutton');
+    const searchInput = document.querySelector('form[role="search"] input');
 
     // Redirect to login page
     const myButton = document.getElementById('signinbutton');
@@ -24,56 +39,95 @@ document.addEventListener('DOMContentLoaded', async () => {
             window.location.href = 'login.html';
         });
     }
-    
-    const user = await checkAuth();
-    const bookListContainer = document.querySelector('.row.gx-4.gx-lg-5');
-    const genreDropdownItems = document.querySelectorAll('#genreDropdown + .dropdown-menu .dropdown-item');
-    const genreHeading = document.getElementById('genreHeading');
-    const logoLink = document.querySelector('.navbar-brand');
-    const profileDropdown = document.querySelector('#profileDropdown'); // Profile dropdown menu
-    const messagesDropdown = document.querySelector('#messagesDropdown'); // Messages dropdown menu
 
-    // Handle redirection based on user authentication
+    if (user) {
+        if (signInButton) signInButton.style.display = 'none';
+    } else {
+        if (signInButton) signInButton.style.display = 'block';
+    }
+
+    booksFeedLink.addEventListener('click', (event) => {
+        event.preventDefault();
+        if (user) {
+            window.location.href = 'userhome.html';
+        } else {
+            window.location.href = 'index.html';
+        }
+    });
+
     if (!user) {
-        // For non-logged in users
         logoLink.href = 'index.html';
         if (profileDropdown) profileDropdown.style.display = 'none';
         if (messagesDropdown) messagesDropdown.style.display = 'none';
+        if (sellBook) sellBook.style.display = 'none';
     } else {
-        // For logged in users
         logoLink.href = 'userhome.html';
         if (profileDropdown) profileDropdown.style.display = 'block';
         if (messagesDropdown) messagesDropdown.style.display = 'block';
+        if (sellBook) sellBook.style.display = 'block';
     }
 
-    // Reference to the book listings and users in Firebase
     const booksRef = ref(database, 'book-listings');
     const usersRef = ref(database, 'users');
 
-    function displayBooks(genre) {
-        onValue(booksRef, (snapshot) => {
+    function displayBooks(genre = null, searchTerm = null, sortBy = 'dateListed') {
+        let queryRef = booksRef;
+    
+        switch (sortBy) {
+            case 'priceLowToHigh':
+                queryRef = query(booksRef, orderByChild('price'));
+                break;
+            case 'priceHighToLow':
+                queryRef = query(booksRef, orderByChild('price'));
+                break;
+            case 'dateListed':
+                queryRef = query(booksRef, orderByChild('dateListed'));
+                break;
+            default:
+                queryRef = booksRef;
+                break;
+        }
+    
+        onValue(queryRef, (snapshot) => {
             const bookData = snapshot.val();
             bookListContainer.innerHTML = '';
-
+    
             if (bookData) {
-                // Create a cache for user names
                 const userNames = {};
-
+    
                 onValue(usersRef, (userSnapshot) => {
                     const userData = userSnapshot.val();
-
+    
                     if (userData) {
                         Object.keys(userData).forEach(userId => {
                             userNames[userId] = userData[userId].firstName || 'Unknown';
                         });
-
-                        // Update the genre heading
-                        genreHeading.textContent = genre;
-
-                        // Now display books
-                        Object.keys(bookData).forEach(key => {
-                            const book = bookData[key];
-                            if (book.genre === genre) {
+    
+                        // Update the genre heading based on the current genre or search term
+                        if (searchTerm && searchTerm.length > 0) {
+                            genreHeading.textContent = `Search Results for "${searchTerm}"`;
+                        } else if (genre) {
+                            genreHeading.textContent = `Books in "${genre}"`;
+                        } else {
+                            genreHeading.textContent = "All Books";
+                        }
+    
+                        const sortedBooks = Object.keys(bookData).map(key => ({
+                            id: key,
+                            ...bookData[key]
+                        }));
+    
+                        if (sortBy === 'priceHighToLow') {
+                            sortedBooks.sort((a, b) => b.price - a.price);
+                        } else if (sortBy === 'priceLowToHigh') {
+                            sortedBooks.sort((a, b) => a.price - b.price);
+                        } else if (sortBy === 'dateListed') {
+                            sortedBooks.sort((a, b) => new Date(b.dateListed) - new Date(a.dateListed));
+                        }
+    
+                        sortedBooks.forEach(book => {
+                            if ((!genre || book.genre === genre) && 
+                                (!searchTerm || book.title.toLowerCase().includes(searchTerm.toLowerCase()))) {
                                 const bookElement = document.createElement('div');
                                 bookElement.className = 'col-lg-3 col-md-6 mb-5';
                                 bookElement.innerHTML = `
@@ -100,32 +154,67 @@ document.addEventListener('DOMContentLoaded', async () => {
                             }
                         });
                     } else {
-                        bookListContainer.innerHTML = '<p>No books available in this genre.</p>';
+                        bookListContainer.innerHTML = '<p>No books available.</p>';
                     }
                 });
             } else {
-                bookListContainer.innerHTML = '<p>No books available in this genre.</p>';
+                bookListContainer.innerHTML = '<p>No books available.</p>';
             }
         });
     }
-
-    // Set up dropdown menu click listeners
+    
+    // Search input event listener
+    searchInput.addEventListener('input', (event) => {
+        const searchTerm = event.target.value.trim();
+        displayBooks(getGenre(), searchTerm, getSortOrder());
+    });
+    
     genreDropdownItems.forEach(item => {
         item.addEventListener('click', (event) => {
             const selectedGenre = event.target.getAttribute('data-genre');
-            displayBooks(selectedGenre);
+            displayBooks(selectedGenre, null, getSortOrder());
 
-            // Update the URL without reloading the page
             const newUrl = new URL(window.location.href);
             newUrl.searchParams.set('genre', selectedGenre);
             window.history.pushState({}, '', newUrl);
         });
     });
 
-    // Handle initial display based on the current genre
+    sortLowestPrice.addEventListener('click', () => {
+        displayBooks(getGenre(), null, 'priceLowToHigh');
+    });
+
+    sortHighestPrice.addEventListener('click', () => {
+        displayBooks(getGenre(), null, 'priceHighToLow');
+    });
+
+    sortMostRecent.addEventListener('click', () => {
+        displayBooks(getGenre(), null, 'dateListed');
+    });
+
     const urlParams = new URLSearchParams(window.location.search);
     const genre = urlParams.get('genre');
     if (genre) {
-        displayBooks(genre);
+        displayBooks(genre, null, getSortOrder());
+    } else {
+        displayBooks(null, null, getSortOrder());
+    }
+
+    searchInput.addEventListener('input', (event) => {
+        const searchTerm = event.target.value.trim();
+        if (searchTerm.length > 0) {
+            displayBooks(getGenre(), searchTerm, getSortOrder());
+        } else {
+            displayBooks(getGenre(), null, getSortOrder());
+        }
+    });
+
+    function getGenre() {
+        const urlParams = new URLSearchParams(window.location.search);
+        return urlParams.get('genre');
+    }
+
+    function getSortOrder() {
+        return 'dateListed';
     }
 });

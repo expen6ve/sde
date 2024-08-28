@@ -28,7 +28,7 @@
         <div class="collapse navbar-collapse" id="navbarSupportedContent">
             <ul class="navbar-nav ms-auto mb-2 mb-lg-0 d-flex align-items-center">
                 <li class="nav-item">
-                    <a class="nav-link active" aria-current="page" href="#!">Booksfeed</a>
+                    <a class="nav-link active" aria-current="page" href="userhome.html" id="booksFeed">Booksfeed</a>
                 </li>
                 <li class="nav-item dropdown">
                     <a class="nav-link dropdown-toggle" href="#" id="genreDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
@@ -45,9 +45,9 @@
                 <li class="nav-item" id="messagesDropdown">
                     <a class="nav-link" href="#!">Messages</a>
                 </li>
-                <form class="d-flex" role="search">
-                    <input class="form-control me-2" type="search" placeholder="Search" aria-label="Search">
-                </form>   
+                <li class="nav-item" id="sellBook">
+                    <a class="nav-link" href="sellingform.html">SELL A BOOK</a>
+                </li>   
                 <li class="nav-item dropdown">
                     <a class="nav-link dropdown-toggle" href="#" id="profileDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                         <img src="images/profileicon.svg" alt="profileicon" style="width: 30px; height: 35px; object-fit: cover; border-radius: 50%">
@@ -71,143 +71,30 @@
     <div class="container px-4 px-lg-5 mt-5">
         <div class=" my-5 py-0 text-center">
             <div class="card-body">
-                <p id="genreHeading" class="display-6 text-dark m-0">Genre</p>
+                <p id="genreHeading" class="display-6 text-dark m-0"></p>
             </div>
         </div>
         <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
             <!-- Search Form -->
             <form class="d-flex me-3" role="search">
-                <input class="form-control me-2" type="search" placeholder="Search" aria-label="Search">
-            </form> 
+                <input class="form-control me-2" type="search" placeholder="Search" aria-label="Search" id="searchInput">
+            </form>            
             <!-- Sort By Dropdown -->
-            <li class="nav-item dropdown">
-                <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                    Sort By
-                </a>
-                <ul class="dropdown-menu">
-                    <li><a class="dropdown-item" href="#">Lowest Price</a></li>
-                    <li><hr class="dropdown-divider"></li>
-                    <li><a class="dropdown-item" href="#">Highest Price</a></li>
-                    <li><hr class="dropdown-divider"></li>
-                    <li><a class="dropdown-item" href="#">Date Posted</a></li>
-                </ul>
-            </li>             
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        Sort By
+                    </a>
+                    <ul class="dropdown-menu">
+                        <li><a class="dropdown-item" href="#" id="sortLowestPrice">Lowest Price</a></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item" href="#" id="sortHighestPrice">Highest Price</a></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item" href="#" id="sortMostRecent">Most Recent</a></li>
+                    </ul>
+                </li>                    
         </ul>        
         <!-- Content Row -->
-        <div class="row gx-4 gx-lg-5">
-            <!-- Column 1 -->
-            <div class="col-lg-3 col-md-6 mb-5">
-                <div class="card h-100">
-                    <div class="card-body">
-                        <div class="d-flex justify-content-center">
-                            <img src="images/default.jpg" class="img-fluid" alt="Book Image" style="height: 200px; object-fit: cover;">
-                        </div>
-                        <!-- Add to Fave Button -->
-                        <div class="d-flex justify-content-center mt-3">
-                            <button class="btn custom-btn">Add to Favorites</button>
-                          </div>                          
-                        <!-- Book Details -->
-                        <h4 class="card-title mt-3 fs-5"></h4>
-                        <p class="card-text"><strong>Author:</strong></p>
-                        <p class="card-text"><strong>Seller:</strong></p>
-                        <p class="card-text"><strong>Condition:</strong></p>
-                        <p class="card-text"><strong>Price:</strong></p>
-
-                        <!-- Contact Button -->
-                        <div class="d-flex justify-content-between mt-3">
-                            <button class="btn btn-success">Contact Seller</button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <!-- Column 2 -->
-            <div class="col-lg-3 col-md-6 mb-5">
-                <div class="card h-100">
-                    <div class="card-body">
-                        <div class="d-flex justify-content-center">
-                            <img src="images/default.jpg" class="img-fluid" alt="Book Image" style="height: 200px; object-fit: cover;">
-                        </div>
-                        <!-- Add to Fave Button -->
-                        <div class="d-flex justify-content-center mt-3">
-                            <button class="btn custom-btn">Add to Favorites</button>
-                          </div>                          
-                        <!-- Book Details -->
-                        <h4 class="card-title mt-3 fs-5"></h4>
-                        <p class="card-text"><strong>Author:</strong></p>
-                        <p class="card-text"><strong>Seller:</strong></p>
-                        <p class="card-text"><strong>Condition:</strong></p>
-                        <p class="card-text"><strong>Price:</strong></p>
-
-                        <!-- Contact Button -->
-                        <div class="d-flex justify-content-between mt-3">
-                            <button class="btn btn-success">Contact Seller</button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <!-- Column 3 -->
-            <div class="col-lg-3 col-md-6 mb-5">
-                <div class="card h-100">
-                    <div class="card-body">
-                        <div class="d-flex justify-content-center">
-                            <img src="images/default.jpg" class="img-fluid" alt="Book Image" style="height: 200px; object-fit: cover;">
-                        </div>
-                        <!-- Add to Fave Button -->
-                        <div class="d-flex justify-content-center mt-3">
-                            <button class="btn custom-btn">Add to Favorites</button>
-                          </div>                          
-                        <!-- Book Details -->
-                        <h4 class="card-title mt-3 fs-5"></h4>
-                        <p class="card-text"><strong>Author:</strong></p>
-                        <p class="card-text"><strong>Seller:</strong></p>
-                        <p class="card-text"><strong>Condition:</strong></p>
-                        <p class="card-text"><strong>Price:</strong></p>
-
-                        <!-- Contact Button -->
-                        <div class="d-flex justify-content-between mt-3">
-                            <button class="btn btn-success">Contact Seller</button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <!-- Column 4 -->
-            <div class="col-lg-3 col-md-6 mb-5">
-                <div class="card h-100">
-                    <div class="card-body">
-                        <div class="d-flex justify-content-center">
-                            <img src="images/default.jpg" class="img-fluid" alt="Book Image" style="height: 200px; object-fit: cover;">
-                        </div>
-                        <!-- Add to Fave Button -->
-                        <div class="d-flex justify-content-center mt-3">
-                            <button class="btn custom-btn">Add to Favorites</button>
-                          </div>                          
-                        <!-- Book Details -->
-                        <h4 class="card-title mt-3 fs-5"></h4>
-                        <p class="card-text"><strong>Author:</strong></p>
-                        <p class="card-text"><strong>Seller:</strong></p>
-                        <p class="card-text"><strong>Condition:</strong></p>
-                        <p class="card-text"><strong>Price:</strong></p>
-
-                        <!-- Contact Button -->
-                        <div class="d-flex justify-content-between mt-3">
-                            <button class="btn btn-success">Contact Seller</button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
+        <div id="bookListContainer" class="row gx-4 gx-lg-5"></div>
     </div>
-<script type="module">
-    import { checkAuth } from './auth.js';
-    
-    document.addEventListener('DOMContentLoaded', async () => {
-        const user = await checkAuth();
-    
-        // Redirect logged-in users from index.html or genre.html to a restricted page
-        if (user) {
-            window.location.href = 'index.html'; // Or any other page for logged-in users
-        }
-    });
-</script>  
 </body>
 </html>
