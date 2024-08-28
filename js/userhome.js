@@ -50,7 +50,8 @@ function updateProfile(user) {
                 }
 
                 // Always add the "Purchases" item
-                let dropdownItems = '<a class="dropdown-item" href="purchases.html">Purchases</a>';
+                let dropdownItems = '<a class="dropdown-item" href="purchases.html">Purchases</a>';'<a class="dropdown-item" href="favorites.html">Favorites</a>';
+                dropdownItems += '<a class="dropdown-item" href="favorites.html">Favorites</a>'; 
 
                 // Conditionally add the "My Listings" item for sellers
                 if (userRole === "seller") {

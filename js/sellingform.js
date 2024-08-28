@@ -121,7 +121,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         imageUrl = await getDownloadURL(imageStorageRef);
                     }
 
-                    // Create the data object with user ID
+                    // Create the data object with user ID and date-listed
                     const bookData = {
                         title: bookTitleInput.value,
                         author: authorInput.value,
@@ -130,7 +130,8 @@ document.addEventListener('DOMContentLoaded', () => {
                         description: descriptionInput.value,
                         price: parseFloat(priceInput.value).toFixed(2),
                         imageUrl: imageUrl,
-                        userId: userId // Associate the book with the logged-in user
+                        userId: userId, // Associate the book with the logged-in user
+                        dateListed: new Date().toISOString() // Add the current date and time
                     };
 
                     // Save the data to Firebase Realtime Database
