@@ -11,7 +11,6 @@
     <link href="css/userhome.css" rel="stylesheet" />
     <link href="css/genre.css" rel="stylesheet" />
     <script defer src="js/bootstrap.bundle.min.js"></script>
-    <script type="module" src="js/userhome.js"></script>
     <script type="module" src="js/genre.js"></script>
 </head>
 <body>
@@ -50,15 +49,15 @@
                 </li>   
                 <li class="nav-item dropdown">
                     <a class="nav-link dropdown-toggle" href="#" id="profileDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                        <img src="images/profileicon.svg" alt="profileicon" style="width: 30px; height: 35px; object-fit: cover; border-radius: 50%">
+                        <img id="profileIcon" src="images/profileicon.svg" alt="profileicon" style="width: 30px; height: 35px; object-fit: cover; border-radius: 50%">
                     </a>                    
-                    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="profileDropdown">
-                        <li><a class="dropdown-item" href="manage-account.html">Manage Account</a></li>
-                        <li><a class="dropdown-item" href="purchases.html">Purchases</a></li>
+                    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="profileDropdown" id="profileDropdownMenu">
+                        <!-- Placeholder for dynamic role-based items -->
+                        <li id="roleBasedItem"></li>
                         <li><hr class="dropdown-divider"></li>
                         <li><a class="dropdown-item" href="#" id="signOut">Sign Out</a></li>
-                    </ul>
-                </li>
+                    </ul> 
+                </li>                
                 <li class="nav-item">
                     <button class="btn btn-outline-success custom-hover-btn" type="submit" id="signinbutton">Sign In</button>
                 </li>                 
@@ -98,3 +97,5 @@
     </div>
 </body>
 </html>
+
+<!-- WALA PAY MY LISTINGS SA SELLER -->
