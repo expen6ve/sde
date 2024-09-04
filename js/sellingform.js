@@ -1,27 +1,13 @@
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js";
-import { getDatabase, ref, set } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-database.js";
-import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js";
-import { getStorage, ref as storageRef, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-storage.js";
+import { checkAuth } from './auth.js';
 import { initializeNavbar } from './navbar.js';
+import { getDatabase, ref, set } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-database.js";
+import { getStorage, ref as storageRef, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-storage.js";
 
-// Firebase configuration and initialization
-const firebaseConfig = {
-    apiKey: "AIzaSyCN8NcVQNRjAF_A86a8NfxC9Audivokuso",
-    authDomain: "sde-ecoread.firebaseapp.com",
-    databaseURL: "https://sde-ecoread-default-rtdb.asia-southeast1.firebasedatabase.app",
-    projectId: "sde-ecoread",
-    storageBucket: "sde-ecoread.appspot.com",
-    messagingSenderId: "137637739158",
-    appId: "1:137637739158:web:c9b885cf9025c89e2c60b7"
-};
 
-const app = initializeApp(firebaseConfig);
-const database = getDatabase(app);
-const storage = getStorage(app);
-const auth = getAuth(app);
+const database = getDatabase();
+const storage = getStorage();
 
 document.addEventListener('DOMContentLoaded', initializeNavbar);
-
 
 document.addEventListener('DOMContentLoaded', () => {
     // Form Elements
@@ -110,57 +96,56 @@ document.addEventListener('DOMContentLoaded', () => {
     // Handle "Continue" button in the modal
     document.getElementById('confirmSubmissionBtn').addEventListener('click', async () => {
         try {
-            // Check if a user is logged in
-            onAuthStateChanged(auth, async (user) => {
-                if (user) {
-                    const userId = user.uid; // Get the logged-in user's ID
-                    // Upload the image to Firebase Storage
-                    const file = bookImageInput.files[0];
-                    let imageUrl = '';
+            // Check if a user is logged in using the checkAuth function
+            const user = await checkAuth();
+            if (user) {
+                const userId = user.uid; // Get the logged-in user's ID
+                // Upload the image to Firebase Storage
+                const file = bookImageInput.files[0];
+                let imageUrl = '';
 
-                    if (file) {
-                        const imageStorageRef = storageRef(storage, `book-images/${Date.now()}-${file.name}`);
-                        await uploadBytes(imageStorageRef, file);
-                        imageUrl = await getDownloadURL(imageStorageRef);
-                    }
-
-                    // Create the data object with user ID and date-listed
-                    const bookData = {
-                        title: bookTitleInput.value,
-                        author: authorInput.value,
-                        genre: genreInput.value,
-                        condition: conditionInput.value,
-                        description: descriptionInput.value,
-                        price: parseFloat(priceInput.value).toFixed(2),
-                        imageUrl: imageUrl,
-                        userId: userId, // Associate the book with the logged-in user
-                        dateListed: new Date().toISOString() // Add the current date and time
-                    };
-
-                    // Save the data to Firebase Realtime Database
-                    const newBookRef = ref(database, `book-listings/${Date.now()}`);
-                    await set(newBookRef, bookData);
-
-                    // Optionally, show a success message here
-                    alert('Book listing added successfully!');
-
-                    // Reset the form
-                    bookTitleInput.value = '';
-                    authorInput.value = '';
-                    genreInput.value = '';
-                    conditionInput.value = '';
-                    descriptionInput.value = '';
-                    priceInput.value = '';
-                    bookImageInput.value = '';
-                    reviewBookImage.src = 'images/default-avatar.png'; // Reset image preview
-
-                    // Close the modal
-                    const modalInstance = bootstrap.Modal.getInstance(document.getElementById('formReviewModal'));
-                    modalInstance.hide();
-                } else {
-                    alert('You must be logged in to add a listing.');
+                if (file) {
+                    const imageStorageRef = storageRef(storage, `book-images/${Date.now()}-${file.name}`);
+                    await uploadBytes(imageStorageRef, file);
+                    imageUrl = await getDownloadURL(imageStorageRef);
                 }
-            });
+
+                // Create the data object with user ID and date-listed
+                const bookData = {
+                    title: bookTitleInput.value,
+                    author: authorInput.value,
+                    genre: genreInput.value,
+                    condition: conditionInput.value,
+                    description: descriptionInput.value,
+                    price: parseFloat(priceInput.value).toFixed(2),
+                    imageUrl: imageUrl,
+                    userId: userId, // Associate the book with the logged-in user
+                    dateListed: new Date().toISOString() // Add the current date and time
+                };
+
+                // Save the data to Firebase Realtime Database
+                const newBookRef = ref(database, `book-listings/${Date.now()}`);
+                await set(newBookRef, bookData);
+
+                // Optionally, show a success message here
+                alert('Book listing added successfully!');
+
+                // Reset the form
+                bookTitleInput.value = '';
+                authorInput.value = '';
+                genreInput.value = '';
+                conditionInput.value = '';
+                descriptionInput.value = '';
+                priceInput.value = '';
+                bookImageInput.value = '';
+                reviewBookImage.src = 'images/default-avatar.png'; // Reset image preview
+
+                // Close the modal
+                const modalInstance = bootstrap.Modal.getInstance(document.getElementById('formReviewModal'));
+                modalInstance.hide();
+            } else {
+                alert('You must be logged in to add a listing.');
+            }
         } catch (error) {
             console.error('Error adding book listing:', error);
             alert('Failed to add the book listing. Please try again.');

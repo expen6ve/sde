@@ -1,23 +1,9 @@
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js";
-import { getDatabase, ref, onValue, query, orderByChild } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-database.js";
-import { getAuth, signOut } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js";
-import { initializeNavbar } from './navbar.js';
 import { checkAuth } from './auth.js';
+import { getDatabase, ref, onValue, query, orderByChild } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-database.js";
+import { initializeNavbar } from './navbar.js';
 
-const firebaseConfig = {
-    apiKey: "AIzaSyCN8NcVQNRjAF_A86a8NfxC9Audivokuso",
-    authDomain: "sde-ecoread.firebaseapp.com",
-    databaseURL: "https://sde-ecoread-default-rtdb.asia-southeast1.firebasedatabase.app",
-    projectId: "sde-ecoread",
-    storageBucket: "sde-ecoread.appspot.com",
-    messagingSenderId: "137637739158",
-    appId: "1:137637739158:web:c9b885cf9025c89e2c60b7"
-};
 
-// Initialize Firebase
-const app = initializeApp(firebaseConfig);
-const database = getDatabase(app);
-const auth = getAuth(app);
+const database = getDatabase();
 
 // DOM elements
 const bookListContainer = document.getElementById('bookListContainer');

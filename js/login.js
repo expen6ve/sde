@@ -1,22 +1,8 @@
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js";
-import { getAuth, signInWithEmailAndPassword, sendPasswordResetEmail } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js";
+import { checkAuth, auth, signInWithEmailAndPassword, sendPasswordResetEmail } from './auth.js';
 import { getDatabase, ref, get } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-database.js";
 
-// Your web app's Firebase configuration
-const firebaseConfig = {
-  apiKey: "AIzaSyCN8NcVQNRjAF_A86a8NfxC9Audivokuso",
-  authDomain: "sde-ecoread.firebaseapp.com",
-  databaseURL: "https://sde-ecoread-default-rtdb.asia-southeast1.firebasedatabase.app",
-  projectId: "sde-ecoread",
-  storageBucket: "sde-ecoread.appspot.com",
-  messagingSenderId: "137637739158",
-  appId: "1:137637739158:web:c9b885cf9025c89e2c60b7"
-};
-
-// Initialize Firebase
-const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
-const db = getDatabase(app);
+// Initialize Firebase services from auth.js
+const db = getDatabase();  // You can still initialize the database here since it doesn't affect auth
 
 // Get form references  
 const emailInput = document.getElementById("emailInput");
@@ -93,4 +79,15 @@ forgotPasswordLink.addEventListener("click", (e) => {
       console.error("Error sending password reset email:", error);
       alert("Failed to send password reset email. Please try again.");
     });
+});
+
+// Example usage of checkAuth (if you want to verify user status before login)
+checkAuth().then((user) => {
+  if (user) {
+    window.location.href = 'userhome.html'; 
+    console.log('User already logged in:', user);
+    // Optionally redirect or take action if the user is already logged in
+  } else {
+    console.log('No user logged in, proceed with login process.');
+  }
 });
