@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+    <title>Home</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Bona+Nova+SC&display=swap" rel="stylesheet">
+    <link href="css/bootstrap.min.css" rel="stylesheet" />
+    <link href="css/userhome.css" rel="stylesheet" />
+    <script defer src="js/bootstrap.bundle.min.js"></script>
+    <script type="module" src="js/manage-account.js"></script>
+</head>
+<body>
+<!-- Responsive navbar -->
+<nav class="navbar navbar-expand-lg">
+    <div class="container px-5">
+        <a class="navbar-brand fs-2 text-muted d-flex align-items-center" href="userhome.html">
+            Eco-Reads
+            <img src="images/logo.png" alt="Eco-Reads Logo" class="ms-2" style="width: 50px; height: auto;">
+        </a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarSupportedContent">
+            <ul class="navbar-nav ms-auto mb-2 mb-lg-0 d-flex align-items-center">
+                <li class="nav-item">
+                    <a class="nav-link active" aria-current="page" href="userhome.html">Booksfeed</a>
+                </li>
+                <!-- Genre Dropdown -->
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                    Genre
+                    </a>
+                    <ul class="dropdown-menu" id="genreDropdown">
+                        <li><a class="dropdown-item" href="#" data-genre="Action">Action</a></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item" href="#" data-genre="Romance">Romance</a></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item" href="#" data-genre="Horror">Horror</a></li>
+                    </ul>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#!">Messages</a>
+                </li>
+                <form class="d-flex" role="search">
+                    <input class="form-control me-2" type="search" placeholder="Search" aria-label="Search">
+                </form>
+                <li class="nav-item">
+                    <a class="nav-link" href="sellingform.html">SELL A BOOK</a>
+                </li>   
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" id="profileDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        <img src="images/profileicon.svg" alt="profileicon" style="width: 30px; height: 35px; object-fit: cover; border-radius: 50%">
+                    </a>                    
+                    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="profileDropdown">
+                        <!-- Placeholder for dynamic role-based items -->
+                        <li id="roleBasedItem"></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item" href="#" id="signOut">Sign Out</a></li>
+                    </ul>                    
+                </li>                
+            </ul>
+        </div>
+    </div>
+</nav>
+
+    <!-- Page Content -->
+    <div class="container px-4 px-lg-5 mt-5">
+        <!-- Heading Row -->
+        <div class="d-flex flex-column align-items-center">
+            <img id="userProfilePic" src="images/profileicon.svg" alt="profileicon" style="width: 12rem; height: 12rem; object-fit: cover; border-radius: 50%">
+            <h1 id="userFullName" class="mb-0"></h1>
+        </div>
+
+        <!-- Books of the Week! -->
+        <h1>sad</h1>
+
+        <!-- Content Row -->
+        <div class="row gx-4 gx-lg-5">
+            <h1>sad</h1>
+        </div>
+        
+</body>
+</html>
