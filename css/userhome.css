@@ -67,6 +67,19 @@ button {
 .form-section {
     margin-bottom: 20px;
 }
+.user-info-font {
+    font-size: 1.1rem; 
+    color: #535353;
+    font-family: "Roboto Mono", monospace;
+    font-optical-sizing: auto;
+    font-weight: 400;
+    font-style: normal;
+}
+
+.user-info-font i {
+    font-size: 1.3rem;
+}
+
 
 
 

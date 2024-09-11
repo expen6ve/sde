@@ -4,6 +4,22 @@ import { initializeNavbar } from './navbar.js';
 
 const database = getDatabase();
 
+function getMonthName(monthNumber) {
+    const months = [
+        'January', 'February', 'March', 'April', 'May', 'June',
+        'July', 'August', 'September', 'October', 'November', 'December'
+    ];
+    return months[monthNumber - 1];
+}
+
+function capitalizeFirstLetter(str) {
+    return str.charAt(0).toUpperCase() + str.slice(1);
+}
+
+function capitalizeWords(str) {
+    return str.split(' ').map(word => capitalizeFirstLetter(word)).join(' ');
+}
+
 // Function to update the user's profile information
 function updateUserProfile() {
     checkAuth().then((user) => {
@@ -27,6 +43,36 @@ function updateUserProfile() {
                     } else {
                         console.log("Profile picture URL is empty");
                     }
+
+                    // Update the user's gender in the DOM
+                    const userGenderElement = document.getElementById('userGender');
+                    userGenderElement.textContent = capitalizeFirstLetter(userData.gender) || 'Not provided';
+
+                    // Update the user's birth date in the DOM
+                    const birthDate = userData.birthDate;
+                    const userBirthDateElement = document.getElementById('userBirthDate');
+                    if (birthDate) {
+                        const monthName = getMonthName(birthDate.dateMonth);
+                        userBirthDateElement.textContent = `${monthName} ${birthDate.dateDay}, ${birthDate.dateYear}`;
+                    } else {
+                        userBirthDateElement.textContent = 'Not provided';
+                    }
+
+                    // Update the user's address in the DOM
+                    const address = userData.address;
+                    const userAddressElement = document.getElementById('userAddress');
+                    if (address) {
+                        // Capitalize each part of the address
+                        const formattedAddress = capitalizeWords(`${address.street}, ${address.barangay}, ${address.city}`);
+                        userAddressElement.textContent = formattedAddress;
+                    } else {
+                        userAddressElement.textContent = 'Not provided';
+                    }
+
+                    // Update the user's phone number in the DOM
+                    const userPhoneNumberElement = document.getElementById('userPhoneNumber');
+                    userPhoneNumberElement.textContent = "+63 " + (userData.phone || 'Not provided');
+                    
                 } else {
                     console.log("No data available");
                 }
@@ -41,6 +87,18 @@ function updateUserProfile() {
 
 // Initialize Navbar and update user profile on DOM content loaded
 document.addEventListener('DOMContentLoaded', () => {
-    initializeNavbar();
-    updateUserProfile();
+    checkAuth().then((user) => {
+        if (user) {
+            // If user is authenticated, initialize the page
+            initializeNavbar();
+            updateUserProfile();
+        } else {
+            // If user is not authenticated, redirect to login page
+            window.location.href = '/login.html';  // Change '/login.html' to your actual login page
+        }
+    }).catch((error) => {
+        console.error("Error checking authentication: ", error);
+        // Optionally redirect to login in case of any error
+        window.location.href = '/login.html';
+    });
 });
