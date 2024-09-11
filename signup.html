@@ -16,7 +16,7 @@
 </head>
 <body>
     <section class="h-100 h-custom gradient-custom-2">
-        <div class="container py-5 h-100">
+        <div class="container pb-5 h-100">
             <div class="row d-flex justify-content-center align-items-center h-100">
                 <div class="col-12">
                     <div class="d-flex justify-content-center align-items-center">
@@ -28,8 +28,8 @@
                             <div class="row g-0">
                                 <!-- Personal Information Section -->
                                 <div class="col-lg-6">
-                                    <div class="p-5 pb-0">
-                                        <h3 class="fw-normal mb-5 text-center" style="color: #85848e;">Personal Information</h3>
+                                    <div class="p-5 pb-0 pt-3">
+                                        <h3 class="fw-normal mb-3 text-center" style="color: #85848e;">Personal Information</h3>
 
                                         <!-- Profile Picture Upload and Preview -->
                                         <div class="text-center">
@@ -42,39 +42,61 @@
 
                                         <div class="row">
                                             <!-- Email input -->
-                                            <div class="col-md-6 mb-4 form-section">
+                                            <div class="col-md-6 mb-3 form-section">
                                                 <div class="form-outline">
                                                     <input type="email" id="email" class="form-control form-control-lg" required />
                                                     <label class="form-label" for="email">Email</label>
                                                 </div>
                                             </div>
-                                            <div class="col-md-6 mb-4 form-section">
+                                            <div class="col-md-6 mb-3 form-section">
                                                 <div class="form-outline">
                                                     <input type="password" id="password" class="form-control form-control-lg" required />
                                                     <label class="form-label" for="password">Password</label>
                                                 </div>
                                             </div>
                                         </div>
-
+                                        
                                         <div class="row">
-                                            <div class="col-md-6 mb-4 form-section">
+                                            <div class="col-md-6 mb-3 form-section">
                                                 <div class="form-outline">
-                                                    <input type="text" id="first-name" class="form-control form-control-lg" />
+                                                    <input type="text" id="first-name" class="form-control form-control-lg" required/>
                                                     <label class="form-label" for="first-name">First Name</label>
                                                 </div>
                                             </div>
-                                            <div class="col-md-6 mb-4 form-section">
+                                            <div class="col-md-6 mb-3 form-section">
                                                 <div class="form-outline">
-                                                    <input type="text" id="last-name" class="form-control form-control-lg" />
+                                                    <input type="text" id="last-name" class="form-control form-control-lg" required/>
                                                     <label class="form-label" for="last-name">Last Name</label>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="lineseparator border border-top-1 border-dark-subtle"></div>
+                                        <div class="birthdateHeading text-center lead">birthdate</div>
+                                        <div class="row">
+                                            <div class="col mb-3 form-section">
+                                                <div class="form-outline">
+                                                    <input type="number" id="user-day" class="form-control form-control-lg" placeholder="What day" min="0" max="31" required />
+                                                    <label class="form-label" for="day">Day</label>
+                                                </div>
+                                            </div>
+                                            <div class="col mb-3 form-section">
+                                                <div class="form-outline">
+                                                    <input type="number" id="user-month" class="form-control form-control-lg" placeholder="What month" min="0" max="12" required />
+                                                    <label class="form-label" for="month">Month</label>
+                                                </div>
+                                            </div>
+                                            <div class="col mb-3 form-section">
+                                                <div class="form-outline">
+                                                    <input type="number" id="user-year" class="form-control form-control-lg" placeholder="What year" min="0" max="9999"  required />
+                                                    <label class="form-label" for="year">Year</label>
                                                 </div>
                                             </div>
                                         </div>
 
                                         <div class="row">
-                                            <div class="col-md-6 mb-4 form-section">
+                                            <div class="col-md-6 mb-3 form-section">
                                                 <div class="form-outline">
-                                                    <input type="number" id="age" class="form-control form-control-lg" />
+                                                    <input type="number" id="age" class="form-control form-control-lg" placeholder="Age" min="0"  required />
                                                     <label class="form-label" for="age">Age</label>
                                                 </div>
                                             </div>
@@ -94,7 +116,7 @@
                                             </div>
                                         </div>
 
-                                        <div class="mb-4 form-section">
+                                        <div class="mb-2 form-section">
                                             <div class="form-outline">
                                                 <input type="tel" id="phone-number" placeholder="+63" class="form-control form-control-lg" />
                                                 <label class="form-label" for="phone-number">Phone Number (+63)</label>
@@ -103,9 +125,9 @@
                                     </div>
                                 </div>
 
-                                <!-- Contact Details Section -->
+                                <!-- User Address Section -->
                                 <div class="col-lg-6 bg-indigo text-white">
-                                    <div class="p-5">
+                                    <div class="p-5 pb-0 pt-3">
                                         <h3 class="fw-normal mb-5 text-center">Address</h3>
 
                                         <div class="mb-4 pb-2">

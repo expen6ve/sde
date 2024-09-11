@@ -26,6 +26,9 @@ const emailInput = document.getElementById("email");
 const passwordInput = document.getElementById("password");
 const firstNameInput = document.getElementById("first-name");
 const lastNameInput = document.getElementById("last-name");
+const dateDayInput = document.getElementById('user-day')
+const dateMonthInput = document.getElementById('user-month')
+const dateYearInput = document.getElementById('user-year')
 const ageInput = document.getElementById("age");
 const genderInputs = document.getElementsByName("gender");
 const phoneInput = document.getElementById("phone-number");
@@ -79,6 +82,11 @@ registerButton.addEventListener("click", (e) => {
                     set(ref(database, 'users/' + user.uid), {
                         firstName: firstNameInput.value,
                         lastName: lastNameInput.value,
+                        birthDate: {
+                            dateDay: dateDayInput.value,
+                            dateMonth: dateMonthInput.value,
+                            dateYear: dateYearInput.value,
+                        },
                         age: ageInput.value,
                         gender: getSelectedGender(),
                         phone: phoneInput.value,
@@ -103,6 +111,11 @@ registerButton.addEventListener("click", (e) => {
             set(ref(database, 'users/' + user.uid), {
                 firstName: firstNameInput.value,
                 lastName: lastNameInput.value,
+                birthDate: {
+                    dateDay: dateDayInput.value,
+                    dateMonth: dateMonthInput.value,
+                    dateYear: dateYearInput.value,
+                },
                 age: ageInput.value,
                 gender: getSelectedGender(),
                 phone: phoneInput.value,

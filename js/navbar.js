@@ -65,10 +65,10 @@ onAuthStateChanged(auth, user => {
 
 export async function initializeNavbar() {
     const user = await checkAuth();
-    if (!user) {
-        window.location.href = 'index.html';
-    } else {
+    if (user) {
         updateProfile(user);
     }
     setupNavbarEventListeners();
 }
+
+
