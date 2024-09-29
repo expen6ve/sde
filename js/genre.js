@@ -1,6 +1,6 @@
 import { checkAuth } from './auth.js';
 import { getDatabase, ref, onValue, query, orderByChild } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-database.js";
-import { initializeNavbar } from './navbar.js';
+import { initializeNavbar, handleSignOut } from './navbar.js';
 
 
 const database = getDatabase();
