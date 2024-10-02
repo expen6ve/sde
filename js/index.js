@@ -1,36 +1,114 @@
-document.addEventListener('DOMContentLoaded', function () {
-    // Redirect to login page
-    const myButton = document.getElementById('signinbutton');
-    if (myButton) {
-        myButton.addEventListener('click', function() {
-            window.location.href = 'login.html';
-        });
-    }
+import { checkAuth } from './auth.js';
+import { getDatabase, ref, onValue, query, orderByChild } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-database.js";
 
-    // Handle "Read More" and "Read Less" functionality
-    const readMoreLinks = document.querySelectorAll('.read-more');
-    readMoreLinks.forEach(link => {
-        link.addEventListener('click', function () {
-            const cardText = this.previousElementSibling;
-            if (cardText.classList.contains('text-hidden')) {
-                cardText.classList.remove('text-hidden');
-                this.textContent = 'Read Less';
+// Initialize Firebase Database
+const database = getDatabase();
+
+// DOM elements
+const bookListContainer = document.getElementById('bookListContainer');
+
+// Function to set up logo redirection based on user authentication
+async function setupLogoRedirection() {
+    const user = await checkAuth();
+    const logo = document.getElementById('logo');
+
+    if (logo) {
+        logo.addEventListener('click', () => {
+            if (user) {
+                window.location.href = 'userhome.html'; // Redirect to user home if logged in
             } else {
-                cardText.classList.add('text-hidden');
-                this.textContent = 'Read More';
+                window.location.href = 'index.html'; // Stay on index page if not logged in
             }
         });
-    });
+    } else {
+        console.error('Logo element not found.');
+    }
+}
 
-    // Handle genre dropdown redirection
+// Function to handle "Sign In" button click
+function setupSigninButton() {
+    const signinButton = document.getElementById('signinbutton');
+    if (signinButton) {
+        signinButton.addEventListener('click', () => {
+            window.location.href = 'login.html'; // Redirect to login page
+        });
+    }
+}
+
+// Function to handle genre dropdown redirection
+function setupGenreDropdown() {
     const genreDropdownItems = document.querySelectorAll('#genreDropdown .dropdown-item');
     genreDropdownItems.forEach(item => {
         item.addEventListener('click', (event) => {
-            event.preventDefault(); // Prevent default link behavior
+            event.preventDefault();
             const selectedGenre = event.target.getAttribute('data-genre');
             if (selectedGenre) {
                 window.location.href = `genre.html?genre=${encodeURIComponent(selectedGenre)}`;
             }
         });
     });
+}
+
+// Function to display recently listed books
+function displayRecentlyListedBooks() {
+    const booksRef = query(ref(database, 'book-listings'), orderByChild('dateListed'));
+
+    // Fetch books from Firebase and display them
+    onValue(booksRef, (snapshot) => {
+        const bookData = snapshot.val();
+        bookListContainer.innerHTML = ''; // Clear previous content
+
+        if (bookData) {
+            const booksArray = Object.entries(bookData).reverse(); // Most recent first
+            const userNames = {};
+
+            // Fetch user data to map seller IDs to names
+            onValue(ref(database, 'users'), (userSnapshot) => {
+                const userData = userSnapshot.val();
+                if (userData) {
+                    // Store user names based on userId
+                    Object.keys(userData).forEach(userId => {
+                        userNames[userId] = userData[userId].firstName || 'Unknown';
+                    });
+
+                    // Loop through each book and display it
+                    booksArray.forEach(([bookId, book]) => {
+                        const bookHtml = `
+                            <div class="col-lg-3 col-md-6 mb-5">
+                                <div class="card h-100">
+                                    <div class="card-body">
+                                        <div class="d-flex justify-content-center">
+                                            <img src="${book.imageUrl || 'images/default-book.png'}" class="img-fluid" alt="Book Image" style="height: 200px; object-fit: cover;">
+                                        </div>
+                                        <div class="d-flex justify-content-center mt-3">
+                                            <button class="btn custom-btn">Add to Favorites</button>
+                                        </div>
+                                        <h4 class="card-title mt-3 fs-5">${book.title}</h4>
+                                        <p class="card-text"><strong>Author:</strong> ${book.author}</p>
+                                        <p class="card-text"><strong>Seller:</strong> ${userNames[book.userId] || 'Unknown'}</p>
+                                        <p class="card-text"><strong>Condition:</strong> ${book.condition}</p>
+                                        <p class="card-text"><strong>Price:</strong> ₱${book.price}</p>
+                                        <div class="d-flex justify-content-between mt-3">
+                                            <button class="btn btn-success">Contact Seller</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        `;
+                        bookListContainer.innerHTML += bookHtml; // Append each book's HTML
+                    });
+                }
+            });
+        } else {
+            bookListContainer.innerHTML = '<p>No books available for sale.</p>';
+        }
+    });
+}
+
+// Set up all necessary listeners once DOM is fully loaded
+document.addEventListener('DOMContentLoaded', () => {
+    setupLogoRedirection();
+    setupSigninButton();
+    setupGenreDropdown();
+    displayRecentlyListedBooks();
 });
