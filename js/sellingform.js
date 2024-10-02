@@ -3,13 +3,22 @@ import { initializeNavbar } from './navbar.js';
 import { getDatabase, ref, set } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-database.js";
 import { getStorage, ref as storageRef, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-storage.js";
 
-
 const database = getDatabase();
 const storage = getStorage();
 
-document.addEventListener('DOMContentLoaded', initializeNavbar);
+// Check if the user is authenticated before loading the rest of the page
+async function checkUserAuthentication() {
+    const user = await checkAuth();
+    if (!user) {
+        window.location.href = 'login.html'; // Redirect to login if not authenticated
+    }
+}
 
-document.addEventListener('DOMContentLoaded', () => {
+// Initialize the page after checking authentication
+document.addEventListener('DOMContentLoaded', async () => {
+    await checkUserAuthentication(); // Ensure user is authenticated before proceeding
+    initializeNavbar();
+
     // Form Elements
     const bookTitleInput = document.getElementById('book-title');
     const authorInput = document.getElementById('author');
@@ -46,13 +55,12 @@ document.addEventListener('DOMContentLoaded', () => {
         );
     }
 
-    // Function to display profile picture preview when selected
+    // Function to display image preview when selected
     bookImageInput.addEventListener('change', (e) => {
         const file = e.target.files[0];
         if (file) {
             const reader = new FileReader();
             reader.onload = () => {
-                // Update the profile preview image with the selected image
                 document.getElementById('profilePreview').src = reader.result;
             };
             reader.readAsDataURL(file);
@@ -96,56 +104,51 @@ document.addEventListener('DOMContentLoaded', () => {
     // Handle "Continue" button in the modal
     document.getElementById('confirmSubmissionBtn').addEventListener('click', async () => {
         try {
-            // Check if a user is logged in using the checkAuth function
             const user = await checkAuth();
-            if (user) {
-                const userId = user.uid; // Get the logged-in user's ID
-                // Upload the image to Firebase Storage
-                const file = bookImageInput.files[0];
-                let imageUrl = '';
+            const userId = user.uid; // Get the logged-in user's ID
+            
+            // Upload the image to Firebase Storage
+            const file = bookImageInput.files[0];
+            let imageUrl = '';
 
-                if (file) {
-                    const imageStorageRef = storageRef(storage, `book-images/${Date.now()}-${file.name}`);
-                    await uploadBytes(imageStorageRef, file);
-                    imageUrl = await getDownloadURL(imageStorageRef);
-                }
-
-                // Create the data object with user ID and date-listed
-                const bookData = {
-                    title: bookTitleInput.value,
-                    author: authorInput.value,
-                    genre: genreInput.value,
-                    condition: conditionInput.value,
-                    description: descriptionInput.value,
-                    price: parseFloat(priceInput.value).toFixed(2),
-                    imageUrl: imageUrl,
-                    userId: userId, // Associate the book with the logged-in user
-                    dateListed: new Date().toISOString() // Add the current date and time
-                };
-
-                // Save the data to Firebase Realtime Database
-                const newBookRef = ref(database, `book-listings/${Date.now()}`);
-                await set(newBookRef, bookData);
-
-                // Optionally, show a success message here
-                alert('Book listing added successfully!');
-
-                // Reset the form
-                bookTitleInput.value = '';
-                authorInput.value = '';
-                genreInput.value = '';
-                conditionInput.value = '';
-                descriptionInput.value = '';
-                priceInput.value = '';
-                bookImageInput.value = '';
-                reviewBookImage.src = 'images/default-avatar.png'; // Reset image preview
-
-                // Close the modal
-                const modalInstance = bootstrap.Modal.getInstance(document.getElementById('formReviewModal'));
-                modalInstance.hide();
-            } else {
-                alert('You must be logged in to add a listing.');
+            if (file) {
+                const imageStorageRef = storageRef(storage, `book-images/${Date.now()}-${file.name}`);
+                await uploadBytes(imageStorageRef, file);
+                imageUrl = await getDownloadURL(imageStorageRef);
             }
+
+            // Create the data object with user ID and date-listed
+            const bookData = {
+                title: bookTitleInput.value,
+                author: authorInput.value,
+                genre: genreInput.value,
+                condition: conditionInput.value,
+                description: descriptionInput.value,
+                price: parseFloat(priceInput.value).toFixed(2),
+                imageUrl: imageUrl,
+                userId: userId, // Associate the book with the logged-in user
+                dateListed: new Date().toISOString() // Add the current date and time
+            };
+
+            // Save the data to Firebase Realtime Database
+            const newBookRef = ref(database, `book-listings/${Date.now()}`);
+            await set(newBookRef, bookData);
+
+            alert('Book listing added successfully!');
+
+            // Reset the form
+            bookTitleInput.value = '';
+            authorInput.value = '';
+            genreInput.value = '';
+            conditionInput.value = '';
+            descriptionInput.value = '';
+            priceInput.value = '';
+            bookImageInput.value = '';
+            reviewBookImage.src = 'images/default-avatar.png'; // Reset image preview
+
+            // Close the modal
+            const modalInstance = bootstrap.Modal.getInstance(document.getElementById('formReviewModal'));
+            modalInstance.hide();
         } catch (error) {
             console.error('Error adding book listing:', error);
             alert('Failed to add the book listing. Please try again.');

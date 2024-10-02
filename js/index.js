@@ -7,13 +7,21 @@ const database = getDatabase();
 // DOM elements
 const bookListContainer = document.getElementById('bookListContainer');
 
+// Check if the user is authenticated
+async function redirectIfAuthenticated() {
+    const user = await checkAuth();
+    if (user) {
+        window.location.href = 'userhome.html'; // Redirect to user home if logged in
+    }
+}
+
 // Function to set up logo redirection based on user authentication
 async function setupLogoRedirection() {
-    const user = await checkAuth();
     const logo = document.getElementById('logo');
-
+    
     if (logo) {
-        logo.addEventListener('click', () => {
+        logo.addEventListener('click', async () => {
+            const user = await checkAuth();
             if (user) {
                 window.location.href = 'userhome.html'; // Redirect to user home if logged in
             } else {
@@ -106,7 +114,8 @@ function displayRecentlyListedBooks() {
 }
 
 // Set up all necessary listeners once DOM is fully loaded
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
+    await redirectIfAuthenticated(); // Check authentication first
     setupLogoRedirection();
     setupSigninButton();
     setupGenreDropdown();

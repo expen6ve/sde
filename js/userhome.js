@@ -10,7 +10,24 @@ const bookListContainer = document.getElementById('bookListContainer');
 const signOutButton = document.getElementById('signOut');
 
 // Initialize Navbar
-document.addEventListener('DOMContentLoaded', initializeNavbar);
+document.addEventListener('DOMContentLoaded', async () => {
+    // Check if the user is authenticated
+    const user = await checkAuth();
+    if (!user) {
+        // Redirect to index if not logged in
+        window.location.href = 'index.html';
+        return;
+    }
+
+    initializeNavbar();
+
+    // Display recently listed books
+    displayRecentlyListedBooks();
+
+    if (signOutButton) {
+        signOutButton.addEventListener('click', handleSignOut);
+    }
+});
 
 // Display recently listed books
 function displayRecentlyListedBooks() {
@@ -65,15 +82,3 @@ function displayRecentlyListedBooks() {
         }
     });
 }
-
-// Event Listeners
-document.addEventListener('DOMContentLoaded', async () => {
-    const user = await checkAuth();
-
-    // Display recently listed books when the page loads
-    displayRecentlyListedBooks();
-
-    if (signOutButton) {
-        signOutButton.addEventListener('click', handleSignOut);
-    }
-});

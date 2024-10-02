@@ -149,12 +149,12 @@ document.addEventListener('DOMContentLoaded', () => {
             updateUserRecentListings(); // Fetch and display recent listings
         } else {
             // If user is not authenticated, redirect to login page
-            window.location.href = '/login.html';  // Change '/login.html' to your actual login page
+            window.location.href = '/index.html';  // Change '/login.html' to your actual login page
         }
     }).catch((error) => {
         console.error("Error checking authentication: ", error);
         // Optionally redirect to login in case of any error
-        window.location.href = '/login.html';
+        window.location.href = '/index.html';
     });
 });
 
