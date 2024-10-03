@@ -108,7 +108,7 @@ function updateUserRecentListings() {
                     if (userListings.length > 0) {
                         const mostRecentBook = userListings[0];
                         const bookCard = `
-                            <div class="card h-100">
+                            <div class="card h-100 mb-3">
                                 <div class="card-body">
                                     <div class="d-flex justify-content-center">
                                         <img src="${mostRecentBook.imageUrl || 'images/default-book.png'}" class="img-fluid" alt="Book Image" style="height: 200px; object-fit: cover;">

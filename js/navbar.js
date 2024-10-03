@@ -44,15 +44,20 @@ export function handleSignOut() {
 }
 
 function handleGenreDropdownClick(event) {
-    event.preventDefault();
+    event.preventDefault(); // Prevent the default anchor click behavior
     const selectedGenre = event.target.getAttribute('data-genre');
-    if (selectedGenre) window.location.href = `genre.html?genre=${encodeURIComponent(selectedGenre)}`;
+    if (selectedGenre) {
+        // Change the window location to redirect correctly
+        window.location.href = `genre.html?genre=${encodeURIComponent(selectedGenre)}#`;
+    }
 }
 
+// Setup navbar event listeners
 export function setupNavbarEventListeners() {
     genreDropdownItems.forEach(item => item.addEventListener('click', handleGenreDropdownClick));
     signOutLink.addEventListener('click', handleSignOut);
 }
+
 
 // Listen for auth state changes
 onAuthStateChanged(auth, user => {

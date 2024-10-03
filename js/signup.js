@@ -3,6 +3,7 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.0/fireba
 import { getDatabase, ref, set } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-database.js";
 import { getAuth, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js";
 import { getStorage, ref as storageRef, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-storage.js";
+import { checkAuth } from "./auth.js";
 
 // Your web app's Firebase configuration
 const firebaseConfig = {
@@ -42,6 +43,14 @@ const registerButton = document.querySelector("button[type='submit']");
 const continueButton = document.getElementById("continueButton");
 const profilePictureInput = document.getElementById("profilePicture");
 const profilePreview = document.getElementById("profilePreview");
+
+// Check if user is already logged in
+checkAuth().then((user) => {
+    if (user) {
+        // Redirect logged-in users to the homepage (or any other page)
+        window.location.href = "userhome.html"; // Change this to the appropriate page
+    }
+});
 
 // Register event listener for form submission
 registerButton.addEventListener("click", (e) => {
