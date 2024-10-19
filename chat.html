@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+    <title>Eco-Reads</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Bona+Nova+SC&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link href="css/bootstrap.min.css" rel="stylesheet" />
+    <link href="css/chat.css" rel="stylesheet" />
+    <script defer src="js/bootstrap.bundle.min.js"></script>
+    <script defer type="module" src="js/chat.js"></script> <!-- Ensure index.js is executed after DOM is ready -->
+</head>
+<body>
+    <!-- Responsive navbar -->
+<nav class="navbar navbar-expand-lg">
+    <div class="container px-5">
+        <a class="navbar-brand fs-2 text-muted d-flex align-items-center" href="userhome.html">
+            Eco-Reads
+            <img src="images/logo.png" alt="Eco-Reads Logo" class="ms-2" style="width: 50px; height: auto;">
+        </a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarSupportedContent">
+            <ul class="navbar-nav ms-auto mb-2 mb-lg-0 d-flex align-items-center">
+                <li class="nav-item">
+                    <a class="nav-link active" aria-current="page" href="userhome.html">Booksfeed</a>
+                </li>
+                <!-- Genre Dropdown -->
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                    Genre
+                    </a>
+                    <ul class="dropdown-menu" id="genreDropdown">
+                        <li><a class="dropdown-item" href="#" data-genre="Action">Action</a></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item" href="#" data-genre="Romance">Romance</a></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item" href="#" data-genre="Horror">Horror</a></li>
+                    </ul>
+                </li>
+                <li class="nav-item">
+                  <a class="nav-link" href="chat.html">Messages</a>
+                </li>
+                <form class="d-flex" role="search">
+                    <input class="form-control me-2" type="search" placeholder="Search" aria-label="Search">
+                </form>
+                <li class="nav-item">
+                    <a class="nav-link" href="sellingform.html">SELL A BOOK</a>
+                </li>   
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" id="profileDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        <img src="images/profileicon.svg" alt="profileicon" style="width: 30px; height: 35px; object-fit: cover; border-radius: 50%">
+                    </a>                    
+                    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="profileDropdown">
+                        <!-- Placeholder for dynamic role-based items -->
+                        <li id="roleBasedItem"></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item" href="#" id="signOut">Sign Out</a></li>
+                    </ul>                    
+                </li>                
+            </ul>
+        </div>
+    </div>
+</nav>
+<!-- Page Content -->
+    <section class="bg-secondary-subtle">
+        <div class="container py-5">
+          <div class="row">
+            <div class="col-md-12">
+              <div class="card" id="chat3" style="border-radius: 15px;">
+                <div class="card-body">
+                  <div class="row">
+                    <div class="col-md-6 col-lg-5 col-xl-4 mb-4 mb-md-0">
+                      <div class="p-3">
+                        <div class="input-group rounded mb-3">
+                          <input type="search" class="form-control rounded" placeholder="Search" aria-label="Search" aria-describedby="search-addon" />
+                          <button class="btn btn-outline-secondary" id="search-addon">
+                            <i class="fas fa-search"></i>
+                          </button>
+                        </div>
+      
+                        <div class="overflow-auto" style="height: 400px">
+                          <ul class="list-unstyled mb-0">
+                            <li class="p-2 border-bottom">
+                              <a href="#!" id="sellerChatTab" class="d-flex justify-content-between align-items-center">
+                                <div class="d-flex align-items-center">
+                                  <img src="https://mdbcdn.b-cdn.net/img/Photos/new-templates/bootstrap-chat/ava1-bg.webp" alt="avatar" id="sellerProfile" class="me-3 rounded-circle" width="60">
+                                  <div>
+                                    <p id="sellerName" class="fw-bold mb-0"></p>
+                                  </div>
+                                </div>
+                                <div>
+                                  <p id="timeSent" class="small text-muted mb-1">Just now</p>
+                                  <span id="notificationCount" class="badge bg-danger rounded-pill">3</span>
+                                </div>
+                              </a>
+                            </li>
+                            <!-- Add more chat list items similarly here -->
+                          </ul>
+                        </div>
+                      </div>
+                    </div>
+      
+                    <div class="col-md-6 col-lg-7 col-xl-8">
+                      <div class="pt-3 pe-3 overflow-auto" style="height: 400px;">
+
+                        <div id="userChatBubble" class="d-flex flex-row justify-content-end mb-3">
+                          <div class="me-3">
+                            <p id="messageSentDisplayed" class="small p-2 text-white rounded-3 bg-primary mb-1">Ut enim ad minim veniam.</p>
+                            <p id="messageTimeStamp" class="small text-muted">12:00 PM | Aug 13</p>
+                          </div>
+                          <img src="https://mdbcdn.b-cdn.net/img/Photos/new-templates/bootstrap-chat/ava1-bg.webp" alt="avatar 1" id="userProfile" class="rounded-circle" style="width: 45px; height: 45px;">
+                        </div>
+
+                        <div id="sellerChatBubble" class="d-flex flex-row align-items-start mb-3">
+                          <img src="https://mdbcdn.b-cdn.net/img/Photos/new-templates/bootstrap-chat/ava6-bg.webp" alt="avatar 1" id="sellerProfilePicture" class="rounded-circle" style="width: 45px; height: 45px;">
+                          <div class="ms-3">
+                            <p id="messageSentDisplayed" class="small p-2 mb-1 rounded-3 bg-body-tertiary">Lorem ipsum dolor sit amet, consectetur adipiscing elit.</p>
+                            <p id="messageTimeStamp" class="small text-muted">12:00 PM | Aug 13</p>
+                          </div>
+                        </div>
+                        <!-- Repeat chat bubbles accordingly -->
+                      </div>
+      
+                      <div class="d-flex justify-content-start align-items-center pe-3 pt-3 mt-2">
+                        <img src="https://mdbcdn.b-cdn.net/img/Photos/new-templates/bootstrap-chat/ava6-bg.webp" alt="avatar 3" id="userProfile" class="rounded-circle me-2" style="width: 40px; height: 40px;">
+                        <input type="text"  class="form-control form-control-lg me-1" id="writeMessage" placeholder="Type message">
+                        <a id="sendMessage" class="text-muted ms-3" href="#!"><i class="fas fa-paper-plane"></i></a>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>      
+</body>
+</html>

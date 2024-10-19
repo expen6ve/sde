@@ -65,7 +65,7 @@
                     </ul>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="#!">Messages</a>
+                    <a class="nav-link" href="chat.html">Messages</a>
                 </li>
                 <form class="d-flex" role="search">
                     <input class="form-control me-2" type="search" placeholder="Search" aria-label="Search">
@@ -175,16 +175,30 @@
                                     <option value="Other">Other</option>
                                 </select>
                             </div>
-                             <!-- Gender -->
-                             <div class="mb-3">
-                                <label for="editGender" class="form-label">Gender</label>
-                                <select class="form-select" id="editGender" required>
-                                    <option value="Male">Male</option>
-                                    <option value="Female">Female</option>
-                                    <option value="Other">Other</option>
-                                </select>
-                            </div>
-        
+                            
+                            <!-- Birth Date -->
+                            <div class="lineseparator border border-top-1 border-dark-subtle"></div>
+                            <div class="birthdateHeading text-center lead">birthdate</div>
+                            <div class="row">
+                                <div class="col mb-3 form-section">
+                                    <div class="form-outline">
+                                        <input type="number" id="user-day" class="form-control form-control-lg" placeholder="Day" min="1" max="31" required />
+                                        <label class="form-label" for="user-day">Day</label>
+                                    </div>
+                                </div>
+                                <div class="col mb-3 form-section">
+                                    <div class="form-outline">
+                                        <input type="number" id="user-month" class="form-control form-control-lg" placeholder="Month" min="1" max="12" required />
+                                        <label class="form-label" for="user-month">Month</label>
+                                    </div>
+                                </div>
+                                <div class="col mb-3 form-section">
+                                    <div class="form-outline">
+                                        <input type="number" id="user-year" class="form-control form-control-lg" placeholder="Year" min="1900" max="9999" required />
+                                        <label class="form-label" for="user-year">Year</label>
+                                    </div>
+                                </div>
+                            </div>        
                             <!-- Phone Number -->
                             <div class="mb-3">
                                 <label for="editPhoneNumber" class="form-label">Phone Number</label>

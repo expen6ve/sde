@@ -5,43 +5,42 @@ import { initializeNavbar } from './navbar.js';
 
 const database = getDatabase();
 const storage = getStorage();
+const months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
 
-const months = [
-    'January', 'February', 'March', 'April', 'May', 'June',
-    'July', 'August', 'September', 'October', 'November', 'December'
-];
-
+// Utility functions
 const capitalize = str => str.charAt(0).toUpperCase() + str.slice(1);
 const capitalizeWords = str => str.split(' ').map(capitalize).join(' ');
 
-// Update user profile information in the DOM
-async function updateUserProfile() {
+const getElementValue = id => document.getElementById(id).value.trim();
+const setElementText = (id, text) => document.getElementById(id).textContent = text || 'Not provided';
+const setImageSrc = (id, src) => document.getElementById(id).src = src || '';
+
+async function fetchUserData() {
     const user = await checkAuth();
-    if (!user) return;
+    if (!user) return null;
 
     const userRef = ref(database, 'users/' + user.uid);
     const snapshot = await get(userRef);
-
-    if (snapshot.exists()) {
-        const userData = snapshot.val();
-        document.getElementById('userFullName').textContent = `${userData.firstName} ${userData.lastName}`;
-        document.getElementById('userProfilePic').src = userData.profilePicture || '';
-        document.getElementById('userGender').textContent = capitalize(userData.gender || 'Not provided');
-        
-        const { birthDate, address, phone } = userData;
-        document.getElementById('userBirthDate').textContent = birthDate 
-            ? `${months[birthDate.dateMonth - 1]} ${birthDate.dateDay}, ${birthDate.dateYear}`
-            : 'Not provided';
-        
-        document.getElementById('userAddress').textContent = address 
-            ? capitalizeWords(`${address.street}, ${address.barangay}, ${address.city}`)
-            : 'Not provided';
-
-        document.getElementById('userPhoneNumber').textContent = phone ? `+63 ${phone}` : 'Not provided';
-    }
+    return snapshot.exists() ? snapshot.val() : null;
 }
 
-// Update profile in the Firebase Database
+function updateDOMUserProfile(userData) {
+    setElementText('userFullName', `${userData.firstName} ${userData.lastName}`);
+    setImageSrc('userProfilePic', userData.profilePicture);
+    setElementText('userGender', capitalize(userData.gender));
+    
+    const { birthDate, address, phone } = userData;
+    setElementText('userBirthDate', birthDate ? `${months[birthDate.dateMonth - 1]} ${birthDate.dateDay}, ${birthDate.dateYear}` : '');
+    setElementText('userAddress', address ? capitalizeWords(`${address.street}, ${address.barangay}, ${address.city}`) : '');
+    setElementText('userPhoneNumber', phone ? `+63 ${phone}` : '');
+}
+
+async function updateUserProfile() {
+    const userData = await fetchUserData();
+    if (userData) updateDOMUserProfile(userData);
+}
+
+// Update Firebase profile and image
 async function updateProfileInFirebase(user, updatedProfileData, profileImageFile) {
     const userRef = ref(database, `users/${user.uid}`);
     
@@ -50,11 +49,11 @@ async function updateProfileInFirebase(user, updatedProfileData, profileImageFil
         const snapshot = await uploadBytes(profileImageRef, profileImageFile);
         updatedProfileData.profilePicture = await getDownloadURL(snapshot.ref);
     }
-
+    
     await update(userRef, updatedProfileData);
 }
 
-// Fetch and display recent listings of the logged-in user
+// Update recent listings in the DOM
 async function updateUserRecentListings() {
     const user = await checkAuth();
     if (!user) return;
@@ -62,7 +61,7 @@ async function updateUserRecentListings() {
     const listingsRef = ref(database, 'book-listings');
     const snapshot = await get(listingsRef);
     const userRecentListingElement = document.getElementById('userRecentListing');
-    userRecentListingElement.innerHTML = ''; // Clear existing content
+    userRecentListingElement.innerHTML = '';  // Clear existing content
 
     if (snapshot.exists()) {
         const allListings = snapshot.val();
@@ -91,34 +90,45 @@ async function updateUserRecentListings() {
     }
 }
 
-// Handle profile update on button click
+// Handle profile update
 document.getElementById('saveProfileChangesButton').addEventListener('click', async () => {
     const user = await checkAuth();
     if (!user) return;
 
-    const updatedProfileData = {
-        firstName: document.getElementById('editFirstName').value,
-        lastName: document.getElementById('editLastName').value,
-        gender: document.getElementById('editGender').value,
-        phone: document.getElementById('editPhoneNumber').value,
-        address: {
-            street: document.getElementById('editStreet').value,
-            barangay: document.getElementById('editBarangay').value,
-            city: document.getElementById('editCity').value,
-            province: document.getElementById('editProvince').value,
-            zipCode: document.getElementById('editZipCode').value,
-        }
-    };
+    const currentUserData = await fetchUserData();
+    const updatedProfileData = {};
+
+    // Update non-empty fields
+    const updateIfFilled = (field, value) => value ? updatedProfileData[field] = value : null;
+
+    updateIfFilled('firstName', getElementValue('editFirstName'));
+    updateIfFilled('lastName', getElementValue('editLastName'));
+    updateIfFilled('gender', getElementValue('editGender'));
+    updateIfFilled('phone', getElementValue('editPhoneNumber'));
+
+    const addressFields = ['editStreet', 'editBarangay', 'editCity', 'editProvince', 'editZipCode'];
+    const updatedAddress = {};
+    addressFields.forEach(field => {
+        const value = getElementValue(field);
+        if (value) updatedAddress[field.replace('edit', '').toLowerCase()] = value;
+    });
+    
+    if (Object.keys(updatedAddress).length) {
+        updatedProfileData.address = { ...currentUserData.address, ...updatedAddress };
+    }
+
+    const [dateDay, dateMonth, dateYear] = ['user-day', 'user-month', 'user-year'].map(getElementValue);
+    if (dateDay && dateMonth && dateYear) {
+        updatedProfileData.birthDate = { dateDay, dateMonth, dateYear };
+    }
 
     const profileImageFile = document.getElementById('profilePicture').files[0];
 
     try {
         await updateProfileInFirebase(user, updatedProfileData, profileImageFile);
         alert("Profile updated successfully!");
-        updateUserProfile();
-        // Close the modal after saving
-        const modal = bootstrap.Modal.getInstance(document.getElementById('editProfileModal'));
-        modal.hide();
+        await updateUserProfile();
+        bootstrap.Modal.getInstance(document.getElementById('editProfileModal')).hide();
     } catch (error) {
         console.error("Error updating profile: ", error);
         alert("Failed to update profile. Please try again.");
@@ -128,11 +138,9 @@ document.getElementById('saveProfileChangesButton').addEventListener('click', as
 // Preview selected image
 document.getElementById('profilePicture').addEventListener('change', function() {
     const file = this.files[0];
-    const previewElement = document.getElementById('profilePicturePreview');
-
     if (file) {
         const reader = new FileReader();
-        reader.onload = e => { previewElement.src = e.target.result; };
+        reader.onload = e => { document.getElementById('profilePicturePreview').src = e.target.result; };
         reader.readAsDataURL(file);
     }
 });

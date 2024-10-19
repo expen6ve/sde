@@ -9,6 +9,12 @@ const database = getDatabase();
 const bookListContainer = document.getElementById('bookListContainer');
 const signOutButton = document.getElementById('signOut');
 
+// Redirect to chat function in the global scope
+window.redirectToChat = function(sellerId, bookTitle) {
+    // Redirect to chat.html with seller ID and book title as query parameters
+    window.location.href = `chat.html?sellerId=${sellerId}`;
+};
+
 // Initialize Navbar
 document.addEventListener('DOMContentLoaded', async () => {
     // Check if the user is authenticated
@@ -68,7 +74,7 @@ function displayRecentlyListedBooks() {
                                         <p class="card-text"><strong>Condition:</strong> ${book.condition}</p>
                                         <p class="card-text"><strong>Price:</strong> ₱${book.price}</p>
                                         <div class="d-flex justify-content-between mt-3">
-                                            <button class="btn btn-success">Contact Seller</button>
+                                            <button class="btn btn-success" onclick="redirectToChat('${book.userId}')">Contact Seller</button>
                                         </div>
                                     </div>
                                 </div>
