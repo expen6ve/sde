@@ -11,7 +11,7 @@
     <link href="css/bootstrap.min.css" rel="stylesheet" />
     <link href="css/chat.css" rel="stylesheet" />
     <script defer src="js/bootstrap.bundle.min.js"></script>
-    <script defer type="module" src="js/chat.js"></script> <!-- Ensure index.js is executed after DOM is ready -->
+    <script defer type="module" src="js/chat.js"></script> 
 </head>
 <body>
     <!-- Responsive navbar -->
@@ -83,55 +83,25 @@
                           </button>
                         </div>
       
-                        <div class="overflow-auto" style="height: 400px">
-                          <ul class="list-unstyled mb-0">
-                            <li class="p-2 border-bottom">
-                              <a href="#!" id="sellerChatTab" class="d-flex justify-content-between align-items-center">
-                                <div class="d-flex align-items-center">
-                                  <img src="https://mdbcdn.b-cdn.net/img/Photos/new-templates/bootstrap-chat/ava1-bg.webp" alt="avatar" id="sellerProfile" class="me-3 rounded-circle" width="60">
-                                  <div>
-                                    <p id="sellerName" class="fw-bold mb-0"></p>
-                                  </div>
-                                </div>
-                                <div>
-                                  <p id="timeSent" class="small text-muted mb-1">Just now</p>
-                                  <span id="notificationCount" class="badge bg-danger rounded-pill">3</span>
-                                </div>
-                              </a>
-                            </li>
-                            <!-- Add more chat list items similarly here -->
+                        <div id="chatList" class="overflow-auto" style="height: 400px">
+                          <ul class="list-unstyled mb-0" id="sellerChatTab">                            
+                            <!-- chatTab here -->
                           </ul>
                         </div>
                       </div>
                     </div>
       
                     <div class="col-md-6 col-lg-7 col-xl-8">
-                      <div class="pt-3 pe-3 overflow-auto" style="height: 400px;">
-
-                        <div id="userChatBubble" class="d-flex flex-row justify-content-end mb-3">
-                          <div class="me-3">
-                            <p id="messageSentDisplayed" class="small p-2 text-white rounded-3 bg-primary mb-1">Ut enim ad minim veniam.</p>
-                            <p id="messageTimeStamp" class="small text-muted">12:00 PM | Aug 13</p>
-                          </div>
-                          <img src="https://mdbcdn.b-cdn.net/img/Photos/new-templates/bootstrap-chat/ava1-bg.webp" alt="avatar 1" id="userProfile" class="rounded-circle" style="width: 45px; height: 45px;">
-                        </div>
-
-                        <div id="sellerChatBubble" class="d-flex flex-row align-items-start mb-3">
-                          <img src="https://mdbcdn.b-cdn.net/img/Photos/new-templates/bootstrap-chat/ava6-bg.webp" alt="avatar 1" id="sellerProfilePicture" class="rounded-circle" style="width: 45px; height: 45px;">
-                          <div class="ms-3">
-                            <p id="messageSentDisplayed" class="small p-2 mb-1 rounded-3 bg-body-tertiary">Lorem ipsum dolor sit amet, consectetur adipiscing elit.</p>
-                            <p id="messageTimeStamp" class="small text-muted">12:00 PM | Aug 13</p>
-                          </div>
-                        </div>
-                        <!-- Repeat chat bubbles accordingly -->
+                      <div id="chatBox" class="pt-3 pe-3 overflow-auto" style="height: 400px;">
+                          <!-- Chat bubbles will be populated here -->
                       </div>
-      
                       <div class="d-flex justify-content-start align-items-center pe-3 pt-3 mt-2">
-                        <img src="https://mdbcdn.b-cdn.net/img/Photos/new-templates/bootstrap-chat/ava6-bg.webp" alt="avatar 3" id="userProfile" class="rounded-circle me-2" style="width: 40px; height: 40px;">
-                        <input type="text"  class="form-control form-control-lg me-1" id="writeMessage" placeholder="Type message">
-                        <a id="sendMessage" class="text-muted ms-3" href="#!"><i class="fas fa-paper-plane"></i></a>
+                          <img src="https://mdbcdn.b-cdn.net/img/Photos/new-templates/bootstrap-chat/ava6-bg.webp" alt="avatar 3" id="userProfile" class="rounded-circle me-2" style="width: 40px; height: 40px;">
+                          <input type="text" class="form-control form-control-lg me-1" id="writeMessage" placeholder="Type message">
+                          <a id="sendMessageButton" class="text-muted ms-3" href="#!"><i class="fas fa-paper-plane"></i></a>
                       </div>
-                    </div>
+                  </div>
+                  
                   </div>
                 </div>
               </div>

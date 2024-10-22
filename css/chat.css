@@ -22,3 +22,6 @@ body {
     margin-left: 2.9rem;
     margin-top: -.75rem;
     }
+.card-body {
+    height: 620px;
+}
