@@ -30,7 +30,7 @@ function updateDOMUserProfile(userData) {
     setElementText('userGender', capitalize(userData.gender));
     
     const { birthDate, address, phone } = userData;
-    setElementText('userBirthDate', birthDate ? `${months[birthDate.dateMonth - 1]} ${birthDate.dateDay}, ${birthDate.dateYear}` : '');
+    setElementText('userBirthDate', birthDate ? `${months[birthDate.month - 1]} ${birthDate.day}, ${birthDate.year }` : '');
     setElementText('userAddress', address ? capitalizeWords(`${address.street}, ${address.barangay}, ${address.city}`) : '');
     setElementText('userPhoneNumber', phone ? `+63 ${phone}` : '');
 }

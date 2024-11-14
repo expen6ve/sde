@@ -31,7 +31,7 @@ export function updateProfile(user) {
             if (role === "seller") {
                 dropdownItems += '<a class="dropdown-item" href="my-listings.html">My Listings</a>';
             }
-
+            
             // Update role-based item in the dropdown
             roleBasedItem.innerHTML = dropdownItems;
         }

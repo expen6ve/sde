@@ -4,24 +4,26 @@ import { initializeNavbar } from './navbar.js';
 
 const database = getDatabase();
 let currentUser = null;
-let selectedChatKey = ''; // Initialize the selected chat key
-let currentMessagesRef = null; // Store the current messages reference
+let selectedChatKey = '';
+let currentMessagesRef = null;
+let renderedMessages = {};
 
 document.addEventListener('DOMContentLoaded', async () => {
     currentUser = await checkAuth();
     if (!currentUser) return redirectToLogin();
+
+    const userDetails = await fetchUserDetails(currentUser.uid);
+    currentUser = { ...currentUser, ...userDetails };
 
     initializeNavbar();
     clearChatBox();
     loadChatList();
 });
 
-// Redirect to index.html if user is not authenticated
 function redirectToLogin() {
     window.location.href = '/index.html';
 }
 
-// Fetch user details by ID
 async function fetchUserDetails(userId) {
     try {
         const userSnapshot = await get(ref(database, `users/${userId}`));
@@ -32,7 +34,6 @@ async function fetchUserDetails(userId) {
     }
 }
 
-// Format timestamp to "hour:minute:second AM/PM"
 function formatTimestamp(timestamp) {
     return new Date(timestamp).toLocaleTimeString('en-US', {
         hour: 'numeric',
@@ -42,19 +43,28 @@ function formatTimestamp(timestamp) {
     });
 }
 
-// Create and append chat tab for each chat
-function createChatTab(chatKey, otherUser, lastMessage, chatList) {
+function getOtherUserId(chatKey) {
+    const [senderId, receiverId] = chatKey.split('_');
+    return senderId === currentUser.uid ? receiverId : senderId;
+}
+
+function getLastMessage(chatMessages) {
+    const otherUserMessages = Object.values(chatMessages).filter(msg => msg.sender !== currentUser.uid);
+    return otherUserMessages.length > 0 ? otherUserMessages[otherUserMessages.length - 1] : { message: "No messages yet", timestamp: Date.now() };
+}
+
+async function createChatTab(chatKey, otherUser, lastMessage, chatList) {
     const otherUserName = otherUser ? `${otherUser.firstName} ${otherUser.lastName}` : 'Unknown User';
     const otherUserProfilePicture = otherUser?.profilePicture || 'https://via.placeholder.com/60';
-    const lastMessageText = lastMessage ? lastMessage.message : 'No messages yet';
-    const lastMessageTime = formatTimestamp(lastMessage?.timestamp);
+    const lastMessageText = lastMessage.message || 'No messages yet';
+    const lastMessageTime = formatTimestamp(lastMessage.timestamp);
 
     const chatTab = document.createElement('li');
     chatTab.classList.add('p-2', 'border-bottom');
     chatTab.innerHTML = `
         <a href="#" onclick="loadMessages('${chatKey}'); return false;" class="d-flex justify-content-between align-items-center">
             <div class="d-flex align-items-center">
-                <img src="${otherUserProfilePicture}" class="rounded-circle me-3" width="45" height="45" alt="User Profile">
+                <img src="${otherUserProfilePicture}" class="rounded-circle me-3" width="45" height="45" alt="User Profile" onerror="this.onerror=null; this.src='https://via.placeholder.com/60';">
                 <div>
                     <p class="fw-bold mb-0">${otherUserName}</p>
                     <p class="small text-muted">${lastMessageText}</p>
@@ -67,7 +77,6 @@ function createChatTab(chatKey, otherUser, lastMessage, chatList) {
     chatList.appendChild(chatTab);
 }
 
-// Load chat list and render chat tabs dynamically
 async function loadChatList() {
     const chatList = document.getElementById('sellerChatTab');
     onValue(ref(database, 'chats/'), async (snapshot) => {
@@ -76,14 +85,10 @@ async function loadChatList() {
 
         if (allChats) {
             const chatArray = Object.keys(allChats)
-                .filter(chatKey => {
-                    const [senderId, receiverId] = chatKey.split('_');
-                    return senderId === currentUser.uid || receiverId === currentUser.uid;
-                })
+                .filter(chatKey => chatKey.includes(currentUser.uid))
                 .map(chatKey => {
-                    const [senderId, receiverId] = chatKey.split('_');
-                    const otherUserId = senderId === currentUser.uid ? receiverId : senderId;
-                    const lastMessage = Object.values(allChats[chatKey]).pop();
+                    const otherUserId = getOtherUserId(chatKey);
+                    const lastMessage = getLastMessage(allChats[chatKey]);
                     return { chatKey, otherUserId, lastMessage };
                 });
 
@@ -99,111 +104,107 @@ async function loadChatList() {
     });
 }
 
-// Show chatBox when user clicks on a chat tab
 function showChatBox() {
-    document.getElementById('chatBox').classList.remove('d-none');  // Show the chat box
+    document.getElementById('chatBox').classList.remove('d-none');
+}
+
+function scrollToBottom() {
+    const chatWindow = document.getElementById('chatBox');
+    chatWindow.scrollTop = chatWindow.scrollHeight;
 }
 
 window.loadMessages = function(chatKey) {
-    selectedChatKey = chatKey; // Set selected chat key
-    clearChatBox(); // Clear the chat box before loading messages
-    showChatBox();  // Show the chat box
-
-    // Remove previous listener if it exists and is valid
-    if (window.currentMessagesRef && typeof window.currentMessagesRef.off === 'function') {
-        window.currentMessagesRef.off(); // Remove the listener
+    if (selectedChatKey === chatKey && window.currentMessagesRef) {
+        return; // Exit if trying to reload the already open chat
     }
 
-    // Create a new reference for the current chat
-    const newMessagesRef = ref(database, `chats/${chatKey}`);
+    selectedChatKey = chatKey;
+    const chatWindow = document.getElementById('chatBox');
+    chatWindow.innerHTML = '';
+    renderedMessages = {}; 
 
-    // Set the new reference to window.currentMessagesRef
-    window.currentMessagesRef = newMessagesRef;
+    showChatBox();
 
-    // Keep track of the messages already displayed to avoid duplication
-    let renderedMessages = {};
+    if (window.currentMessagesRef) window.currentMessagesRef.off();
 
-    // Create a new listener callback function
-    window.currentMessagesCallback = async (snapshot) => {
+    currentMessagesRef = ref(database, `chats/${chatKey}`);
+    onValue(currentMessagesRef, async (snapshot) => {
         const messages = snapshot.val();
-        const chatWindow = document.getElementById('chatBox');
-    
-        chatWindow.innerHTML = '';  // Clear any previous content (including placeholder text)
-    
         if (messages) {
             await Promise.all(Object.keys(messages).map(async (msgKey) => {
-                if (!renderedMessages[msgKey]) { // Only render messages that haven't been displayed yet
+                if (!renderedMessages[msgKey]) {
                     const msg = messages[msgKey];
                     const isCurrentUser = msg.sender === currentUser.uid;
                     const otherUserId = isCurrentUser ? msg.receiver : msg.sender;
                     const otherUser = await fetchUserDetails(otherUserId);
-                    const profilePicture = isCurrentUser ? otherUser?.profilePicture || 'https://via.placeholder.com/60' : 'https://mdbcdn.b-cdn.net/img/Photos/new-templates/bootstrap-chat/ava6-bg.webp';
+                    const profilePicture = isCurrentUser ? currentUser.profilePicture : otherUser.profilePicture || 'https://via.placeholder.com/60';
                     const formattedTime = formatTimestamp(msg.timestamp);
-    
-                    chatWindow.innerHTML += `
-                        <div class="d-flex flex-row ${isCurrentUser ? 'justify-content-end' : 'align-items-start'} mb-3">
-                            ${isCurrentUser ? ` 
-                                <div class="me-3">
-                                    <p class="small p-2 text-white rounded-3 bg-primary mb-1">${msg.message}</p>
-                                    <p class="small text-muted">${formattedTime}</p>
-                                </div>
-                                <img src="${profilePicture}" alt="User Avatar" class="rounded-circle" style="width: 45px; height: 45px;">
-                            ` : `
-                                <img src="${profilePicture}" alt="Seller Avatar" class="rounded-circle" style="width: 45px; height: 45px;">
-                                <div class="ms-3">
-                                    <p class="small p-2 mb-1 rounded-3 bg-body-tertiary">${msg.message}</p>
-                                    <p class="small text-muted">${formattedTime}</p>
-                                </div>
-                            `}
-                        </div>`;
-    
-                    // Mark the message as rendered
+                    chatWindow.innerHTML += createMessageElement(msg, isCurrentUser, profilePicture, formattedTime);
                     renderedMessages[msgKey] = true;
                 }
             }));
+            scrollToBottom();
         } else {
-            chatWindow.innerHTML = '<p class="text-muted">No messages yet.</p>';  // If no messages exist
+            chatWindow.innerHTML = '<p class="text-muted">No messages yet.</p>';
         }
-    };
-    
+    });
 
-    // Set up the new listener for the current chat
-    onValue(window.currentMessagesRef, window.currentMessagesCallback);
+    hideUnreadMessageIndicator(chatKey);
 };
 
+function createMessageElement(msg, isCurrentUser, profilePicture, formattedTime) {
+    return `
+        <div class="d-flex flex-row ${isCurrentUser ? 'justify-content-end' : 'align-items-start'} mb-3">
+            ${isCurrentUser ? `
+                <div class="me-3">
+                    <p class="small p-2 text-white rounded-3 bg-primary mb-1">${msg.message}</p>
+                    <p class="small text-muted">${formattedTime}</p>
+                </div>
+                <img src="${profilePicture}" alt="User Avatar" class="rounded-circle" style="width: 45px; height: 45px;" onerror="this.onerror=null; this.src='https://via.placeholder.com/60';">
+            ` : `
+                <img src="${profilePicture}" alt="Other User Avatar" class="rounded-circle" style="width: 45px; height: 45px;" onerror="this.onerror=null; this.src='https://via.placeholder.com/60';">
+                <div class="ms-3">
+                    <p class="small p-2 mb-1 rounded-3 bg-body-tertiary">${msg.message}</p>
+                    <p class="small text-muted">${formattedTime}</p>
+                </div>
+            `}
+        </div>`;
+}
 
+function hideUnreadMessageIndicator(chatKey) {
+    const chatTab = document.querySelector(`#sellerChatTab a[href="#"][onclick="loadMessages('${chatKey}'); return false;"]`);
+    if (chatTab) {
+        const lastMessageTextElement = chatTab.querySelector('.small.text-muted');
+        if (lastMessageTextElement) {
+            lastMessageTextElement.style.display = 'none'; 
+        }
+    }
+}
 
-// Clear the chat box content
 function clearChatBox() {
     document.getElementById('chatBox').innerHTML = '<p class="text-muted">Select a chat to view messages.</p>';
 }
 
-// Selectors for sending messages
 const messageInput = document.getElementById('writeMessage');
 const sendMessageButton = document.getElementById('sendMessageButton');
 
-// Send message when button is clicked
 sendMessageButton.addEventListener('click', async (event) => {
-    event.preventDefault(); // Prevent default form submission behavior
-
+    event.preventDefault();
     const message = messageInput.value.trim();
 
     if (message && selectedChatKey) {
+        const receiverId = selectedChatKey.split('_').find(id => id !== currentUser.uid);
         const chatRef = push(ref(database, `chats/${selectedChatKey}`));
-        
-        // Send the message to the database
+
         await set(chatRef, {
             sender: currentUser.uid,
-            receiver: (currentUser.uid === selectedChatKey.split('_')[0]) ? selectedChatKey.split('_')[1] : selectedChatKey.split('_')[0],
+            receiver: receiverId,
             message,
             timestamp: Date.now()
         }).then(() => {
-            messageInput.value = ''; // Clear the input field
-            // No need to manually append the message here
-            // The onValue listener will automatically update the UI
+            messageInput.value = '';
         }).catch(error => {
             console.error('Error sending message:', error);
         });
     }
 });
-

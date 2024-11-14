@@ -1,93 +1,72 @@
-import { checkAuth, auth, signInWithEmailAndPassword, sendPasswordResetEmail } from './auth.js';
-import { getDatabase, ref, get } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-database.js";
+import { auth, signInWithEmailAndPassword, sendPasswordResetEmail } from './auth.js';
 
-// Initialize Firebase services from auth.js
-const db = getDatabase();  // You can still initialize the database here since it doesn't affect auth
-
-// Get form references  
+// Get references to the elements
 const emailInput = document.getElementById("emailInput");
 const passInput = document.getElementById("passInput");
 const loginButton = document.getElementById("loginButton");
 const forgotPasswordLink = document.querySelector('a[href="#"]');
 
-// Add event listener for form submission
+// Function to show error modal
+function showErrorModal(message) {
+  const errorModal = new bootstrap.Modal(document.getElementById('errorModal'));
+  document.querySelector('#errorModal .modal-body').textContent = message;
+  errorModal.show();
+}
+
 loginButton.addEventListener("click", async (e) => {
-  e.preventDefault(); // Prevent default form submission
+  e.preventDefault();
 
   const email = emailInput.value;
   const password = passInput.value;
 
   if (!email || !password) {
-    alert("Please fill out all fields.");
+    showErrorModal("Please fill out all fields.");
     return;
   }
 
   try {
     const userCredential = await signInWithEmailAndPassword(auth, email, password);
     const user = userCredential.user;
-    console.log('User logged in:', user);
 
-    // Fetch the user's role from the database
-    const userRef = ref(db, 'users/' + user.uid + '/role');
-    const snapshot = await get(userRef);
-    
-    if (snapshot.exists()) {
-      const role = snapshot.val();
-      // Clear the input fields
-      emailInput.value = '';
-      passInput.value = '';
-
-      // Redirect based on role
-      if (role === 'buyer') {
-        window.location.href = 'userhome.html'; 
-      } else if (role === 'seller') {
-        window.location.href = 'userhome.html'; 
-      } else if (role === 'admin') {
-        window.location.href = 'admindashboard.html'; // Redirect to Admin home
-      } else {
-        console.error('Unknown role:', role);
-        alert('Unknown user role. Please contact support.');
-      }
-    } else {
-      console.error('No role found for user');
-      alert('No role found for the user. Please contact support.');
+    // Check if the user's email is verified
+    if (!user.emailVerified) {
+      showErrorModal("Please verify your email before logging in.");
+      return;
     }
+
+    // Redirect based on role (assuming some role check is needed)
+    window.location.href = 'userhome.html';
   } catch (error) {
     console.error("Error logging in:", error);
-    // Show the error modal
-    const errorModal = new bootstrap.Modal(document.getElementById('errorModal'));
-    errorModal.show();
+    showErrorModal("There was an error with your login attempt. Please try again.");
     passInput.value = '';
   }
 });
 
-// Add event listener for forgot password link
+// Open Forgot Password modal when the link is clicked
 forgotPasswordLink.addEventListener("click", (e) => {
   e.preventDefault();
-  const email = emailInput.value;
+  const forgotPasswordModal = new bootstrap.Modal(document.getElementById('forgotPasswordModal'));
+  forgotPasswordModal.show();
+});
+
+// Handle Forgot Password functionality
+document.getElementById('forgotPasswordContinueButton').addEventListener('click', () => {
+  const email = document.getElementById('forgotPasswordEmailInput').value;
 
   if (!email) {
-    alert("Please enter your email address.");
+    showErrorModal("Please enter your email address.");
     return;
   }
 
   sendPasswordResetEmail(auth, email)
     .then(() => {
-      alert("A password reset link has been sent to your email!");
+      alert("A password reset link has been sent to your email.");
+      const forgotPasswordModal = bootstrap.Modal.getInstance(document.getElementById('forgotPasswordModal'));
+      forgotPasswordModal.hide();
     })
     .catch((error) => {
       console.error("Error sending password reset email:", error);
-      alert("Failed to send password reset email. Please try again.");
+      showErrorModal("Failed to send password reset email. Please try again.");
     });
-});
-
-// Example usage of checkAuth (if you want to verify user status before login)
-checkAuth().then((user) => {
-  if (user) {
-    window.location.href = 'userhome.html'; 
-    console.log('User already logged in:', user);
-    // Optionally redirect or take action if the user is already logged in
-  } else {
-    console.log('No user logged in, proceed with login process.');
-  }
 });

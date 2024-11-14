@@ -1,11 +1,11 @@
-// Import the functions you need from the SDKs you need
+// Import Firebase SDK functions
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js";
 import { getDatabase, ref, set } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-database.js";
-import { getAuth, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js";
+import { getAuth, createUserWithEmailAndPassword, sendEmailVerification, signOut } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js";
 import { getStorage, ref as storageRef, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-storage.js";
 import { checkAuth } from "./auth.js";
 
-// Your web app's Firebase configuration
+// Firebase configuration and initialization
 const firebaseConfig = {
     apiKey: "AIzaSyCN8NcVQNRjAF_A86a8NfxC9Audivokuso",
     authDomain: "sde-ecoread.firebaseapp.com",
@@ -14,170 +14,118 @@ const firebaseConfig = {
     storageBucket: "sde-ecoread.appspot.com",
     messagingSenderId: "137637739158",
     appId: "1:137637739158:web:c9b885cf9025c89e2c60b7"
-    };
-
-// Initialize Firebase
+};
 const app = initializeApp(firebaseConfig);
 const database = getDatabase(app);
 const auth = getAuth(app);
 const storage = getStorage(app);
 
-// Get form references
-const emailInput = document.getElementById("email");
-const passwordInput = document.getElementById("password");
-const firstNameInput = document.getElementById("first-name");
-const lastNameInput = document.getElementById("last-name");
-const dateDayInput = document.getElementById('user-day')
-const dateMonthInput = document.getElementById('user-month')
-const dateYearInput = document.getElementById('user-year')
-const ageInput = document.getElementById("age");
-const genderInputs = document.getElementsByName("gender");
-const phoneInput = document.getElementById("phone-number");
-const streetInput = document.getElementById("street");
-const barangayInput = document.getElementById("barangay");
-const zipCodeInput = document.getElementById("zip-code");
-const cityInput = document.getElementById("city");
-const provinceInput = document.getElementById("province");
-const termsCheckbox = document.getElementById("terms");
-const registerButton = document.querySelector("button[type='submit']");
-const continueButton = document.getElementById("continueButton");
-const profilePictureInput = document.getElementById("profilePicture");
-const profilePreview = document.getElementById("profilePreview");
+// Element references
+const formElements = {
+    email: document.getElementById("email"),
+    password: document.getElementById("password"),
+    firstName: document.getElementById("first-name"),
+    lastName: document.getElementById("last-name"),
+    dateDay: document.getElementById('user-day'),
+    dateMonth: document.getElementById('user-month'),
+    dateYear: document.getElementById('user-year'),
+    age: document.getElementById("age"),
+    gender: document.getElementsByName("gender"),
+    phone: document.getElementById("phone-number"),
+    address: {
+        street: document.getElementById("street"),
+        barangay: document.getElementById("barangay"),
+        zipCode: document.getElementById("zip-code"),
+        city: document.getElementById("city"),
+        province: document.getElementById("province"),
+    },
+    termsCheckbox: document.getElementById("terms"),
+    profilePicture: document.getElementById("profilePicture"),
+    profilePreview: document.getElementById("profilePreview"),
+    registerButton: document.querySelector("button[type='submit']"),
+    continueButton: document.getElementById("continueButton"),
+    goBackButton: document.getElementById("goBackButton"),
+};
 
 // Check if user is already logged in
 checkAuth().then((user) => {
-    if (user) {
-        // Redirect logged-in users to the homepage (or any other page)
-        window.location.href = "userhome.html"; // Change this to the appropriate page
-    }
+    if (user) window.location.href = "userhome.html"; 
 });
 
-// Register event listener for form submission
-registerButton.addEventListener("click", (e) => {
-    e.preventDefault(); // Prevent default form submission
+// Helper functions
+const getFormData = () => ({
+    email: formElements.email.value,
+    password: formElements.password.value,
+    firstName: formElements.firstName.value,
+    lastName: formElements.lastName.value,
+    birthDate: {
+        day: formElements.dateDay.value,
+        month: formElements.dateMonth.value,
+        year: formElements.dateYear.value,
+    },
+    age: formElements.age.value,
+    gender: Array.from(formElements.gender).find(g => g.checked)?.value || null,
+    phone: formElements.phone.value,
+    address: {
+        street: formElements.address.street.value,
+        barangay: formElements.address.barangay.value,
+        zipCode: formElements.address.zipCode.value,
+        city: formElements.address.city.value,
+        province: formElements.address.province.value,
+    },
+});
 
-    if (!termsCheckbox.checked) {
-        alert("You must accept the terms and conditions to register.");
-        return;
+const uploadProfilePicture = async (userId, file) => {
+    if (!file) return null;
+    const storagePath = `profilePictures/${userId}/${file.name}`;
+    const imageRef = storageRef(storage, storagePath);
+    await uploadBytes(imageRef, file);
+    return await getDownloadURL(imageRef);
+};
+
+const saveUserData = (userId, data) => {
+    const userRef = ref(database, `users/${userId}`);
+    return set(userRef, data);
+};
+
+// Event Listeners
+formElements.registerButton.addEventListener("click", async (e) => {
+    e.preventDefault();
+    if (!formElements.termsCheckbox.checked) return alert("You must accept the terms and conditions to register.");
+    if (!formElements.email.value || !formElements.password.value || !formElements.firstName.value || !formElements.lastName.value) {
+        return alert("Please fill out all required fields.");
     }
 
-    const email = emailInput.value;
-    const password = passwordInput.value;
-
-    // Ensure the form fields are not empty
-    if (!email || !password || !firstNameInput.value || !lastNameInput.value) {
-        alert("Please fill out all required fields.");
-        return;
-    }
-
-    // Create a new user
-    createUserWithEmailAndPassword(auth, email, password)
-    .then((userCredential) => {
-        // Signed in successfully
+    try {
+        const userCredential = await createUserWithEmailAndPassword(auth, formElements.email.value, formElements.password.value);
         const user = userCredential.user;
 
-        // Handle profile picture upload
-        const file = profilePictureInput.files[0];
-        let profilePictureUrl = null;
+        sendEmailVerification(user)
+            .then(() => console.log("Verification email sent. Please verify to complete registration."))
+            .catch(error => console.error("Error sending email verification:", error));
 
-        if (file) {
-            const storagePath = `profilePictures/${user.uid}/${file.name}`;
-            const imageRef = storageRef(storage, storagePath);
+        const profilePictureUrl = await uploadProfilePicture(user.uid, formElements.profilePicture.files[0]);
+        const userData = { ...getFormData(), profilePicture: profilePictureUrl };
+        await saveUserData(user.uid, userData);
 
-            uploadBytes(imageRef, file).then(() => {
-                getDownloadURL(imageRef).then((url) => {
-                    profilePictureUrl = url;
-                    // Save additional user information to the database
-                    set(ref(database, 'users/' + user.uid), {
-                        firstName: firstNameInput.value,
-                        lastName: lastNameInput.value,
-                        birthDate: {
-                            dateDay: dateDayInput.value,
-                            dateMonth: dateMonthInput.value,
-                            dateYear: dateYearInput.value,
-                        },
-                        age: ageInput.value,
-                        gender: getSelectedGender(),
-                        phone: phoneInput.value,
-                        address: {
-                            street: streetInput.value,
-                            barangay: barangayInput.value,
-                            zipCode: zipCodeInput.value,
-                            city: cityInput.value,
-                            province: provinceInput.value
-                        },
-                        profilePicture: profilePictureUrl
-                    }).then(() => {
-                        // Show the modal on successful registration
-                        $('#successModal').modal('show');
-                    });
-                });
-            }).catch((error) => {
-                console.error("Error uploading profile picture:", error);
-            });
-        } else {
-            // Save user data without profile picture
-            set(ref(database, 'users/' + user.uid), {
-                firstName: firstNameInput.value,
-                lastName: lastNameInput.value,
-                birthDate: {
-                    dateDay: dateDayInput.value,
-                    dateMonth: dateMonthInput.value,
-                    dateYear: dateYearInput.value,
-                },
-                age: ageInput.value,
-                gender: getSelectedGender(),
-                phone: phoneInput.value,
-                address: {
-                    street: streetInput.value,
-                    barangay: barangayInput.value,
-                    zipCode: zipCodeInput.value,
-                    city: cityInput.value,
-                    province: provinceInput.value
-                }
-            }).then(() => {
-                // Show the modal on successful registration
-                $('#successModal').modal('show');
-            });
-        }
-    })
-    .catch((error) => {
+        $('#successModal').modal('show');
+        await signOut(auth);
+    } catch (error) {
         console.error("Error registering user:", error);
         alert(error.message);
-    });
-});
-
-// "Go Back" button reference
-const goBackButton = document.getElementById("goBackButton");
-
-// Redirect to login.html when the "Go Back" button is clicked
-goBackButton.addEventListener("click", () => {
-    window.location.href = "login.html";
-});
-
-// Redirect to login.html when the "Continue" button is clicked
-continueButton.addEventListener("click", () => {
-    window.location.href = "landingpage.html";
-});
-
-// Function to get the selected gender
-function getSelectedGender() {
-    for (const genderInput of genderInputs) {
-        if (genderInput.checked) {
-            return genderInput.value;
-        }
     }
-    return null;
-}
+});
 
-// Display profile picture preview
-profilePictureInput.addEventListener('change', (e) => {
+// Redirect to login on button click
+formElements.goBackButton.addEventListener("click", () => window.location.href = "login.html");
+formElements.continueButton.addEventListener("click", () => window.location.href = "login.html");
+
+// Profile picture preview
+formElements.profilePicture.addEventListener('change', (e) => {
     const file = e.target.files[0];
     if (file) {
         const reader = new FileReader();
-        reader.onload = () => {
-            profilePreview.src = reader.result;
-        };
+        reader.onload = () => formElements.profilePreview.src = reader.result;
         reader.readAsDataURL(file);
     }
 });

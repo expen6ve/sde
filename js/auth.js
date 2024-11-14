@@ -14,10 +14,20 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 
+// Modified checkAuth function to include email verification check
 export function checkAuth() {
     return new Promise((resolve) => {
         onAuthStateChanged(auth, (user) => {
-            resolve(user);
+            if (user) {
+                if (user.emailVerified) {
+                    resolve(user); // User is verified, allow them to proceed
+                } else {
+                    console.log("Account Not Verified")
+                    resolve(null); // Deny login for unverified users
+                }
+            } else {
+                resolve(null); // No user is logged in
+            }
         });
     });
 }
