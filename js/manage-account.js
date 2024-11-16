@@ -32,8 +32,26 @@ function updateDOMUserProfile(userData) {
     const { birthDate, address, phone } = userData;
     setElementText('userBirthDate', birthDate ? `${months[birthDate.month - 1]} ${birthDate.day}, ${birthDate.year }` : '');
     setElementText('userAddress', address ? capitalizeWords(`${address.street}, ${address.barangay}, ${address.city}`) : '');
-    setElementText('userPhoneNumber', phone ? `+63 ${phone}` : '');
+    setElementText('userPhoneNumber', phone ? ` ${phone}` : '');
 }
+
+async function fetchGCashDetails() {
+    const user = await checkAuth(); // Ensure the user is authenticated
+    if (!user) return;
+
+    const gcashRef = ref(database, `users/${user.uid}/gcash`);
+    const snapshot = await get(gcashRef);
+
+    if (snapshot.exists()) {
+        const { gcashname, gcashnum } = snapshot.val();
+        setElementText('gcashName', gcashname || 'Not provided');
+        setElementText('gcashNum', gcashnum || 'Not provided');
+    } else {
+        setElementText('gcashName', 'Not provided');
+        setElementText('gcashNum', 'Not provided');
+    }
+}
+
 
 async function updateUserProfile() {
     const userData = await fetchUserData();
@@ -151,6 +169,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (user) {
         initializeNavbar();
         await updateUserProfile();
+        await fetchGCashDetails(); // Update GCash details
         await updateUserRecentListings();
     } else {
         window.location.href = '/index.html';

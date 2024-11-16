@@ -67,9 +67,6 @@
                 <li class="nav-item">
                     <a class="nav-link" href="chat.html">Messages</a>
                 </li>
-                <form class="d-flex" role="search">
-                    <input class="form-control me-2" type="search" placeholder="Search" aria-label="Search">
-                </form>
                 <li class="nav-item">
                     <a class="nav-link" href="sellingform.html">SELL A BOOK</a>
                 </li>   
@@ -101,40 +98,60 @@
         </div>
         <!-- Content Row -->
         <div class="container p-0">
-            <div class="row mt-2 ms-0 me-0 gap-5 p-0">
-                <div class="col ps-0 pe-0 h-50 custombg-bwhite rounded-top-3">
-                    <h4 class="content-column-first title ps-3 " style="color:#535353;">About</h4>
-                    <div class="lineseparator border border-top-1 custombg-bwhite"></div>
-                    <div class="row" style="box-sizing: border-box; margin-right: 0; margin-left: 0;">
-                        <div class="col-12 p-0 d-flex flex-column justify-content-center">
-                            <div class="d-flex align-items-center mb-2 user-info-font ps-3">
-                                <span class="me-2"><i class="bi bi-person-fill"></i></span>
-                                <div id="userGender"></div>
+            <div class="row mt-2 ms-0 me-0" style="gap: 110px;">
+                <!-- Left Column -->
+                <div class="col-4 p-0 d-flex flex-column gap-3">
+                    <!-- First "About" Section -->
+                    <div class="col ps-0 pe-0 h-50 custombg-bwhite rounded-top-3">
+                        <h4 class="content-column-first title ps-3 " style="color:#535353;">About</h4>
+                        <div class="lineseparator border border-top-1 custombg-bwhite"></div>
+                        <div class="row" style="box-sizing: border-box; margin-right: 0; margin-left: 0;">
+                            <div class="col-12 p-0 d-flex flex-column justify-content-center">
+                                <div class="d-flex align-items-center mb-2 user-info-font ps-3">
+                                    <span class="me-2"><i class="bi bi-person-fill"></i></span>
+                                    <div id="userGender"></div>
+                                </div>
+                                <div class="d-flex align-items-center mb-2 user-info-font ps-3">
+                                    <span class="me-2"><i class="bi bi-cake2-fill"></i></span>
+                                    <div id="userBirthDate"></div>
+                                </div>
+                                <div class="d-flex align-items-center mb-2 user-info-font ps-3">
+                                    <span class="me-2"><i class="bi bi-geo-alt-fill"></i></span>
+                                    <div id="userAddress"></div>
+                                </div>
+                                <div class="d-flex align-items-center mb-2 user-info-font ps-3">
+                                    <span class="me-2"><i class="bi bi-telephone-fill"></i></span>
+                                    <div id="userPhoneNumber"></div>
+                                </div>                            
                             </div>
-                            <div class="d-flex align-items-center mb-2 user-info-font ps-3">
-                                <span class="me-2"><i class="bi bi-cake2-fill"></i></span>
-                                <div id="userBirthDate"></div>
-                            </div>
-                            <div class="d-flex align-items-center mb-2 user-info-font ps-3">
-                                <span class="me-2"><i class="bi bi-geo-alt-fill"></i></span>
-                                <div id="userAddress"></div>
-                            </div>
-                            <div class="d-flex align-items-center mb-2 user-info-font ps-3">
-                                <span class="me-2"><i class="bi bi-telephone-fill"></i></span>
-                                <div id="userPhoneNumber"></div>
-                            </div>                            
+                        </div>
+                    </div> 
+        
+                    <!-- Payment Details -->
+                    <div class="custombg-bwhite rounded-top-3 p-3">
+                        <h4 class="content-column-first title" style="color:#535353;">GCash Details</h4>
+                        <div class="lineseparator border border-top-1 custombg-bwhite"></div>
+                        <div class="d-flex align-items-center mb-2 user-info-font">
+                            <span class="me-2"><i class="bi bi-person-fill"></i></span>
+                            <div id="gcashName"></div>
+                        </div>
+                        <div class="d-flex align-items-center mb-2 user-info-font">
+                            <span class="me-2"><i class="bi bi-sim-fill"></i></span>
+                            <div id="gcashNum"></div>
+                        </div>
+                    </div>                    
+                </div>
+        
+                <!-- Right Column -->
+                <div class="col-7 ps-0 pe-0 custombg-bwhite rounded-top-3">
+                    <h4 class="content-column-first title text-center" style="color:#535353;">Recent Listing</h4>
+                    <div class="row">
+                        <div class="d-flex flex-column align-items-center justify-content-center" id="userRecentListing">
                         </div>
                     </div>
-                </div>              
-              <div class="col-7 ps-0 pe-0 custombg-bwhite rounded-top-3">
-                <h4 class="content-column-first title text-center" style="color:#535353;">Recent Listing</h4>
-                <div class="row">
-                    <div class="d-flex flex-column align-items-center justify-content-center" id="userRecentListing">
-                    </div>
-                </div>
-              </div>
+                  </div>
             </div>
-          </div>
+        </div>
         <!-- Edit Profile Modal -->
         <div class="modal fade" id="editProfileModal" tabindex="-1" aria-labelledby="editProfileModalLabel" aria-hidden="true">
             <div class="modal-dialog">

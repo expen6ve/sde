@@ -95,6 +95,53 @@
         <!-- Content Row -->
         <div id="bookListContainer" class="row gx-4 gx-lg-5"></div>
     </div>
+    <!-- Send Message Modal -->
+    <div class="modal fade" id="messageModal" tabindex="-1" aria-labelledby="messageModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="messageModalLabel">Send Message</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <textarea id="messageInput" class="form-control" rows="3" placeholder="Type your message..."></textarea>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="button" id="sendMessageBtn" class="btn btn-primary">Send</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    </div>
+        <!-- More Info Modal -->
+        <div class="modal fade" id="moreInfoModal" tabindex="-1" aria-labelledby="moreInfoModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="moreInfoModalLabel">Book Details</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="d-flex justify-content-center mb-3">
+                            <img id="moreInfoBookImage" src="" alt="Book Image" class="img-fluid" style="max-width: 300px; max-height: 300px; border-radius: 8px;">
+                        </div>
+                        <ul class="list-group">
+                            <li class="list-group-item">Title: <span id="moreInfoBookTitle"></span></li>
+                            <li class="list-group-item">Author: <span id="moreInfoAuthor"></span></li>
+                            <li class="list-group-item">Genre: <span id="moreInfoGenre"></span></li>
+                            <li class="list-group-item">Condition: <span id="moreInfoCondition"></span></li>
+                            <li class="list-group-item">Description: <span id="moreInfoDescription"></span></li>
+                            <li class="list-group-item">Price: ₱<span id="moreInfoPrice"></span></li>
+                        </ul>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    </div>
+                </div>
+            </div>
+        </div>
 </body>
 </html>
 

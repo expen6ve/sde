@@ -1,6 +1,6 @@
 import { checkAuth } from './auth.js';
 import { initializeNavbar } from './navbar.js';
-import { getDatabase, ref, set } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-database.js";
+import { getDatabase, ref, get, set, update } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-database.js";
 import { getStorage, ref as storageRef, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-storage.js";
 
 const database = getDatabase();
@@ -13,6 +13,63 @@ async function checkUserAuthentication() {
         window.location.href = 'login.html'; // Redirect to login if not authenticated
     }
 }
+
+document.addEventListener('DOMContentLoaded', async () => {
+    const user = await checkAuth();
+    if (!user) {
+        window.location.href = 'login.html';
+        return;
+    }
+
+    const userId = user.uid;
+    const gcashSetupSection = document.getElementById('gcash-setup-section');
+    const bookListingSection = document.getElementById('book-listing-section');
+    const gcashSetupForm = document.getElementById('gcash-setup-form');
+
+    // Check if user has GCash details
+    const gcashRef = ref(database, `users/${userId}/gcash`);
+    const gcashSnapshot = await get(gcashRef);
+
+    if (gcashSnapshot.exists()) {
+        // User has GCash setup, show book listing form
+        gcashSetupSection.classList.add('d-none');
+        bookListingSection.classList.remove('d-none');
+    } else {
+        // User doesn't have GCash setup, show GCash form
+        gcashSetupSection.classList.remove('d-none');
+        bookListingSection.classList.add('d-none');
+    }
+
+    // Handle GCash form submission
+    gcashSetupForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+
+        const gcashNumber = document.getElementById('gcash-number').value.trim();
+        const gcashName = document.getElementById('gcash-name').value.trim();
+
+        if (!gcashNumber || !gcashName) {
+            alert('Please fill out both GCash fields.');
+            return;
+        }
+
+        try {
+            // Save GCash details to the database
+            await set(ref(database, `users/${userId}/gcash`), {
+                gcashnum: gcashNumber,
+                gcashname: gcashName
+            });
+
+            alert('GCash details saved successfully!');
+
+            // Show book listing form after GCash setup
+            gcashSetupSection.classList.add('d-none');
+            bookListingSection.classList.remove('d-none');
+        } catch (error) {
+            console.error('Error saving GCash details:', error);
+            alert('Failed to save GCash details. Please try again.');
+        }
+    });
+});
 
 // Initialize the page after checking authentication
 document.addEventListener('DOMContentLoaded', async () => {
@@ -110,13 +167,13 @@ document.addEventListener('DOMContentLoaded', async () => {
             // Upload the image to Firebase Storage
             const file = bookImageInput.files[0];
             let imageUrl = '';
-
+    
             if (file) {
                 const imageStorageRef = storageRef(storage, `book-images/${Date.now()}-${file.name}`);
                 await uploadBytes(imageStorageRef, file);
                 imageUrl = await getDownloadURL(imageStorageRef);
             }
-
+    
             // Create the data object with user ID and date-listed
             const bookData = {
                 title: bookTitleInput.value,
@@ -129,13 +186,16 @@ document.addEventListener('DOMContentLoaded', async () => {
                 userId: userId, // Associate the book with the logged-in user
                 dateListed: new Date().toISOString() // Add the current date and time
             };
-
+    
             // Save the data to Firebase Realtime Database
             const newBookRef = ref(database, `book-listings/${Date.now()}`);
             await set(newBookRef, bookData);
-
+    
+            // Assign "seller" role to the user after adding the book
+            await updateUserRole(userId);
+    
             alert('Book listing added successfully!');
-
+    
             // Reset the form
             bookTitleInput.value = '';
             authorInput.value = '';
@@ -145,7 +205,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             priceInput.value = '';
             bookImageInput.value = '';
             reviewBookImage.src = 'images/default-avatar.png'; // Reset image preview
-
+    
             // Close the modal
             const modalInstance = bootstrap.Modal.getInstance(document.getElementById('formReviewModal'));
             modalInstance.hide();
@@ -154,4 +214,13 @@ document.addEventListener('DOMContentLoaded', async () => {
             alert('Failed to add the book listing. Please try again.');
         }
     });
+    
 });
+
+// Function to assign the "seller" role to a user
+async function updateUserRole(userId) {
+    const userRef = ref(database, `users/${userId}`);
+    await update(userRef, {
+        role: 'seller'
+    });
+}

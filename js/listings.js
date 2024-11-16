@@ -1,6 +1,6 @@
 import { checkAuth } from './auth.js';
 import { getDatabase, ref, onValue, query, orderByChild, equalTo, set, remove, get } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-database.js";
-import { initializeNavbar, handleSignOut } from './navbar.js';
+import { initializeNavbar } from './navbar.js';
 
 const database = getDatabase();
 const elements = {
@@ -13,45 +13,61 @@ const elements = {
         high: document.getElementById('sortHighestPrice'),
         recent: document.getElementById('sortMostRecent'),
     },
-    profilePreview: document.getElementById('profilePreview'), // Added for book image preview
-    bookImageInput: document.getElementById('bookImage') // Added for book image upload
+    genreDropdownItems: document.querySelectorAll('#genreDropdown + .dropdown-menu .dropdown-item'),
+    genreHeading: document.getElementById('genreHeading'),
+    profilePreview: document.getElementById('profilePreview'),
+    bookImageInput: document.getElementById('bookImage'),
+    saveEditButton: document.getElementById('saveEditButton'),
+    editModalCloseButton: document.querySelector('#editListingModal .btn-close'),
+    confirmRemoveButton: document.getElementById('confirmRemoveButton'),
+    removeModalCloseButton: document.querySelector('#removeListingModal .btn-close') // Added close button reference
 };
 
 let currentBookIdToEdit = null;
+let currentBookIdToRemove = null;
 let bookData = {};
+let currentUser = null;
+let selectedGenre = null;
 
-// Initialize Navbar
-document.addEventListener('DOMContentLoaded', () => {
+// Initialize Navbar and Authentication
+document.addEventListener('DOMContentLoaded', async () => {
     initializeNavbar();
-    handleAuth();
-});
-
-// Handle user authentication
-async function handleAuth() {
-    const user = await checkAuth();
-    if (user) {
+    currentUser = await checkAuth();
+    if (currentUser) {
         elements.signInButton.style.display = 'none';
-        displayUserBooks(user.uid);
+        displayUserBooks(currentUser.uid);
     } else {
         elements.signInButton.style.display = 'block';
     }
-}
+});
 
 // Display books for the logged-in user
-function displayUserBooks(userId, searchTerm = '', sortBy = 'dateListed') {
+function displayUserBooks(userId, searchTerm = '', sortBy = 'dateListed', genre = null) {
     const queryRef = query(ref(database, 'book-listings'), orderByChild('userId'), equalTo(userId));
-    
+
     onValue(queryRef, (snapshot) => {
         bookData = snapshot.val() || {};
-        elements.bookListContainer.innerHTML = Object.keys(bookData).length ? renderBooks(Object.entries(bookData), searchTerm, sortBy) : '<p>No books available.</p>';
+        elements.bookListContainer.innerHTML = Object.keys(bookData).length 
+            ? renderBooks(Object.entries(bookData), searchTerm, sortBy, genre) 
+            : '<p>No books available.</p>';
     });
 }
 
-// Render books and handle "Edit Listing" button click
-function renderBooks(bookEntries, searchTerm, sortBy) {
-    const sortedBooks = bookEntries.map(([id, book]) => ({ id, ...book }))
-        .filter(book => book.title.toLowerCase().includes(searchTerm.toLowerCase()))
+// Render books based on filters
+function renderBooks(bookEntries, searchTerm, sortBy, genre) {
+    const sortedBooks = bookEntries
+        .map(([id, book]) => ({ id, ...book }))
+        .filter(book => 
+            (!genre || book.genre === genre) &&
+            (!searchTerm || book.title.toLowerCase().includes(searchTerm.toLowerCase()))
+        )
         .sort((a, b) => sortBooks(a, b, sortBy));
+
+    elements.genreHeading.textContent = searchTerm 
+        ? `Search Results for "${searchTerm}"`
+        : genre 
+        ? `Books in "${genre}"`
+        : "My Book Listings";
 
     return sortedBooks.map(book => 
         `<div class="col-lg-3 col-md-6 mb-5">
@@ -70,10 +86,59 @@ function renderBooks(bookEntries, searchTerm, sortBy) {
                     <button class="btn btn-secondary m-1 edit-listing" data-id="${book.id}" data-bs-toggle="modal" data-bs-target="#editListingModal">Edit Listing</button>
                 </div>
             </div>
-        </div>`).join('');
+        </div>`
+    ).join('');
 }
 
-// Event listener for "Edit Listing" button
+// Sort books based on the selected criteria
+function sortBooks(a, b, sortBy) {
+    return sortBy === 'priceHighToLow' ? b.price - a.price :
+           sortBy === 'priceLowToHigh' ? a.price - b.price :
+           new Date(b.dateListed) - new Date(a.dateListed);
+}
+
+// Search functionality
+elements.searchInput.addEventListener('input', (e) => {
+    const searchTerm = e.target.value.trim();
+    if (currentUser) displayUserBooks(currentUser.uid, searchTerm, getSortOrder(), selectedGenre);
+});
+
+// Genre filter functionality
+elements.genreDropdownItems.forEach(item => {
+    item.addEventListener('click', (event) => {
+        selectedGenre = event.target.getAttribute('data-genre');
+        displayUserBooks(currentUser.uid, elements.searchInput.value.trim(), getSortOrder(), selectedGenre);
+    });
+});
+
+// Sort buttons functionality
+Object.entries(elements.sortButtons).forEach(([key, button]) => {
+    button.addEventListener('click', () => {
+        const sortBy = key === 'low' ? 'priceLowToHigh' : key === 'high' ? 'priceHighToLow' : 'dateListed';
+        if (currentUser) displayUserBooks(currentUser.uid, elements.searchInput.value.trim(), sortBy, selectedGenre);
+    });
+});
+
+// Remove book functionality
+document.addEventListener('click', (event) => {
+    if (event.target.classList.contains('remove-listing')) {
+        currentBookIdToRemove = event.target.dataset.id;
+    }
+});
+
+// Confirm removal of the book listing
+elements.confirmRemoveButton.addEventListener('click', async () => {
+    if (currentBookIdToRemove) {
+        await remove(ref(database, `book-listings/${currentBookIdToRemove}`));
+        displayUserBooks(currentUser.uid);
+        currentBookIdToRemove = null;
+        
+        // Close the remove listing modal
+        elements.removeModalCloseButton.click();
+    }
+});
+
+// Editing book functionality
 document.addEventListener('click', (event) => {
     if (event.target.classList.contains('edit-listing')) {
         currentBookIdToEdit = event.target.dataset.id;
@@ -92,115 +157,45 @@ document.addEventListener('click', (event) => {
     }
 });
 
-// Event listener for "Save Changes" button in Edit Modal
-document.getElementById('saveEditButton').addEventListener('click', async () => {
-    const updatedBook = {
-        title: document.getElementById('editBookTitle').value,
-        author: document.getElementById('editAuthor').value,
-        genre: document.getElementById('editGenre').value,
-        condition: document.getElementById('editCondition').value,
-        description: document.getElementById('editDescription').value,
-        price: document.getElementById('editPrice').value,
-        dateListed: new Date().toISOString() // Optionally update the date
-    };
-
-    // Check for new image upload
-    if (elements.bookImageInput.files.length > 0) {
-        const file = elements.bookImageInput.files[0];
-        const reader = new FileReader();
-        reader.onload = async (e) => {
-            updatedBook.imageUrl = e.target.result; // Get the new image URL
-
-            if (currentBookIdToEdit) {
-                // Fetch the existing book data to retain userId
-                const bookRef = ref(database, `book-listings/${currentBookIdToEdit}`);
-                const existingBookSnapshot = await get(bookRef);
-                const existingBookData = existingBookSnapshot.val();
-
-                // Merge the updated fields with the existing data
-                await set(bookRef, { ...existingBookData, ...updatedBook });
-
-                currentBookIdToEdit = null;
-
-                // Close modal and refresh listings
-                document.querySelector('#editListingModal .btn-close').click();
-                const user = await checkAuth();
-                if (user) displayUserBooks(user.uid);
-            }
-        };
-        reader.readAsDataURL(file); // Read the file as a data URL
-    } else {
-        if (currentBookIdToEdit) {
-            // Fetch the existing book data to retain userId
-            const bookRef = ref(database, `book-listings/${currentBookIdToEdit}`);
-            const existingBookSnapshot = await get(bookRef);
-            const existingBookData = existingBookSnapshot.val();
-
-            // Merge the updated fields with the existing data
-            await set(bookRef, { ...existingBookData, ...updatedBook });
-
-            currentBookIdToEdit = null;
-
-            // Close modal and refresh listings
-            document.querySelector('#editListingModal .btn-close').click();
-            const user = await checkAuth();
-            if (user) displayUserBooks(user.uid);
-        }
-    }
-});
-
-// Sort books based on the selected criteria
-function sortBooks(a, b, sortBy) {
-    return sortBy === 'priceHighToLow' ? b.price - a.price :
-           sortBy === 'priceLowToHigh' ? a.price - b.price :
-           new Date(b.dateListed) - new Date(a.dateListed);
-}
-
-// Function to remove a book listing from the database
-async function removeListing(bookId) {
-    await remove(ref(database, `book-listings/${bookId}`));
-    const user = await checkAuth();
-    if (user) displayUserBooks(user.uid);
-}
-
-// Add event listeners
-elements.searchInput.addEventListener('input', (e) => {
-    const userId = checkAuth()?.uid;
-    if (userId) displayUserBooks(userId, e.target.value);
-});
-
-Object.entries(elements.sortButtons).forEach(([key, button]) => {
-    button.addEventListener('click', async () => {
-        const userId = await checkAuth()?.uid;
-        if (userId) displayUserBooks(userId, elements.searchInput.value, key === 'low' ? 'priceLowToHigh' : key === 'high' ? 'priceHighToLow' : 'dateListed');
-    });
-});
-
-// Event listener for "Remove Listing" button
-let bookIdToRemove;
-
-document.addEventListener('click', (event) => {
-    if (event.target.classList.contains('remove-listing')) {
-        bookIdToRemove = event.target.dataset.id;
-    }
-});
-
-// Confirm removal when the "Remove" button in the modal is clicked
-document.getElementById('confirmRemoveButton').addEventListener('click', () => {
-    if (bookIdToRemove) {
-        removeListing(bookIdToRemove);
-        bookIdToRemove = null;
-    }
-});
-
-// Handle book image upload preview
+// Image upload preview functionality
 elements.bookImageInput.addEventListener('change', (event) => {
     const file = event.target.files[0];
     if (file) {
         const reader = new FileReader();
+
+        // When the file is read, update the preview
         reader.onload = (e) => {
-            elements.profilePreview.src = e.target.result; // Preview uploaded image
+            elements.profilePreview.src = e.target.result;  // Set the image preview to the uploaded image
         };
+
+        // Read the file as a data URL (base64)
         reader.readAsDataURL(file);
     }
 });
+
+// Save changes to book
+elements.saveEditButton.addEventListener('click', async () => {
+    if (currentBookIdToEdit) {
+        const bookRef = ref(database, `book-listings/${currentBookIdToEdit}`);
+        const existingBookData = (await get(bookRef)).val();
+
+        const updatedBook = {
+            ...existingBookData,
+            title: document.getElementById('editBookTitle').value,
+            author: document.getElementById('editAuthor').value,
+            genre: document.getElementById('editGenre').value,
+            condition: document.getElementById('editCondition').value,
+            description: document.getElementById('editDescription').value,
+            price: document.getElementById('editPrice').value
+        };
+
+        await set(bookRef, updatedBook);
+        closeModal();
+        displayUserBooks(currentUser.uid);
+    }
+});
+
+// Close the edit listing modal
+function closeModal() {
+    elements.editModalCloseButton.click();
+}

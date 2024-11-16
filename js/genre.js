@@ -1,7 +1,7 @@
 import { checkAuth } from './auth.js';
-import { getDatabase, ref, onValue, query, orderByChild } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-database.js";
+import { getDatabase, ref, onValue, query, orderByChild, get } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-database.js";
 import { initializeNavbar, handleSignOut } from './navbar.js';
-
+import { openChatModal, sendMessage } from './contactseller.js';  // Import contact seller functions
 
 const database = getDatabase();
 
@@ -22,8 +22,65 @@ const signOutButton = document.getElementById('signOut');
 const searchForm = document.querySelector('form[role="search"]');
 const searchInput = searchForm.querySelector('input');
 
+document.addEventListener('DOMContentLoaded', async () => {
+    // Wait for user authentication
+    const user = await checkAuth();
+    currentUser = user; // Make sure currentUser is set
+    updateUIBasedOnAuth(user);
+
+    // Only call displayBooks after currentUser is set
+    const genre = getGenre();
+    displayBooks(genre, null, getSortOrder());
+
+    // Other event listeners
+    searchForm.addEventListener('submit', (event) => {
+        event.preventDefault();
+        displayBooks(getGenre(), searchInput.value.trim(), getSortOrder());
+    });
+
+    booksFeedLink.addEventListener('click', (event) => {
+        event.preventDefault();
+        window.location.href = user ? 'userhome.html' : 'index.html';
+    });
+
+    genreDropdownItems.forEach(item => {
+        item.addEventListener('click', (event) => {
+            const selectedGenre = event.target.getAttribute('data-genre');
+            displayBooks(selectedGenre, null, getSortOrder());
+            const newUrl = new URL(window.location.href);
+            newUrl.searchParams.set('genre', selectedGenre);
+            window.history.pushState({}, '', newUrl);
+        });
+    });
+
+    sortLowestPrice.addEventListener('click', () => displayBooks(getGenre(), null, 'priceLowToHigh'));
+    sortHighestPrice.addEventListener('click', () => displayBooks(getGenre(), null, 'priceHighToLow'));
+    sortMostRecent.addEventListener('click', () => displayBooks(getGenre(), null, 'dateListed'));
+
+    searchInput.addEventListener('input', (event) => {
+        displayBooks(getGenre(), event.target.value.trim(), getSortOrder());
+    });
+
+    if (signOutButton) {
+        signOutButton.addEventListener('click', handleSignOut);
+    }
+
+    if (signInButton) {
+        signInButton.addEventListener('click', () => {
+            window.location.href = 'login.html';
+        });
+    }
+});
+
+
 // Initialize Navbar
 document.addEventListener('DOMContentLoaded', initializeNavbar);
+
+// Variables for message modal
+let currentUser = null;
+
+// Make the function globally accessible
+window.openChatModal = openChatModal;  // Add the function to the global window object
 
 // Helper Functions
 function getGenre() {
@@ -86,6 +143,7 @@ function displayBooks(genre = null, searchTerm = null, sortBy = 'dateListed') {
                         return new Date(b.dateListed) - new Date(a.dateListed);
                     });
 
+                    // Display the books in cards
                     sortedBooks.forEach(book => {
                         if ((!genre || book.genre === genre) &&
                             (!searchTerm || book.title.toLowerCase().includes(searchTerm.toLowerCase()))) {
@@ -104,15 +162,29 @@ function displayBooks(genre = null, searchTerm = null, sortBy = 'dateListed') {
                                             <p class="card-text"><strong>Seller:</strong> ${userNames[book.userId] || 'Unknown'}</p>
                                             <p class="card-text"><strong>Condition:</strong> ${book.condition}</p>
                                             <p class="card-text"><strong>Price:</strong> ₱${book.price}</p>
-                                            <div class="d-flex justify-content-between mt-3">
-                                                <button class="btn btn-success">Contact Seller</button>
+                                            <!-- More Info button to open modal -->
+                                            <div class="mt-2 mb-2">
+                                                <button class="btn btn-primary w-100" onclick="openMoreInfoModal('${book.id}')">More Info</button>
                                             </div>
+                                            
+                                            <!-- Conditionally render the Contact Seller button -->
+                                            ${currentUser ? `
+                                                <div class="mt-auto">
+                                                    <button class="btn btn-success w-100" 
+                                                            data-seller="${book.userId}" 
+                                                            data-title="${book.title}" 
+                                                            onclick="openChatModal('${book.userId}', '${currentUser.uid}')">
+                                                        Contact Seller
+                                                    </button>
+                                                </div>
+                                            ` : ''}
                                         </div>
                                     </div>
                                 </div>
                             `;
                         }
                     });
+
                 } else {
                     bookListContainer.innerHTML = '<p>No books available.</p>';
                 }
@@ -123,50 +195,33 @@ function displayBooks(genre = null, searchTerm = null, sortBy = 'dateListed') {
     });
 }
 
-// Event Listeners
-document.addEventListener('DOMContentLoaded', async () => {
-    const user = await checkAuth();
-    updateUIBasedOnAuth(user);
+// Open More Info modal
+window.openMoreInfoModal = function(bookId) {
+    const booksRef = ref(database, `book-listings/${bookId}`);
+    get(booksRef).then((snapshot) => {
+        if (snapshot.exists()) {
+            const book = snapshot.val();
+            document.getElementById('moreInfoBookTitle').textContent = book.title;
+            document.getElementById('moreInfoAuthor').textContent = book.author;
+            document.getElementById('moreInfoGenre').textContent = book.genre || 'N/A';
+            document.getElementById('moreInfoCondition').textContent = book.condition;
+            document.getElementById('moreInfoDescription').textContent = book.description || 'No description available';
+            document.getElementById('moreInfoPrice').textContent = book.price;
+            document.getElementById('moreInfoBookImage').src = book.imageUrl || 'images/default-book.png';
 
-    searchForm.addEventListener('submit', (event) => {
-        event.preventDefault();
-        displayBooks(getGenre(), searchInput.value.trim(), getSortOrder());
+            const modal = new bootstrap.Modal(document.getElementById('moreInfoModal'));
+            modal.show();
+        } else {
+            console.error('Book not found');
+        }
+    }).catch((error) => {
+        console.error('Error fetching book details:', error);
     });
+};
 
-    booksFeedLink.addEventListener('click', (event) => {
-        event.preventDefault();
-        window.location.href = user ? 'userhome.html' : 'index.html';
-    });
-
-    genreDropdownItems.forEach(item => {
-        item.addEventListener('click', (event) => {
-            const selectedGenre = event.target.getAttribute('data-genre');
-            displayBooks(selectedGenre, null, getSortOrder());
-            const newUrl = new URL(window.location.href);
-            newUrl.searchParams.set('genre', selectedGenre);
-            window.history.pushState({}, '', newUrl);
-        });
-    });
-
-    sortLowestPrice.addEventListener('click', () => displayBooks(getGenre(), null, 'priceLowToHigh'));
-    sortHighestPrice.addEventListener('click', () => displayBooks(getGenre(), null, 'priceHighToLow'));
-    sortMostRecent.addEventListener('click', () => displayBooks(getGenre(), null, 'dateListed'));
-
-    const genre = getGenre();
-    displayBooks(genre, null, getSortOrder());
-
-    searchInput.addEventListener('input', (event) => {
-        displayBooks(getGenre(), event.target.value.trim(), getSortOrder());
-    });
-
-    if (signOutButton) {
-        signOutButton.addEventListener('click', handleSignOut);
-    }
-
-    if (signInButton) {
-        signInButton.addEventListener('click', () => {
-            window.location.href = 'login.html'; // Redirect to login page on sign-in button click
-        });
-    }
+// Send message
+document.getElementById('sendMessageBtn').addEventListener('click', () => {
+    const messageInput = document.getElementById('messageInput');
+    sendMessage(messageInput);  // Using function from contactseller.js
 });
 

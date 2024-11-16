@@ -45,9 +45,6 @@
                 <li class="nav-item">
                     <a class="nav-link" href="chat.html">Messages</a>
                 </li>
-                <form class="d-flex" role="search">
-                    <input class="form-control me-2" type="search" placeholder="Search" aria-label="Search">
-                </form>
                 <li class="nav-item">
                     <a class="nav-link" href="sellingform.html">SELL A BOOK</a>
                 </li>   
@@ -66,8 +63,35 @@
         </div>
     </div>
 </nav>
- <!-- Form Fill-Up Section -->
-<section class="h-100 h-custom gradient-custom-2">
+ <!-- GCash Form Fill-Up Section -->
+<section id="gcash-setup-section" class="h-100 h-custom gradient-custom-2 d-none">
+    <div class="container py-5 h-100">
+        <div class="row d-flex justify-content-center align-items-center h-100">
+            <div class="col-12">
+                <div class="card card-registration" style="border-radius: 15px;">
+                    <div class="card-body p-4">
+                        <h5 class="card-title text-center mb-4">Setup your GCash to proceed!</h5>
+                        <form id="gcash-setup-form">
+                            <div class="mb-3">
+                                <label for="gcash-number" class="form-label">GCash Number</label>
+                                <input type="text" id="gcash-number" class="form-control" placeholder="Enter your GCash number" required />
+                            </div>
+                            <div class="mb-3">
+                                <label for="gcash-name" class="form-label">GCash Name</label>
+                                <input type="text" id="gcash-name" class="form-control" placeholder="Enter your GCash name" required />
+                            </div>
+                            <div class="text-center">
+                                <button type="submit" class="btn btn-primary">Save GCash Details</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+ <!-- Book Form Fill-Up Section -->
+ <section id="book-listing-section" class="h-100 h-custom gradient-custom-2 d-none">
     <div class="container py-5 h-100">
         <div class="row d-flex justify-content-center align-items-center h-100">
             <div class="col-12">                  
