@@ -262,6 +262,51 @@ messageInput.addEventListener('keydown', async (event) => {
     }
 });
 
+// Buyer listens for new payment requests
+onValue(ref(database, 'paymentRequests/'), (snapshot) => {
+    const paymentRequests = snapshot.val();
+
+    if (paymentRequests) {
+        // Check if there's a new payment request for the current buyer
+        Object.keys(paymentRequests).forEach(requestId => {
+            const paymentRequest = paymentRequests[requestId];
+
+            if (paymentRequest.receiver === currentUser.uid && paymentRequest.status === "pending") {
+                // Display an alert for the buyer
+                alert(`You have a new payment request of ${paymentRequest.amount} from ${paymentRequest.sender}`);
+
+                // You can also update the UI here, e.g., display a notification badge.
+            }
+        });
+    }
+});
+
+
+// Seller clicks the 'confirmPaymentButton'
+document.getElementById('confirmPaymentButton').addEventListener('click', async () => {
+    const buyerId = getOtherUserId(selectedChatKey); // Get the other user (buyer) ID
+    const paymentRequest = {
+        sender: currentUser.uid,  // Seller's ID
+        receiver: buyerId,        // Buyer's ID
+        amount: "100.00",         // Example payment amount (can be dynamic)
+        timestamp: Date.now(),
+        status: "pending",        // Payment request status
+    };
+
+    // Save the payment request in Firebase
+    try {
+        const paymentRequestRef = push(ref(database, 'paymentRequests'));
+        await set(paymentRequestRef, paymentRequest);
+        console.log('Payment request sent to buyer:', paymentRequest);
+
+        // Trigger a notification for the buyer (buyer will receive this in real-time)
+        alert('Payment request has been sent to the buyer!');
+    } catch (error) {
+        console.error('Error sending payment request:', error);
+    }
+});
+
+
 document.getElementById('requestPaymentButtonTrigger').addEventListener('click', async () => {
     await loadUserBooks(currentUser);
     await loadGcashDetails(currentUser);
