@@ -1,7 +1,7 @@
 import { getDatabase, ref, onValue, get, push, set, update } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-database.js";
 import { checkAuth } from './auth.js';
 import { initializeNavbar } from './navbar.js';
-import { loadUserBooks, loadShippingDetails, loadGcashDetails, editShippingDetailsBtn, saveShippingDetailsBtn, selectedBookKey } from './transactionHelper.js';
+import { loadUserBooks, loadShippingDetails, loadGcashDetails, editShippingDetailsBtn, saveShippingDetailsBtn } from './transactionHelper.js';
 
 
 const database = getDatabase();
@@ -155,34 +155,26 @@ window.loadMessages = async function(chatKey) {
     }
 
     currentMessagesRef = ref(database, `chats/${chatKey}`);
-currentMessagesListener = onValue(currentMessagesRef, async (snapshot) => {
-    const messages = snapshot.val();
-    if (messages) {
-        await Promise.all(Object.keys(messages).map(async (msgKey) => {
-            if (!renderedMessages[msgKey]) {
-                const msg = messages[msgKey];
-                const isCurrentUser = msg.sender === currentUser.uid;
-                const otherUserId = isCurrentUser ? msg.receiver : msg.sender;
-                const otherUser = await fetchUserDetails(otherUserId);
-                const profilePicture = isCurrentUser ? currentUser.profilePicture : otherUser.profilePicture || 'https://via.placeholder.com/60';
-                const formattedTime = formatTimestamp(msg.timestamp);
-
-                // Check if this is a payment request
-                if (msg.type === 'payment_request' && msg.receiver === currentUser.uid) {
-                    alert(`You have a payment request for "${msg.bookTitle}".`);
+    currentMessagesListener = onValue(currentMessagesRef, async (snapshot) => {
+        const messages = snapshot.val();
+        if (messages) {
+            await Promise.all(Object.keys(messages).map(async (msgKey) => {
+                if (!renderedMessages[msgKey]) {
+                    const msg = messages[msgKey];
+                    const isCurrentUser = msg.sender === currentUser.uid;
+                    const otherUserId = isCurrentUser ? msg.receiver : msg.sender;
+                    const otherUser = await fetchUserDetails(otherUserId);
+                    const profilePicture = isCurrentUser ? currentUser.profilePicture : otherUser.profilePicture || 'https://via.placeholder.com/60';
+                    const formattedTime = formatTimestamp(msg.timestamp);
+                    chatWindow.innerHTML += createMessageElement(msg, isCurrentUser, profilePicture, formattedTime);
+                    renderedMessages[msgKey] = true;
                 }
-
-
-                chatWindow.innerHTML += createMessageElement(msg, isCurrentUser, profilePicture, formattedTime);
-                renderedMessages[msgKey] = true;
-            }
-        }));
-        scrollToBottom();
-    } else {
-        chatWindow.innerHTML = '<p class="text-muted">No messages yet.</p>';
-    }
-});
-
+            }));
+            scrollToBottom();
+        } else {
+            chatWindow.innerHTML = '<p class="text-muted">No messages yet.</p>';
+        }
+    });
 
     await markMessagesAsRead(chatKey);
 };
@@ -269,52 +261,6 @@ messageInput.addEventListener('keydown', async (event) => {
         }
     }
 });
-
-document.getElementById('confirmPaymentButton').addEventListener('click', async () => {
-    try {
-        if (!selectedBookKey) {
-            console.error("No book selected");
-            return;
-        }
-
-        console.log("Selected Book Key:", selectedBookKey);  // Debugging the selectedBookKey value
-        const bookSnapshot = await get(ref(database, `book-listings/${selectedBookKey}`));
-        if (!bookSnapshot.exists()) {
-            console.error("Selected book does not exist");
-            return;
-        }
-
-        const bookData = bookSnapshot.val();
-        const receiverId = selectedChatKey.split('_').find(id => id !== currentUser.uid);
-
-        // Construct the payment slip message
-        const paymentSlipMessage = `Payment Requested for "${bookData.title}" - Price: ${bookData.price}`;
-
-        // Save the payment slip to Firebase
-        const chatRef = push(ref(database, `chats/${selectedChatKey}`));
-        await set(chatRef, {
-            sender: currentUser.uid,
-            receiver: receiverId,
-            message: paymentSlipMessage,
-            timestamp: Date.now(),
-            read: false, // default to unread
-            bookTitle: bookData.title,
-            bookImageUrl: bookData.imageUrl,
-            type: 'payment_request' // Add a new type to indicate it's a payment request
-        });
-        
-
-        // Notify the other user with an alert (temporary)
-        alert(`Payment slip sent to ${receiverId} for "${bookData.title}".`);
-
-        // Close the modal
-        $('#requestPaymentModal').modal('hide');
-
-    } catch (error) {
-        console.error("Error sending payment slip:", error);
-    }
-});
-
 
 document.getElementById('requestPaymentButtonTrigger').addEventListener('click', async () => {
     await loadUserBooks(currentUser);
