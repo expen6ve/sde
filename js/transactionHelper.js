@@ -3,6 +3,8 @@ import { getDatabase, ref, get, update } from "https://www.gstatic.com/firebasej
 const database = getDatabase();
 let currentUser = null;
 
+export let selectedBookKey = null; // Global variable to store selected book key
+
 export async function loadUserBooks(currentUser) {
     const bookSearch = document.getElementById('bookSearch');
     const bookDropdown = document.getElementById('bookDropdown');
@@ -12,8 +14,6 @@ export async function loadUserBooks(currentUser) {
     const selectedBookPrice = document.getElementById('selectedBookPrice');
     const editPriceButton = document.getElementById('editPriceButton');
     const savePriceButton = document.getElementById('savePriceButton');
-    
-    let selectedBookKey = null; // Variable to store the selected book's key
 
     function clearBookDetails() {
         selectedBookDetails.style.display = 'none';
@@ -44,14 +44,14 @@ export async function loadUserBooks(currentUser) {
 
                     // Fetch the latest book details from the database
                     const bookDetails = (await get(ref(database, `book-listings/${key}`))).val();
-                    
+
                     // Display selected book details
                     selectedBookDetails.style.display = 'block';
                     selectedBookImage.src = bookDetails.imageUrl || 'https://via.placeholder.com/150';
                     selectedBookImage.alt = bookDetails.title;
                     selectedBookTitle.textContent = bookDetails.title;
                     selectedBookPrice.value = bookDetails.price; // Set the latest price
-                    selectedBookKey = key; // Store the selected book's key
+                    selectedBookKey = key; // Store the selected book's key globally
                 });
                 bookDropdown.appendChild(listItem);
             });
@@ -103,16 +103,11 @@ export async function loadUserBooks(currentUser) {
     savePriceButton.addEventListener('click', async () => {
         const newPrice = parseFloat(selectedBookPrice.value).toFixed(2);
         if (selectedBookKey && !isNaN(newPrice)) {
-            console.log('Updating price for book:', selectedBookKey);  // Log the book being updated
             try {
                 // Update the price for the specific book
                 await update(ref(database, `book-listings/${selectedBookKey}`), {
                     price: newPrice,
                 });
-    
-                console.log('Price updated successfully!');
-                
-                // Update the UI immediately
                 selectedBookPrice.setAttribute('readonly', true);
                 selectedBookPrice.value = newPrice;  // Update the price input field with the new price
                 editPriceButton.style.display = 'inline-block';
@@ -126,6 +121,7 @@ export async function loadUserBooks(currentUser) {
         }
     });
 }
+
 
 
 export async function loadShippingDetails(currentUser) {
@@ -198,8 +194,4 @@ export async function saveShippingDetailsBtn(currentUser) {
     } catch (error) {
         console.error('Error saving updated shipping details:', error);
     }
-}
-
-function getSelectedBookKey() {
-    return document.getElementById('selectedBookKey').value; // Assuming this is set when a book is selected
 }
