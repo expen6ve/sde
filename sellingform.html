@@ -43,7 +43,7 @@
                     </ul>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="chat.html">Messages</a>
+                    <a class="nav-link" id="messagesLink" href="chat.html">Messages</a>
                 </li>
                 <li class="nav-item">
                     <a class="nav-link" href="sellingform.html">SELL A BOOK</a>
@@ -63,7 +63,7 @@
         </div>
     </div>
 </nav>
- <!-- GCash Form Fill-Up Section -->
+<!-- GCash Form Fill-Up Section -->
 <section id="gcash-setup-section" class="h-100 h-custom gradient-custom-2 d-none">
     <div class="container py-5 h-100">
         <div class="row d-flex justify-content-center align-items-center h-100">
@@ -72,10 +72,20 @@
                     <div class="card-body p-4">
                         <h5 class="card-title text-center mb-4">Setup your GCash to proceed!</h5>
                         <form id="gcash-setup-form">
+                            <!-- QR Code Upload Section -->
+                            <div class="mb-3 text-center">
+                                <!-- Image Preview -->
+                                <img id="qr-preview" src="" alt="QR Code Preview" class="mt-2" style="max-width: 100%; max-height: 200px; display: none; margin-bottom: 10px;">
+                                <label for="gcash-qr-code" class="form-label">Upload GCash QR Code (Optional)</label>
+                                <input type="file" id="gcash-qr-code" class="form-control" accept="image/*" />
+                                <div class="form-text">This is optional. Upload your GCash QR code if you'd like.</div>
+                            </div>
+                            <!-- GCash Number -->
                             <div class="mb-3">
                                 <label for="gcash-number" class="form-label">GCash Number</label>
                                 <input type="text" id="gcash-number" class="form-control" placeholder="Enter your GCash number" required />
                             </div>
+                            <!-- GCash Name -->
                             <div class="mb-3">
                                 <label for="gcash-name" class="form-label">GCash Name</label>
                                 <input type="text" id="gcash-name" class="form-control" placeholder="Enter your GCash name" required />
@@ -90,6 +100,7 @@
         </div>
     </div>
 </section>
+
  <!-- Book Form Fill-Up Section -->
  <section id="book-listing-section" class="h-100 h-custom gradient-custom-2 d-none">
     <div class="container py-5 h-100">
@@ -103,7 +114,7 @@
                                 <div class="p-5">
                                     <!-- Profile Picture Upload and Preview -->
                                     <div class="text-center">
-                                        <img id="profilePreview" src="images/default-avatar.png" alt="Book Image Preview" class="profile-preview" />
+                                        <img id="profilePreview" src="" alt="Book Image Preview" class="profile-preview border" />
                                     </div>
                                     <div class="mb-4 form-section text-center">
                                         <label for="bookImage" class="form-label small">Upload Book Image:</label>

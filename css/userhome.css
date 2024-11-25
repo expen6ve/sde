@@ -79,6 +79,14 @@ button {
 .user-info-font i {
     font-size: 1.3rem;
 }
+#qr-preview {
+    display: block; /* Ensures the image is treated as a block element */
+    margin-left: auto; /* Centers the image */
+    margin-right: auto; /* Centers the image */
+    max-width: 100%; /* Ensures it doesn't stretch beyond its container */
+    max-height: 200px; /* Limit the height */
+    margin-bottom: 10px; /* Optional: adds spacing below the image */
+}
 
 
 @media (min-width: 1025px) {

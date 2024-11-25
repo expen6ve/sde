@@ -1,6 +1,8 @@
 import { getDatabase, ref, onValue, get, push, set, update } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-database.js";
 import { checkAuth } from './auth.js';
 import { initializeNavbar } from './navbar.js';
+import { loadUserBooks, loadShippingDetails, loadGcashDetails, editShippingDetailsBtn, saveShippingDetailsBtn } from './transactionHelper.js';
+
 
 const database = getDatabase();
 let currentUser = null;
@@ -258,4 +260,23 @@ messageInput.addEventListener('keydown', async (event) => {
             });
         }
     }
+});
+
+
+
+document.getElementById('requestPaymentButtonTrigger').addEventListener('click', async () => {
+    await loadUserBooks(currentUser);
+    await loadGcashDetails(currentUser);
+});
+
+document.getElementById('shippingDetailsButton').addEventListener('click', () => {
+    loadShippingDetails(currentUser);
+});
+
+document.getElementById('editShippingDetailsBtn').addEventListener('click', () => {
+    editShippingDetailsBtn();
+});
+
+document.getElementById('saveShippingDetailsBtn').addEventListener('click', async () => {
+    await saveShippingDetailsBtn(currentUser);
 });

@@ -46,20 +46,30 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         const gcashNumber = document.getElementById('gcash-number').value.trim();
         const gcashName = document.getElementById('gcash-name').value.trim();
+        const qrCodeFile = document.getElementById('gcash-qr-code').files[0];
 
         if (!gcashNumber || !gcashName) {
             alert('Please fill out both GCash fields.');
             return;
         }
 
+        let qrCodeUrl = '';
+        if (qrCodeFile) {
+            // Upload QR code image to Firebase Storage
+            const qrCodeStorageRef = storageRef(storage, `gcash-qr-codes/${userId}-${Date.now()}`);
+            await uploadBytes(qrCodeStorageRef, qrCodeFile);
+            qrCodeUrl = await getDownloadURL(qrCodeStorageRef);
+        }
+
         try {
             // Save GCash details to the database
             await set(ref(database, `users/${userId}/gcash`), {
                 gcashnum: gcashNumber,
-                gcashname: gcashName
+                gcashname: gcashName,
+                qrCodeUrl: qrCodeUrl // Save the QR code URL if available
             });
 
-            alert('GCash details saved successfully!');
+            console.log('GCash details saved successfully!');
 
             // Show book listing form after GCash setup
             gcashSetupSection.classList.add('d-none');
@@ -69,7 +79,25 @@ document.addEventListener('DOMContentLoaded', async () => {
             alert('Failed to save GCash details. Please try again.');
         }
     });
+
+    // Preview the QR code image when selected
+    const qrCodeInput = document.getElementById('gcash-qr-code');
+    const qrPreview = document.getElementById('qr-preview');
+    qrCodeInput.addEventListener('change', (e) => {
+        const file = e.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = () => {
+                qrPreview.src = reader.result;
+                qrPreview.style.display = 'block'; // Show the image preview
+            };
+            reader.readAsDataURL(file);
+        } else {
+            qrPreview.style.display = 'none'; // Hide if no file selected
+        }
+    });
 });
+
 
 // Initialize the page after checking authentication
 document.addEventListener('DOMContentLoaded', async () => {
@@ -194,7 +222,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             // Assign "seller" role to the user after adding the book
             await updateUserRole(userId);
     
-            alert('Book listing added successfully!');
+            console.log('Book listing added successfully!');
     
             // Reset the form
             bookTitleInput.value = '';

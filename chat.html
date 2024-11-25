@@ -8,10 +8,11 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Bona+Nova+SC&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <!-- Add Select2 CSS & JS links in your HTML <head> section -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/css/select2.min.css" rel="stylesheet" />
+    
     <link href="css/bootstrap.min.css" rel="stylesheet" />
     <link href="css/chat.css" rel="stylesheet" />
-    <script defer src="js/bootstrap.bundle.min.js"></script>
-    <script defer type="module" src="js/chat.js"></script> 
 </head>
 <body>
     <!-- Responsive navbar -->
@@ -43,7 +44,7 @@
                     </ul>
                 </li>
                 <li class="nav-item">
-                  <a class="nav-link" href="chat.html">Messages</a>
+                  <a class="nav-link" id="messagesLink" href="chat.html">Messages</a>
                 </li>
                 <li class="nav-item">
                     <a class="nav-link" href="sellingform.html">SELL A BOOK</a>
@@ -69,9 +70,10 @@
           <div class="row">
             <div class="col-md-12">
               <div class="card" id="chat3" style="border-radius: 15px;">
-                <div class="card-body">
+                <div class="card-body p-0">
                   <div class="row">
-                    <div class="col-md-6 col-lg-5 col-xl-4 mb-4 mb-md-0">
+                    <!-- First Column -->
+                    <div class="col-md-3 col-lg-2 col-xl-3 border-end border-secondary-subtle">
                       <div class="p-3">
                         <div class="input-group rounded mb-3">
                           <input type="search" class="form-control rounded" placeholder="Search" aria-label="Search" aria-describedby="search-addon" />
@@ -79,33 +81,48 @@
                             <i class="fas fa-search"></i>
                           </button>
                         </div>
-      
                         <div id="chatList" class="overflow-auto" style="height: 400px">
-                          <ul class="list-unstyled mb-0" id="sellerChatTab">                            
+                          <ul class="list-unstyled mb-0" id="sellerChatTab">
                             <!-- chatTab here -->
                           </ul>
                         </div>
                       </div>
                     </div>
-      
-                    <div class="col-md-6 col-lg-7 col-xl-8">
+                  
+                    <!-- Second Column (Wider) -->
+                    <div class="col-md-6 col-lg-8 col-xl-7 border-end border-secondary-subtle">
                       <div id="chatBox" class="pt-3 pe-3 overflow-auto" style="height: 400px;">
-                          <!-- Chat bubbles will be populated here -->
+                        <!-- Chat bubbles will be populated here -->
                       </div>
                       <div class="d-flex justify-content-start align-items-center pe-3 pt-3 mt-2">
                         <input type="text" class="form-control form-control-lg me-1" id="writeMessage" placeholder="Type message" style="font-family: monospace; font-weight: normal;">
-                        <!-- Add icons in a flexible container -->
                         <div class="d-flex align-items-center">
-                            <a id="creditCardButton" class="text-muted me-2" href="#!">
-                                <i class="fa-regular fa-credit-card fa-lg"></i>
-                            </a>
-                            <a id="sendMessageButton" class="text-muted" href="#!">
-                                <i class="fas fa-paper-plane fa-lg"></i>
-                            </a>
+                          <a id="creditCardButton" class="text-muted me-2" href="#!">
+                            <i class="fa-regular fa-credit-card fa-lg"></i>
+                          </a>
+                          <a id="sendMessageButton" class="text-muted" href="#!">
+                            <i class="fas fa-paper-plane fa-lg"></i>
+                          </a>
                         </div>
+                      </div>
                     </div>
-                    
+                  
+                    <!-- Third Column -->
+                    <div class="col-md-3 col-lg-2 col-xl-2 d-flex flex-column justify-content-center align-items-center">
+                      <div class="text-center">
+                        <h5>Transaction Helper</h5>
+                        <div class="p-3">
+                          <button type="button" class="btn btn-outline-success" id="requestPaymentButtonTrigger" data-bs-toggle="modal" data-bs-target="#requestPaymentModal">Request Payment</button>
+                        </div>
+                        <div class="p-3">
+                          <button type="button" class="btn btn-outline-primary" id="shippingDetailsButton" data-bs-toggle="modal" data-bs-target="#shippingDetailsModal">Shipping Details</button>
+                        </div>
+                      </div>
+                    </div>
+
                   </div>
+                  
+                  
                   
                   </div>
                 </div>
@@ -113,6 +130,95 @@
             </div>
           </div>
         </div>
-      </section>      
+      </section>
+      
+<!-- Modal for selecting a book -->
+<div class="modal fade" id="requestPaymentModal" tabindex="-1" aria-labelledby="requestPaymentModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="requestPaymentModalLabel">Select Book for the Transaction</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <label for="bookSearch">Search for a book:</label>
+        <input type="text" id="bookSearch" class="form-control mb-1" placeholder="Type to search..." />
+        <div class="position-relative">
+            <ul id="bookDropdown" class="list-group" style="max-height: 150px; overflow-y: auto; display: none;">
+                <!-- Dynamic book options will be injected here -->
+            </ul>
+        </div>
+      </div>
+      <!-- Container to display the selected book details -->
+      <div id="selectedBookDetails" class="mt-1" style="display: none;">
+        <div class="card m-2">
+          <img id="selectedBookImage" class="card-img-top mx-auto mt-4" style="height: 200px; object-fit: contain;" alt="Book Image" />
+            <div class="card-body">
+                <h5 class="card-title" id="selectedBookTitle"></h5>
+                <label for="selectedBookPrice" class="form-label">Price:</label>
+                <!-- Editable Price Field with Edit and Save Buttons -->
+                <div class="input-group mb-3">
+                  <input type="number" id="selectedBookPrice" class="form-control" step="0.01" readonly />
+                  <button id="editPriceButton" class="btn btn-outline-secondary">Edit</button>
+                  <button id="savePriceButton" class="btn btn-primary" style="display: none;">Save</button>
+              </div>
+              <!-- GCash Details -->    
+              <label for="gcashDetails" class="form-label mt-3">My GCash Details:</label>
+                <div id="gcashDetails" class="mb-3" style="display:none;">
+                    <p><strong>GCash Name:</strong> <span id="gcashName"></span></p>
+                    <p><strong>GCash Number:</strong> <span id="gcashNumber"></span></p>
+                </div>
+            </div>
+        </div>
+      </div>
+    
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+        <button type="button" class="btn btn-primary" id="confirmPaymentButton">Request Payment</button>
+      </div>
+    </div>
+  </div>
+</div>
+<!-- Modal for Shipping Details -->
+<div class="modal fade" id="shippingDetailsModal" tabindex="-1" aria-labelledby="shippingDetailsModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="shippingDetailsModalLabel">Shipping Details</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <!-- Shipping Address Section -->
+        <div class="mb-3">
+          <h6><b>Address</b></h6>
+          <div id="shippingAddressDisplay">
+            <p id="shippingAddress" class="form-control-plaintext"></p>
+          </div>
+          <div id="shippingAddressEdit" class="d-none">
+            <input type="text" id="newStreet" class="form-control mb-2" placeholder="Street">
+            <input type="text" id="newBarangay" class="form-control mb-2" placeholder="Barangay">
+            <input type="text" id="newCity" class="form-control mb-2" placeholder="City">
+            <input type="text" id="newProvince" class="form-control mb-2" placeholder="Province">
+            <input type="text" id="newZipCode" class="form-control mb-2" placeholder="Zip Code">
+          </div>
+        </div>
+
+        <!-- Edit and Save Buttons -->
+        <div id="editButtons" class="d-flex justify-content-between">
+          <button type="button" id="editShippingDetailsBtn" class="btn btn-primary">Edit</button>
+          <button type="button" id="saveShippingDetailsBtn" class="btn btn-success d-none">Save</button>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<script defer src="js/bootstrap.bundle.min.js"></script> <!-- Bootstrap JS -->
+<script defer type="module" src="js/chat.js"></script> <!-- Your custom JS -->
 </body>
+
 </html>
