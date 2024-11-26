@@ -1,4 +1,4 @@
-import { getDatabase, ref, get, update } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-database.js";
+import { getDatabase, ref, get, update, push, set } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-database.js";
 
 const database = getDatabase();
 let currentUser = null;
@@ -197,5 +197,113 @@ export async function saveShippingDetailsBtn(currentUser) {
         document.getElementById('saveShippingDetailsBtn').classList.add('d-none');
     } catch (error) {
         console.error('Error saving updated shipping details:', error);
+    }
+}
+
+// Function to handle confirmPaymentButton click
+export async function confirmPaymentButton(currentUser, selectedChatKey) {
+    if (!currentUser) {
+        alert('You must be logged in to send a payment slip.');
+        return;
+    }
+
+    if (!selectedChatKey) {
+        alert('Please select a chat to proceed.');
+        return;
+    }
+
+    const bookTitle = document.getElementById('selectedBookTitle').textContent;
+    const bookPrice = parseFloat(document.getElementById('selectedBookPrice').value).toFixed(2);
+    const receiverId = selectedChatKey.split('_').find(id => id !== currentUser.uid);
+
+    // Fetch the book image URL
+    const bookImageUrl = document.getElementById('selectedBookImage').src;
+
+    if (!bookTitle || !bookPrice || !bookImageUrl) {
+        alert('Please select a book to generate a payment slip.');
+        return;
+    }
+
+    try {
+        // Create the payment slip
+        const paymentSlip = {
+            bookTitle,
+            bookPrice,
+            bookImageUrl,
+            timestamp: Date.now(),
+            sender: currentUser.uid,
+            receiver: receiverId,
+        };
+
+        const paymentRef = push(ref(database, 'payments/'));
+        const paymentKey = paymentRef.key;
+
+        await set(paymentRef, paymentSlip);
+
+        // Update each user's sent/received payment slips
+        await update(ref(database, `users/${currentUser.uid}/sentPaymentSlips/${paymentKey}`), paymentSlip);
+        await update(ref(database, `users/${receiverId}/receivedPaymentSlips/${paymentKey}`), paymentSlip);
+
+        // Notify users in the chat with the payment slip
+        const chatRef = push(ref(database, `chats/${selectedChatKey}`));
+
+        await set(chatRef, {
+            sender: currentUser.uid,
+            receiver: receiverId,
+            message: `Payment Slip: ${bookTitle} - ₱${bookPrice}`,
+            paymentSlip: paymentKey,
+            timestamp: Date.now(),
+            read: false,
+        });
+
+        console.log('Payment slip sent successfully.');
+    } catch (error) {
+        console.error('Error sending payment slip:', error);
+        alert('Failed to send the payment slip. Please try again.');
+    }
+}
+
+// Function to view the payment slip in a modal
+export async function viewPaymentSlip(paymentSlipId) {
+    try {
+        const paymentSlipRef = ref(database, `payments/${paymentSlipId}`);
+        const paymentSlipSnapshot = await get(paymentSlipRef);
+
+        if (paymentSlipSnapshot.exists()) {
+            const paymentSlip = paymentSlipSnapshot.val();
+            const bookTitle = paymentSlip.bookTitle;
+            const bookPrice = paymentSlip.bookPrice;
+            const bookImageUrl = paymentSlip.bookImageUrl;
+
+            document.getElementById('bookTitle').textContent = bookTitle;
+            document.getElementById('bookPrice').textContent = `Price: ₱${parseFloat(bookPrice).toFixed(2)}`;
+            document.getElementById('bookImage').src = bookImageUrl;
+
+            // Fetch seller's details
+            const sellerRef = ref(database, `users/${paymentSlip.sender}`);
+            const sellerSnapshot = await get(sellerRef);
+
+            if (sellerSnapshot.exists()) {
+                const sellerData = sellerSnapshot.val();
+                const gcashName = sellerData.gcash.gcashname;
+                const gcashNumber = sellerData.gcash.gcashnum;
+                const gcashQrCodeUrl = sellerData.gcash.qrCodeUrl;
+
+                document.getElementById('slipGcashName').textContent = `Name: ${gcashName}`;
+                document.getElementById('slipGcashNumber').textContent = `Number: ${gcashNumber}`;
+                document.getElementById('slipGcashQr').src = gcashQrCodeUrl;
+
+            } else {
+                console.error("Seller details not found.");
+            }
+
+            const paymentSlipModal = new bootstrap.Modal(document.getElementById('paymentSlipModal'));
+            paymentSlipModal.show();
+        } else {
+            alert('Payment slip not found.');
+        }
+    } catch (error) {
+        console.error('Error fetching payment slip:', error);
+        alert('Failed to load payment slip details.');
     }
 }

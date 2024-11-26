@@ -1,5 +1,5 @@
 import { checkAuth } from './auth.js';
-import { getDatabase, ref, get, update } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-database.js";
+import { getDatabase, ref, get, push, set, update } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-database.js";
 import { getStorage, ref as storageRef, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-storage.js";
 import { initializeNavbar } from './navbar.js';
 
@@ -7,7 +7,6 @@ const database = getDatabase();
 const storage = getStorage();
 const months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
 
-// Utility functions
 const capitalize = str => str.charAt(0).toUpperCase() + str.slice(1);
 const capitalizeWords = str => str.split(' ').map(capitalize).join(' ');
 
@@ -15,11 +14,8 @@ const getElementValue = id => document.getElementById(id).value.trim();
 const setElementText = (id, text) => document.getElementById(id).textContent = text || 'Not provided';
 const setImageSrc = (id, src) => document.getElementById(id).src = src || '';
 
-async function fetchUserData() {
-    const user = await checkAuth();
-    if (!user) return null;
-
-    const userRef = ref(database, 'users/' + user.uid);
+async function fetchUserData(userId) {
+    const userRef = ref(database, 'users/' + userId);
     const snapshot = await get(userRef);
     return snapshot.exists() ? snapshot.val() : null;
 }
@@ -35,11 +31,8 @@ function updateDOMUserProfile(userData) {
     setElementText('userPhoneNumber', phone ? ` ${phone}` : '');
 }
 
-async function fetchGCashDetails() {
-    const user = await checkAuth(); // Ensure the user is authenticated
-    if (!user) return;
-
-    const gcashRef = ref(database, `users/${user.uid}/gcash`);
+async function fetchGCashDetails(userId) {
+    const gcashRef = ref(database, `users/${userId}/gcash`);
     const snapshot = await get(gcashRef);
 
     if (snapshot.exists()) {
@@ -52,30 +45,122 @@ async function fetchGCashDetails() {
     }
 }
 
-
 async function updateUserProfile() {
-    const userData = await fetchUserData();
-    if (userData) updateDOMUserProfile(userData);
-}
+    const params = new URLSearchParams(window.location.search);
+    const otherUserId = params.get('userId');
+    const currentUser = await checkAuth();
+    const userId = otherUserId || currentUser.uid;
+    const isCurrentUser = userId === currentUser.uid;
 
-// Update Firebase profile and image
-async function updateProfileInFirebase(user, updatedProfileData, profileImageFile) {
-    const userRef = ref(database, `users/${user.uid}`);
-    
-    if (profileImageFile) {
-        const profileImageRef = storageRef(storage, `profilePictures/${user.uid}`);
-        const snapshot = await uploadBytes(profileImageRef, profileImageFile);
-        updatedProfileData.profilePicture = await getDownloadURL(snapshot.ref);
+    // Fetch user data and update the profile
+    const userData = await fetchUserData(userId);
+    if (userData) {
+        updateDOMUserProfile(userData);
+        await fetchGCashDetails(userId);
+        await updateUserRecentListings(userId);
+
+        // Change the button text depending on whether it's the current user or another user
+        const editProfileButton = document.querySelector('#editProfileButton');
+        if (editProfileButton) {
+            if (isCurrentUser) {
+                // If it's the current user, show "Edit Profile"
+                editProfileButton.textContent = "Edit Profile";
+                editProfileButton.setAttribute('data-bs-toggle', 'modal');
+                editProfileButton.setAttribute('data-bs-target', '#editProfileModal');
+            } else {
+                // If it's another user, show "Send a Message"
+                editProfileButton.textContent = "Send a Message";
+                editProfileButton.removeAttribute('data-bs-toggle');
+                editProfileButton.removeAttribute('data-bs-target');
+                // You can add a message sending functionality here if needed
+
+                // Add event listener to open the modal
+                editProfileButton.addEventListener('click', () => openMessageModal(otherUserId));
+            }
+        }
     }
-    
-    await update(userRef, updatedProfileData);
 }
 
-// Update recent listings in the DOM
-async function updateUserRecentListings() {
-    const user = await checkAuth();
-    if (!user) return;
+function openMessageModal(receiverId) {
+    // Set the selected seller's ID
+    window.selectedSellerId = receiverId;
+    // Show the modal
+    new bootstrap.Modal(document.getElementById('messageModal')).show();
+}
 
+document.getElementById('sendMessageBtn').addEventListener('click', async () => {
+    const messageInput = document.getElementById('messageInput');
+    await sendMessage(messageInput);
+});
+
+async function sendMessage(messageInput) {
+    const message = messageInput.value.trim();
+
+    if (!message) {
+        console.error('Error: Message is empty.');
+        return;
+    }
+
+    // Ensure selectedSellerId and currentUser are defined
+    const currentUser = await checkAuth();
+    if (!window.selectedSellerId || !currentUser) {
+        console.error('Error: selectedSellerId or currentUser is not defined.');
+        return;
+    }
+
+    // Check if chat exists
+    let chatKey = await checkExistingChat(window.selectedSellerId, currentUser);
+
+    if (!chatKey) {
+        chatKey = `${currentUser.uid}_${window.selectedSellerId}`;
+    }
+
+    const chatRef = push(ref(database, `chats/${chatKey}`));
+
+    try {
+        await set(chatRef, {
+            sender: currentUser.uid,
+            receiver: window.selectedSellerId,
+            message,
+            timestamp: Date.now(),
+        });
+
+        messageInput.value = ''; // Clear input
+        const messageModal = bootstrap.Modal.getInstance(document.getElementById('messageModal'));
+        messageModal.hide();
+
+        console.log('Message sent successfully!');
+    } catch (error) {
+        console.error('Error sending message:', error);
+    }
+}
+
+
+async function checkExistingChat(sellerId, currentUser) {
+    const chatKey1 = `${currentUser.uid}_${sellerId}`;
+    const chatKey2 = `${sellerId}_${currentUser.uid}`;
+
+    try {
+        const chat1 = await get(ref(database, `chats/${chatKey1}`));
+        const chat2 = await get(ref(database, `chats/${chatKey2}`));
+
+        if (chat1.exists()) {
+            return chatKey1;  // Return existing chat
+        } else if (chat2.exists()) {
+            return chatKey2;  // Return existing chat
+        } else {
+            return null;  // No existing chat
+        }
+    } catch (error) {
+        console.error('Error checking for existing chat:', error);
+        return null;
+    }
+}
+
+
+
+
+async function updateUserRecentListings(userId) {
     const listingsRef = ref(database, 'book-listings');
     const snapshot = await get(listingsRef);
     const userRecentListingElement = document.getElementById('userRecentListing');
@@ -84,7 +169,7 @@ async function updateUserRecentListings() {
     if (snapshot.exists()) {
         const allListings = snapshot.val();
         const userListings = Object.keys(allListings)
-            .filter(key => allListings[key].userId === user.uid)
+            .filter(key => allListings[key].userId === userId)
             .map(key => ({ id: key, ...allListings[key] }))
             .sort((a, b) => new Date(b.dateListed) - new Date(a.dateListed));
 
@@ -101,7 +186,8 @@ async function updateUserRecentListings() {
                         <p class="card-text mb-0 user-info-font"><strong>Condition:</strong> ${condition}</p>
                         <p class="card-text mb-0 user-info-font"><strong>Price:</strong> ₱${price}</p>
                     </div>
-                </div>`;
+                </div>
+                `;
         } else {
             userRecentListingElement.innerHTML = '<p>No recent listings available.</p>';
         }
@@ -113,10 +199,9 @@ document.getElementById('saveProfileChangesButton').addEventListener('click', as
     const user = await checkAuth();
     if (!user) return;
 
-    const currentUserData = await fetchUserData();
+    const currentUserData = await fetchUserData(user.uid);
     const updatedProfileData = {};
 
-    // Update non-empty fields
     const updateIfFilled = (field, value) => value ? updatedProfileData[field] = value : null;
 
     updateIfFilled('firstName', getElementValue('editFirstName'));
@@ -124,20 +209,28 @@ document.getElementById('saveProfileChangesButton').addEventListener('click', as
     updateIfFilled('gender', getElementValue('editGender'));
     updateIfFilled('phone', getElementValue('editPhoneNumber'));
 
-    const addressFields = ['editStreet', 'editBarangay', 'editCity', 'editProvince', 'editZipCode'];
+    const addressFields = {
+        editStreet: 'street',
+        editBarangay: 'barangay',
+        editCity: 'city',
+        editProvince: 'province',
+        editZipCode: 'zipCode'
+    };
+    
     const updatedAddress = {};
-    addressFields.forEach(field => {
-        const value = getElementValue(field);
-        if (value) updatedAddress[field.replace('edit', '').toLowerCase()] = value;
+    Object.entries(addressFields).forEach(([fieldId, fieldKey]) => {
+        const value = getElementValue(fieldId);
+        if (value) updatedAddress[fieldKey] = value;
     });
     
     if (Object.keys(updatedAddress).length) {
         updatedProfileData.address = { ...currentUserData.address, ...updatedAddress };
     }
+    
 
-    const [dateDay, dateMonth, dateYear] = ['user-day', 'user-month', 'user-year'].map(getElementValue);
-    if (dateDay && dateMonth && dateYear) {
-        updatedProfileData.birthDate = { dateDay, dateMonth, dateYear };
+    const [day, month, year] = ['user-day', 'user-month', 'user-year'].map(getElementValue);
+    if (day && month && year) {
+        updatedProfileData.birthDate = { day, month, year };
     }
 
     const profileImageFile = document.getElementById('profilePicture').files[0];
@@ -163,15 +256,26 @@ document.getElementById('profilePicture').addEventListener('change', function() 
     }
 });
 
-// Initialize Navbar and user data on DOM content loaded
+// Update Firebase profile and image
+async function updateProfileInFirebase(user, updatedProfileData, profileImageFile) {
+    const userRef = ref(database, `users/${user.uid}`);
+    
+    if (profileImageFile) {
+        const profileImageRef = storageRef(storage, `profilePictures/${user.uid}`);
+        const snapshot = await uploadBytes(profileImageRef, profileImageFile);
+        updatedProfileData.profilePicture = await getDownloadURL(snapshot.ref);
+    }
+    
+    await update(userRef, updatedProfileData);
+}
+
 document.addEventListener('DOMContentLoaded', async () => {
     const user = await checkAuth();
     if (user) {
         initializeNavbar();
         await updateUserProfile();
-        await fetchGCashDetails(); // Update GCash details
-        await updateUserRecentListings();
     } else {
         window.location.href = '/index.html';
     }
 });
+

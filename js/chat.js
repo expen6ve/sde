@@ -1,7 +1,7 @@
 import { getDatabase, ref, onValue, get, push, set, update } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-database.js";
 import { checkAuth } from './auth.js';
 import { initializeNavbar } from './navbar.js';
-import { loadUserBooks, loadShippingDetails, loadGcashDetails, editShippingDetailsBtn, saveShippingDetailsBtn } from './transactionHelper.js';
+import { loadUserBooks, loadShippingDetails, loadGcashDetails, editShippingDetailsBtn, saveShippingDetailsBtn, confirmPaymentButton, viewPaymentSlip } from './transactionHelper.js';
 
 
 const database = getDatabase();
@@ -162,11 +162,11 @@ window.loadMessages = async function(chatKey) {
                 if (!renderedMessages[msgKey]) {
                     const msg = messages[msgKey];
                     const isCurrentUser = msg.sender === currentUser.uid;
-                    const otherUserId = isCurrentUser ? msg.receiver : msg.sender;
+                    const otherUserId = isCurrentUser ? msg.receiver : msg.sender; // Ensure we get the other user's ID
                     const otherUser = await fetchUserDetails(otherUserId);
                     const profilePicture = isCurrentUser ? currentUser.profilePicture : otherUser.profilePicture || 'https://via.placeholder.com/60';
                     const formattedTime = formatTimestamp(msg.timestamp);
-                    chatWindow.innerHTML += createMessageElement(msg, isCurrentUser, profilePicture, formattedTime);
+                    chatWindow.innerHTML += createMessageElement(msg, isCurrentUser, profilePicture, formattedTime, otherUserId);
                     renderedMessages[msgKey] = true;
                 }
             }));
@@ -179,14 +179,23 @@ window.loadMessages = async function(chatKey) {
     await markMessagesAsRead(chatKey);
 };
 
-function createMessageElement(msg, isCurrentUser, profilePicture, formattedTime) {
-    // Check if book information is included in the message
-    const bookInfo = msg.bookTitle && msg.bookImageUrl ? `
+
+function createMessageElement(msg, isCurrentUser, profilePicture, formattedTime, otherUserId) {
+    const bookInfo = msg.bookTitle && msg.bookImageUrl ? ` 
         <div class="mt-2">
-            <strong></strong> ${msg.bookTitle}
+            <strong>${msg.bookTitle}</strong>
             <img src="${msg.bookImageUrl}" alt="${msg.bookTitle}" class="img-fluid mt-2" style="max-width: 50px; height: auto;">
         </div>
     ` : '';
+
+    const paymentSlipButton = msg.paymentSlip ? ` 
+        <button class="btn btn-sm btn-primary mt-2" onclick="viewPaymentSlip('${msg.paymentSlip}')">View Payment Slip</button>
+    ` : '';
+
+    // Determine if the logged-in user is viewing their own profile or someone else's
+    const profileUrl = isCurrentUser 
+        ? `/manage-account.html?userId=${currentUser.uid}` // Redirect to logged-in user's profile
+        : `/manage-account.html?userId=${otherUserId}`;   // Redirect to the other user's profile
 
     return `
         <div class="d-flex flex-row ${isCurrentUser ? 'justify-content-end' : 'align-items-start'} mb-3">
@@ -194,19 +203,27 @@ function createMessageElement(msg, isCurrentUser, profilePicture, formattedTime)
                 <div class="me-3">
                     <p class="small p-2 text-white rounded-3 bg-secondary mb-1" style="font-family: monospace;">${msg.message}</p>
                     ${bookInfo}
+                    ${paymentSlipButton}
                     <p class="small text-muted">${formattedTime}</p>
                 </div>
-                <img src="${profilePicture}" alt="User Avatar" class="rounded-circle" style="width: 45px; height: 45px;" onerror="this.onerror=null; this.src='https://via.placeholder.com/60';">
+                <a href="${profileUrl}" class="ms-3">
+                    <img src="${profilePicture}" alt="Current Logged User Avatar" class="rounded-circle" style="width: 45px; height: 45px;" onerror="this.onerror=null;">
+                </a>
             ` : `
-                <img src="${profilePicture}" alt="Other User Avatar" class="rounded-circle" style="width: 45px; height: 45px;" onerror="this.onerror=null; this.src='https://via.placeholder.com/60';">
+                <a href="${profileUrl}" class="me-3">
+                    <img src="${profilePicture}" alt="Other User Avatar" class="rounded-circle" style="width: 45px; height: 45px;" onerror="this.onerror=null;">
+                </a>
                 <div class="ms-3">
                     <p class="small p-2 mb-1 rounded-3 bg-body-tertiary" style="font-family: monospace;">${msg.message}</p>
                     ${bookInfo}
+                    ${paymentSlipButton}
                     <p class="small text-muted">${formattedTime}</p>
                 </div>
             `}
-        </div>`;
+        </div>
+    `;
 }
+
 
 
 function clearChatBox() {
@@ -262,50 +279,23 @@ messageInput.addEventListener('keydown', async (event) => {
     }
 });
 
-// Buyer listens for new payment requests
-onValue(ref(database, 'paymentRequests/'), (snapshot) => {
-    const paymentRequests = snapshot.val();
-
-    if (paymentRequests) {
-        // Check if there's a new payment request for the current buyer
-        Object.keys(paymentRequests).forEach(requestId => {
-            const paymentRequest = paymentRequests[requestId];
-
-            if (paymentRequest.receiver === currentUser.uid && paymentRequest.status === "pending") {
-                // Display an alert for the buyer
-                alert(`You have a new payment request of ${paymentRequest.amount} from ${paymentRequest.sender}`);
-
-                // You can also update the UI here, e.g., display a notification badge.
-            }
-        });
-    }
-});
-
-
-// Seller clicks the 'confirmPaymentButton'
 document.getElementById('confirmPaymentButton').addEventListener('click', async () => {
-    const buyerId = getOtherUserId(selectedChatKey); // Get the other user (buyer) ID
-    const paymentRequest = {
-        sender: currentUser.uid,  // Seller's ID
-        receiver: buyerId,        // Buyer's ID
-        amount: "100.00",         // Example payment amount (can be dynamic)
-        timestamp: Date.now(),
-        status: "pending",        // Payment request status
-    };
-
-    // Save the payment request in Firebase
-    try {
-        const paymentRequestRef = push(ref(database, 'paymentRequests'));
-        await set(paymentRequestRef, paymentRequest);
-        console.log('Payment request sent to buyer:', paymentRequest);
-
-        // Trigger a notification for the buyer (buyer will receive this in real-time)
-        alert('Payment request has been sent to the buyer!');
-    } catch (error) {
-        console.error('Error sending payment request:', error);
+    if (!currentUser) {
+        alert('You must be logged in to send a payment slip.');
+        return;
     }
+
+    if (!selectedChatKey) {
+        alert('Please select a chat to proceed.');
+        return;
+    }
+
+    await confirmPaymentButton(currentUser, selectedChatKey); // Calling the imported function
 });
 
+window.viewPaymentSlip = async function(paymentSlipId) {
+    await viewPaymentSlip(paymentSlipId); // Calling the imported function
+};
 
 document.getElementById('requestPaymentButtonTrigger').addEventListener('click', async () => {
     await loadUserBooks(currentUser);
