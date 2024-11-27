@@ -202,7 +202,7 @@ export async function saveShippingDetailsBtn(currentUser) {
 }
 
 // Function to handle confirmPaymentButton click
-export async function confirmPaymentButton(currentUser, selectedChatKey) {
+export async function confirmReqPaymentButton(currentUser, selectedChatKey) {
     if (!currentUser) {
         alert('You must be logged in to send a payment slip.');
         return;
@@ -226,7 +226,14 @@ export async function confirmPaymentButton(currentUser, selectedChatKey) {
     }
 
     try {
-        // Create the payment slip
+        // Create the payment slip with formatted HTML message
+        const paymentSlipMessage = `
+            <div style="display: flex; flex-direction: column; align-items: center;">
+                <p><strong>Payment Slip</strong></p>
+                <p><strong>To Pay: ₱${bookPrice}</strong></p>
+            </div>
+        `;
+
         const paymentSlip = {
             bookTitle,
             bookPrice,
@@ -234,6 +241,7 @@ export async function confirmPaymentButton(currentUser, selectedChatKey) {
             timestamp: Date.now(),
             sender: currentUser.uid,
             receiver: receiverId,
+            message: paymentSlipMessage, // Add formatted message
         };
 
         const paymentRef = push(ref(database, 'payments/'));
@@ -251,7 +259,7 @@ export async function confirmPaymentButton(currentUser, selectedChatKey) {
         await set(chatRef, {
             sender: currentUser.uid,
             receiver: receiverId,
-            message: `Payment Slip: ${bookTitle} - ₱${bookPrice}`,
+            message: paymentSlipMessage,
             paymentSlip: paymentKey,
             timestamp: Date.now(),
             read: false,
@@ -263,6 +271,7 @@ export async function confirmPaymentButton(currentUser, selectedChatKey) {
         alert('Failed to send the payment slip. Please try again.');
     }
 }
+
 
 // Function to view the payment slip in a modal
 export async function viewPaymentSlip(paymentSlipId) {

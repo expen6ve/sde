@@ -1,7 +1,7 @@
 import { getDatabase, ref, onValue, get, push, set, update, off } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-database.js";
 import { checkAuth } from './auth.js';
 import { initializeNavbar } from './navbar.js';
-import { loadUserBooks, loadShippingDetails, loadGcashDetails, editShippingDetailsBtn, saveShippingDetailsBtn, confirmPaymentButton, viewPaymentSlip, paymentForTheBookIsSent, confirmPayment } from './transactionHelper.js';
+import { loadUserBooks, loadShippingDetails, loadGcashDetails, editShippingDetailsBtn, saveShippingDetailsBtn, confirmReqPaymentButton, viewPaymentSlip, paymentForTheBookIsSent, confirmPayment } from './transactionHelper.js';
 
 
 const database = getDatabase();
@@ -53,7 +53,22 @@ export function getOtherUserId(chatKey) {
 async function createChatTab(chatKey, otherUser, lastMessage, chatList) {
     const otherUserName = otherUser ? `${otherUser.firstName} ${otherUser.lastName}` : 'Unknown User';
     const otherUserProfilePicture = otherUser?.profilePicture || 'https://via.placeholder.com/60';
-    const lastMessageText = lastMessage.message || 'No messages yet';
+
+    // Check if the last message is a payment slip and extract the paid amount or to pay amount
+    let lastMessageText = lastMessage.message || 'No messages yet';
+    
+    // Check if the last message includes payment information
+    if (lastMessage.message && (lastMessage.message.includes('Paid: ₱') || lastMessage.message.includes('To Pay: ₱'))) {
+        // Extract the "Paid: ₱..." part of the message
+        const paidAmountMatch = lastMessage.message.match(/Paid: ₱\d+(\.\d{2})?/);
+        const toPayAmountMatch = lastMessage.message.match(/To Pay: ₱\d+(\.\d{2})?/);
+        
+        if (paidAmountMatch) {
+            lastMessageText = paidAmountMatch[0]; // This will set it to something like "Paid: ₱123.45"
+        } else if (toPayAmountMatch) {
+            lastMessageText = toPayAmountMatch[0]; // This will set it to something like "To Pay: ₱123.45"
+        }
+    }
 
     // Check if the last message is read or not to conditionally hide/show
     const isRead = lastMessage.read || false;
@@ -73,6 +88,8 @@ async function createChatTab(chatKey, otherUser, lastMessage, chatList) {
     chatList.appendChild(chatTab);
 }
 
+
+
 function getLastMessage(chatMessages, currentUser) {
     const messagesArray = Object.values(chatMessages);
     // Find the last message sent by the other user (not currentUser)
@@ -84,7 +101,7 @@ function getLastMessage(chatMessages, currentUser) {
 
 async function loadChatList() {
     const chatList = document.getElementById('sellerChatTab');
-    
+        
     onValue(ref(database, 'chats/'), async (snapshot) => {
         const allChats = snapshot.val();
         chatList.innerHTML = '';
@@ -328,7 +345,7 @@ document.getElementById('confirmPaymentButton').addEventListener('click', async 
         return;
     }
 
-    await confirmPaymentButton(currentUser, selectedChatKey); // Calling the imported function
+    await confirmReqPaymentButton(currentUser, selectedChatKey); // Calling the imported function
 });
 
 window.viewPaymentSlip = async function(paymentSlipId) {
