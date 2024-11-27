@@ -1,4 +1,5 @@
 import { getDatabase, ref, get, update, push, set } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-database.js";
+import { getOtherUserId } from './chat.js';
 
 const database = getDatabase();
 let currentUser = null;
@@ -47,7 +48,7 @@ export async function loadUserBooks(currentUser) {
                     
                     // Display selected book details
                     selectedBookDetails.style.display = 'block';
-                    selectedBookImage.src = bookDetails.imageUrl || 'https://via.placeholder.com/150';
+                    selectedBookImage.src = bookDetails.imageUrl ;
                     selectedBookImage.alt = bookDetails.title;
                     selectedBookTitle.textContent = bookDetails.title;
                     selectedBookPrice.value = bookDetails.price; // Set the latest price
@@ -306,4 +307,46 @@ export async function viewPaymentSlip(paymentSlipId) {
         console.error('Error fetching payment slip:', error);
         alert('Failed to load payment slip details.');
     }
+}
+
+export async function paymentForTheBookIsSent(currentUser, selectedChatKey) {
+    if (!currentUser) {
+        alert('You must be logged in to confirm payment.');
+        return;
+    }
+
+    if (!selectedChatKey) {
+        alert('Please select a chat to proceed.');
+        return;
+    }
+
+    const bookPrice = document.getElementById('bookPrice').textContent.replace('Price: ₱', '').trim(); // Get the price dynamically
+    const paymentSlipMessage = `
+    <div style="display: flex; flex-direction: column; align-items: center;">
+        <p><strong>Payment Sent</strong></p>
+        <p><strong>Paid: ₱${bookPrice}</strong></p>
+        <img src="/images/paymentcheck.gif" alt="Payment GIF" style="width: 200px; height: auto;">
+        <button class="btn btn-primary mt-2" onclick="confirmPayment('${selectedChatKey}')">Confirm Payment</button>
+    </div>
+    `;
+
+    // Push this message to Firebase
+    const chatRef = push(ref(database, `chats/${selectedChatKey}`));
+
+    await set(chatRef, {
+        sender: currentUser.uid,
+        receiver: getOtherUserId(selectedChatKey),
+        message: paymentSlipMessage,
+        timestamp: Date.now(),
+        read: false // default to unread
+    }).catch(error => {
+        console.error('Error sending payment confirmation:', error);
+    });
+}
+
+// Confirm Payment Function (to be invoked by the button in the message)
+export async function confirmPayment(chatKey) {
+    // Logic to confirm the payment (update status in the database, notify the seller, etc.)
+    alert('Payment confirmed!');
+    // You can add your Firebase logic here to mark the payment as confirmed.
 }

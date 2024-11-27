@@ -1,7 +1,7 @@
-import { getDatabase, ref, onValue, get, push, set, update } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-database.js";
+import { getDatabase, ref, onValue, get, push, set, update, off } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-database.js";
 import { checkAuth } from './auth.js';
 import { initializeNavbar } from './navbar.js';
-import { loadUserBooks, loadShippingDetails, loadGcashDetails, editShippingDetailsBtn, saveShippingDetailsBtn, confirmPaymentButton, viewPaymentSlip } from './transactionHelper.js';
+import { loadUserBooks, loadShippingDetails, loadGcashDetails, editShippingDetailsBtn, saveShippingDetailsBtn, confirmPaymentButton, viewPaymentSlip, paymentForTheBookIsSent, confirmPayment } from './transactionHelper.js';
 
 
 const database = getDatabase();
@@ -44,10 +44,11 @@ function formatTimestamp(timestamp) {
     });
 }
 
-function getOtherUserId(chatKey) {
+export function getOtherUserId(chatKey) {
     const [senderId, receiverId] = chatKey.split('_');
     return senderId === currentUser.uid ? receiverId : senderId;
 }
+
 
 async function createChatTab(chatKey, otherUser, lastMessage, chatList) {
     const otherUserName = otherUser ? `${otherUser.firstName} ${otherUser.lastName}` : 'Unknown User';
@@ -77,7 +78,7 @@ function getLastMessage(chatMessages, currentUser) {
     // Find the last message sent by the other user (not currentUser)
     const lastMessageFromOtherUser = messagesArray.reverse().find(msg => msg.sender !== currentUser.uid);
     
-    return lastMessageFromOtherUser || { message: "No messages yet", timestamp: Date.now() };
+    return lastMessageFromOtherUser || { message: "", timestamp: Date.now() };
 }
 
 
@@ -116,8 +117,15 @@ function showChatBox() {
 
 function scrollToBottom() {
     const chatWindow = document.getElementById('chatBox');
-    chatWindow.scrollTop = chatWindow.scrollHeight;
+    if (chatWindow) {
+        // Use a timeout to ensure DOM updates have been rendered
+        setTimeout(() => {
+            chatWindow.scrollTop = chatWindow.scrollHeight;
+        }, 0); // Minimal delay to wait for rendering
+    }
 }
+
+
 
 let currentMessagesListener = null;
 
@@ -140,45 +148,61 @@ async function markMessagesAsRead(chatKey) {
     }
 }
 
-window.loadMessages = async function(chatKey) {
-    if (selectedChatKey === chatKey && currentMessagesListener) return;
+window.loadMessages = async function (chatKey) {
+    if (selectedChatKey === chatKey) return;
 
     selectedChatKey = chatKey;
     const chatWindow = document.getElementById('chatBox');
     chatWindow.innerHTML = '';
-    renderedMessages = {};
 
-    showChatBox();
-
-    if (currentMessagesListener) {
-        currentMessagesListener();
+    if (currentMessagesRef) {
+        off(currentMessagesRef); 
+        currentMessagesRef = null;
     }
 
+    renderedMessages = {}; // Reset for new chat
     currentMessagesRef = ref(database, `chats/${chatKey}`);
+
+    // Reattach listener
     currentMessagesListener = onValue(currentMessagesRef, async (snapshot) => {
         const messages = snapshot.val();
         if (messages) {
-            await Promise.all(Object.keys(messages).map(async (msgKey) => {
+            const messageKeys = Object.keys(messages);
+    
+            // Iterate over messages and render only new ones
+            for (const msgKey of messageKeys) {
                 if (!renderedMessages[msgKey]) {
+                    renderedMessages[msgKey] = true;
+    
                     const msg = messages[msgKey];
                     const isCurrentUser = msg.sender === currentUser.uid;
-                    const otherUserId = isCurrentUser ? msg.receiver : msg.sender; // Ensure we get the other user's ID
+                    const otherUserId = isCurrentUser ? msg.receiver : msg.sender;
                     const otherUser = await fetchUserDetails(otherUserId);
-                    const profilePicture = isCurrentUser ? currentUser.profilePicture : otherUser.profilePicture || 'https://via.placeholder.com/60';
+                    const profilePicture = isCurrentUser
+                        ? currentUser.profilePicture
+                        : otherUser.profilePicture || 'https://via.placeholder.com/60';
                     const formattedTime = formatTimestamp(msg.timestamp);
-                    chatWindow.innerHTML += createMessageElement(msg, isCurrentUser, profilePicture, formattedTime, otherUserId);
-                    renderedMessages[msgKey] = true;
+    
+                    // Append message to chat box
+                    chatWindow.innerHTML += createMessageElement(
+                        msg,
+                        isCurrentUser,
+                        profilePicture,
+                        formattedTime,
+                        otherUserId
+                    );
                 }
-            }));
+            }
+    
+            // Always scroll to the bottom after rendering
             scrollToBottom();
         } else {
             chatWindow.innerHTML = '<p class="text-muted">No messages yet.</p>';
         }
     });
-
-    await markMessagesAsRead(chatKey);
+   
+      await markMessagesAsRead(chatKey);
 };
-
 
 function createMessageElement(msg, isCurrentUser, profilePicture, formattedTime, otherUserId) {
     const bookInfo = msg.bookTitle && msg.bookImageUrl ? ` 
@@ -188,9 +212,13 @@ function createMessageElement(msg, isCurrentUser, profilePicture, formattedTime,
         </div>
     ` : '';
 
-    const paymentSlipButton = msg.paymentSlip ? ` 
+    // Show the payment slip button only if the current user did NOT send the message
+    const paymentSlipButton = msg.paymentSlip && !isCurrentUser ? ` 
         <button class="btn btn-sm btn-primary mt-2" onclick="viewPaymentSlip('${msg.paymentSlip}')">View Payment Slip</button>
     ` : '';
+
+    // Payment confirmation message (optional: if there's more logic to display additional info)
+    const paymentMessage = msg.message.includes('Payment Sent') ? `` : '';
 
     // Determine if the logged-in user is viewing their own profile or someone else's
     const profileUrl = isCurrentUser 
@@ -203,7 +231,8 @@ function createMessageElement(msg, isCurrentUser, profilePicture, formattedTime,
                 <div class="me-3">
                     <p class="small p-2 text-white rounded-3 bg-secondary mb-1" style="font-family: monospace;">${msg.message}</p>
                     ${bookInfo}
-                    ${paymentSlipButton}
+                    ${paymentSlipButton} <!-- Conditionally rendered button -->
+                    ${paymentMessage}
                     <p class="small text-muted">${formattedTime}</p>
                 </div>
                 <a href="${profileUrl}" class="ms-3">
@@ -214,15 +243,24 @@ function createMessageElement(msg, isCurrentUser, profilePicture, formattedTime,
                     <img src="${profilePicture}" alt="Other User Avatar" class="rounded-circle" style="width: 45px; height: 45px;" onerror="this.onerror=null;">
                 </a>
                 <div class="ms-3">
-                    <p class="small p-2 mb-1 rounded-3 bg-body-tertiary" style="font-family: monospace;">${msg.message}</p>
+                    <p class="small p-2 mb-1 rounded-3 bg-body-secondary" style="font-family: monospace;">${msg.message}</p>
                     ${bookInfo}
-                    ${paymentSlipButton}
+                    ${paymentSlipButton} <!-- Conditionally rendered button -->
+                    ${paymentMessage}
                     <p class="small text-muted">${formattedTime}</p>
                 </div>
             `}
         </div>
     `;
 }
+
+document.getElementById('paymentForTheBookIsSent').addEventListener('click', async () => {
+    await paymentForTheBookIsSent(currentUser, selectedChatKey);
+});
+
+window.confirmPayment = async (chatKey) => {
+    await confirmPayment(chatKey);
+};
 
 
 
