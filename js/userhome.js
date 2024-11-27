@@ -73,22 +73,25 @@ function displayRecentlyListedBooks() {
                                         <button class="btn btn-primary w-100" onclick="openMoreInfoModal('${bookId}')">More Info</button>
                                     </div>
                     
-                                    <!-- Contact Seller button at the bottom -->
-                                    <div class="mt-auto">
-                                        <button class="btn btn-success w-100" 
-                                                data-seller="${book.userId}" 
-                                                data-title="${book.title}" 
-                                                data-image="${book.imageUrl || 'images/default-book.png'}" 
-                                                onclick="openChatModal('${book.userId}', '${currentUser.uid}', '${book.title}', '${book.imageUrl || 'images/default-book.png'}')">
-                                            Contact Seller
-                                        </button>
-                                    </div>
+                                    <!-- Conditionally render Contact Seller button -->
+                                    ${
+                                        book.userId !== currentUser.uid
+                                            ? `<div class="mt-auto">
+                                                <button class="btn btn-success w-100" 
+                                                        data-seller="${book.userId}" 
+                                                        data-title="${book.title}" 
+                                                        data-image="${book.imageUrl || 'images/default-book.png'}" 
+                                                        onclick="openChatModal('${book.userId}', '${currentUser.uid}', '${book.title}', '${book.imageUrl || 'images/default-book.png'}')">
+                                                    Contact Seller
+                                                </button>
+                                               </div>`
+                                            : ''
+                                    }
                                 </div>
                             </div>
                         </div>
                         `;
                     });
-                    
                 }
             });
         } else {
@@ -96,6 +99,7 @@ function displayRecentlyListedBooks() {
         }
     });
 }
+
 
 // Open More Info modal
 window.openMoreInfoModal = function(bookId) {

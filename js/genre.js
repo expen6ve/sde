@@ -168,7 +168,7 @@ function displayBooks(genre = null, searchTerm = null, sortBy = 'dateListed') {
                                             </div>
                                             
                                             <!-- Conditionally render the Contact Seller button -->
-                                            ${currentUser ? `
+                                            ${currentUser && currentUser.uid !== book.userId ? `
                                                 <div class="mt-auto">
                                                     <button class="btn btn-success w-100" 
                                                             data-seller="${book.userId}" 
@@ -184,6 +184,7 @@ function displayBooks(genre = null, searchTerm = null, sortBy = 'dateListed') {
                             `;
                         }
                     });
+                    
 
                 } else {
                     bookListContainer.innerHTML = '<p>No books available.</p>';
