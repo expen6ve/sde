@@ -244,7 +244,7 @@ export async function confirmReqPaymentButton(currentUser, selectedChatKey) {
             message: paymentSlipMessage, // Add formatted message
         };
 
-        const paymentRef = push(ref(database, 'payments/'));
+        const paymentRef = push(ref(database, 'paymentsslip/'));
         const paymentKey = paymentRef.key;
 
         await set(paymentRef, paymentSlip);
@@ -276,7 +276,7 @@ export async function confirmReqPaymentButton(currentUser, selectedChatKey) {
 // Function to view the payment slip in a modal
 export async function viewPaymentSlip(paymentSlipId) {
     try {
-        const paymentSlipRef = ref(database, `payments/${paymentSlipId}`);
+        const paymentSlipRef = ref(database, `paymentsslip/${paymentSlipId}`);
         const paymentSlipSnapshot = await get(paymentSlipRef);
 
         if (paymentSlipSnapshot.exists()) {
@@ -339,7 +339,7 @@ export async function paymentForTheBookIsSent(currentUser, selectedChatKey) {
     </div>
     `;
 
-    // Push this message to Firebase
+    // Notify users in the chat with the paid payment confirmation slip
     const chatRef = push(ref(database, `chats/${selectedChatKey}`));
 
     await set(chatRef, {
