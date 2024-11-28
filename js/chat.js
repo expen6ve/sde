@@ -1,7 +1,7 @@
 import { getDatabase, ref, onValue, get, push, set, update, off } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-database.js";
 import { checkAuth } from './auth.js';
 import { initializeNavbar } from './navbar.js';
-import { loadUserBooks, loadShippingDetails, loadGcashDetails, editShippingDetailsBtn, saveShippingDetailsBtn, confirmReqPaymentButton, viewPaymentSlip, paymentForTheBookIsSent, confirmPayment } from './transactionHelper.js';
+import { loadUserBooks, loadShippingDetails, loadGcashDetails, editShippingDetailsBtn, saveShippingDetailsBtn, confirmReqPaymentButton, viewPaymentSlip, paymentForTheBookIsSent, confirmPaidPayment } from './transactionHelper.js';
 
 
 const database = getDatabase();
@@ -229,18 +229,20 @@ function createMessageElement(msg, isCurrentUser, profilePicture, formattedTime,
         </div>
     ` : '';
 
-    // Show the payment slip button only if the current user did NOT send the message
     const paymentSlipButton = msg.paymentSlip && !isCurrentUser ? ` 
         <button class="btn btn-sm btn-primary mt-2" onclick="viewPaymentSlip('${msg.paymentSlip}')">View Payment Slip</button>
     ` : '';
 
-    // Payment confirmation message (optional: if there's more logic to display additional info)
+    // Show "Confirm Payment" button only if the logged-in user is NOT the one who sent the confirmation
+    const confirmPaymentButton = msg.confirmationSlip && !isCurrentUser ? `
+        <button class="btn btn-primary mt-2" onclick="confirmPaidPayment('${msg.confirmationSlip}')">Confirm Payment</button>
+    ` : '';
+
     const paymentMessage = msg.message.includes('Payment Sent') ? `` : '';
 
-    // Determine if the logged-in user is viewing their own profile or someone else's
     const profileUrl = isCurrentUser 
-        ? `/manage-account.html?userId=${currentUser.uid}` // Redirect to logged-in user's profile
-        : `/manage-account.html?userId=${otherUserId}`;   // Redirect to the other user's profile
+        ? `/manage-account.html?userId=${currentUser.uid}`
+        : `/manage-account.html?userId=${otherUserId}`;
 
     return `
         <div class="d-flex flex-row ${isCurrentUser ? 'justify-content-end' : 'align-items-start'} mb-3">
@@ -248,7 +250,8 @@ function createMessageElement(msg, isCurrentUser, profilePicture, formattedTime,
                 <div class="me-3">
                     <p class="small p-2 text-white rounded-3 bg-secondary mb-1" style="font-family: monospace;">${msg.message}</p>
                     ${bookInfo}
-                    ${paymentSlipButton} <!-- Conditionally rendered button -->
+                    ${paymentSlipButton}
+                    ${confirmPaymentButton} <!-- Conditionally rendered button -->
                     ${paymentMessage}
                     <p class="small text-muted">${formattedTime}</p>
                 </div>
@@ -262,7 +265,8 @@ function createMessageElement(msg, isCurrentUser, profilePicture, formattedTime,
                 <div class="ms-3">
                     <p class="small p-2 mb-1 rounded-3 bg-body-secondary" style="font-family: monospace;">${msg.message}</p>
                     ${bookInfo}
-                    ${paymentSlipButton} <!-- Conditionally rendered button -->
+                    ${paymentSlipButton}
+                    ${confirmPaymentButton} <!-- Conditionally rendered button -->
                     ${paymentMessage}
                     <p class="small text-muted">${formattedTime}</p>
                 </div>
@@ -271,12 +275,33 @@ function createMessageElement(msg, isCurrentUser, profilePicture, formattedTime,
     `;
 }
 
+
+// Handle image preview for receipt upload
+document.getElementById('receiptImage').addEventListener('change', function(event) {
+    const file = event.target.files[0];
+    const previewElement = document.getElementById('receiptPreview');
+    
+    if (file) {
+        const reader = new FileReader();
+        
+        reader.onload = function(e) {
+            previewElement.src = e.target.result;
+            previewElement.style.display = 'block'; // Show the preview image
+        };
+        
+        reader.readAsDataURL(file); // Convert the file to a data URL for preview
+    } else {
+        previewElement.style.display = 'none'; // Hide preview if no file is selected
+    }
+});
+
+
 document.getElementById('paymentForTheBookIsSent').addEventListener('click', async () => {
     await paymentForTheBookIsSent(currentUser, selectedChatKey);
 });
 
-window.confirmPayment = async (chatKey) => {
-    await confirmPayment(chatKey);
+window.confirmPaidPayment = async (chatKey) => {
+    await confirmPaidPayment(chatKey);
 };
 
 

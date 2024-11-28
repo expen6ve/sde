@@ -1,7 +1,8 @@
 import { getDatabase, ref, get, update, push, set } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-database.js";
-import { getOtherUserId } from './chat.js';
+import { getStorage, ref as storageRef, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-storage.js";
 
 const database = getDatabase();
+const storage = getStorage();
 let currentUser = null;
 
 export async function loadUserBooks(currentUser) {
@@ -317,7 +318,7 @@ export async function viewPaymentSlip(paymentSlipId) {
         alert('Failed to load payment slip details.');
     }
 }
-
+//Function to send a paid payment confirmation slip
 export async function paymentForTheBookIsSent(currentUser, selectedChatKey) {
     if (!currentUser) {
         alert('You must be logged in to confirm payment.');
@@ -330,32 +331,132 @@ export async function paymentForTheBookIsSent(currentUser, selectedChatKey) {
     }
 
     const bookPrice = document.getElementById('bookPrice').textContent.replace('Price: ₱', '').trim(); // Get the price dynamically
-    const paymentSlipMessage = `
-    <div style="display: flex; flex-direction: column; align-items: center;">
-        <p><strong>Payment Sent</strong></p>
-        <p><strong>Paid: ₱${bookPrice}</strong></p>
-        <img src="/images/paymentcheck.gif" alt="Payment GIF" style="width: 200px; height: auto;">
-        <button class="btn btn-primary mt-2" onclick="confirmPayment('${selectedChatKey}')">Confirm Payment</button>
-    </div>
-    `;
+    const receiverId = selectedChatKey.split('_').find(id => id !== currentUser.uid); // Get the other user's ID
+    const receiptImage = document.getElementById('receiptImage').files[0];
+    const timestamp = Date.now();
 
-    // Notify users in the chat with the paid payment confirmation slip
-    const chatRef = push(ref(database, `chats/${selectedChatKey}`));
+    // If there's a receipt image, upload it to Firebase Storage
+    let receiptImageUrl = null;
+    if (receiptImage) {
+        const receiptStorageRef = storageRef(storage, `payment-receipts/${currentUser.uid}/${timestamp}-${receiptImage.name}`);
+        
+        try {
+            // Upload the image to Firebase Storage
+            const snapshot = await uploadBytes(receiptStorageRef, receiptImage);
+            // Get the download URL
+            receiptImageUrl = await getDownloadURL(snapshot.ref);
+        } catch (error) {
+            console.error('Error uploading receipt image:', error);
+            alert('Failed to upload receipt image.');
+            return;
+        }
+    }
 
-    await set(chatRef, {
+    // Create the confirmationSlip object
+    const confirmationSlip = {
+        bookPrice,
+        timestamp,
         sender: currentUser.uid,
-        receiver: getOtherUserId(selectedChatKey),
-        message: paymentSlipMessage,
-        timestamp: Date.now(),
-        read: false // default to unread
-    }).catch(error => {
-        console.error('Error sending payment confirmation:', error);
-    });
+        receiver: receiverId,
+        receiptImageUrl, // Save the image URL here
+        status: "awaiting confirmation", // Payment status
+    };
+
+    try {
+        // Save the confirmationSlip in the database
+        const confirmationRef = push(ref(getDatabase(), 'paymenttoconfirm/'));
+        const confirmationKey = confirmationRef.key;
+
+        await set(confirmationRef, confirmationSlip);
+
+        // Update sender and receiver records
+        await update(ref(getDatabase(), `users/${currentUser.uid}/sentPaymentConfirmSlips/${confirmationKey}`), confirmationSlip);
+        await update(ref(getDatabase(), `users/${receiverId}/receivedPaymentConfirmSlips/${confirmationKey}`), confirmationSlip);
+
+        // Notify the chat with the confirmation slip
+        const paymentSlipMessage = `
+        <div style="display: flex; flex-direction: column; align-items: center;">
+            <p><strong>Payment Sent</strong></p>
+            <p><strong>Paid: ₱${bookPrice}</strong></p>
+            <img src="/images/paymentcheck.gif" alt="Payment GIF" style="width: 200px; height: auto;">
+            <button class="btn btn-primary mt-2" onclick="confirmPaidPayment('${confirmationKey}')">Confirm Payment</button>
+        </div>
+        `;
+        
+
+        const chatRef = push(ref(getDatabase(), `chats/${selectedChatKey}`));
+
+        await set(chatRef, {
+            sender: currentUser.uid,
+            receiver: receiverId,
+            message: paymentSlipMessage,
+            confirmationSlip: confirmationKey, // Link to the confirmation slip
+            timestamp: timestamp,
+            read: false, // Default to unread
+        });
+
+        console.log('Payment confirmation slip sent successfully.');
+    } catch (error) {
+        console.error('Error sending payment confirmation slip:', error);
+        alert('Failed to send the payment confirmation slip. Please try again.');
+    }
 }
 
 // Confirm Payment Function (to be invoked by the button in the message)
-export async function confirmPayment(chatKey) {
-    // Logic to confirm the payment (update status in the database, notify the seller, etc.)
-    alert('Payment confirmed!');
-    // You can add your Firebase logic here to mark the payment as confirmed.
+// Confirm Payment Function (to be invoked by the button in the message)
+export async function confirmPaidPayment(confirmationKey) {
+    if (!confirmationKey) {
+        console.error('No confirmation slip key provided.');
+        alert('Invalid confirmation slip.');
+        return;
+    }
+
+    try {
+        // Fetch the confirmation slip from the database using the key
+        const confirmationSlipRef = ref(database, `paymenttoconfirm/${confirmationKey}`);
+        const confirmationSlipSnapshot = await get(confirmationSlipRef);
+
+        if (confirmationSlipSnapshot.exists()) {
+            const confirmationSlip = confirmationSlipSnapshot.val();
+            const { receiptImageUrl } = confirmationSlip;
+
+            // If a receipt image URL is present, display it in a modal
+            if (receiptImageUrl) {
+                const modalContent = document.getElementById('receiptModalContent');
+                modalContent.innerHTML = `
+                    <div style="text-align: center;">
+                        <h5>Payment Receipt</h5>
+                        <img src="${receiptImageUrl}" alt="Receipt Image" style="max-width: 100%; height: auto; margin-bottom: 1rem;">
+                        <button id="continueConfirmPayment" class="btn btn-primary">Continue</button>
+                    </div>
+                `;
+
+                const receiptModal = new bootstrap.Modal(document.getElementById('receiptModal'));
+                receiptModal.show();
+
+                // Handle the "Continue" button click
+                document.getElementById('continueConfirmPayment').addEventListener('click', async () => {
+                    // Update the status to confirmed
+                    await update(confirmationSlipRef, { status: "confirmed" });
+
+                    receiptModal.hide();
+                    console.log(`Payment confirmation slip ${confirmationKey} has been confirmed.`);
+                    alert('Payment confirmed successfully!');
+                });
+            } else {
+                // If no receipt image, immediately confirm the payment
+                await update(confirmationSlipRef, { status: "confirmed" });
+                console.log(`Payment confirmation slip ${confirmationKey} has been confirmed.`);
+                alert('Payment confirmed successfully!');
+            }
+        } else {
+            alert('Confirmation slip not found.');
+        }
+    } catch (error) {
+        console.error('Error confirming payment slip:', error);
+        alert('Failed to confirm the payment. Please try again.');
+    }
 }
+
+
+
