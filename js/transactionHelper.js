@@ -1,4 +1,4 @@
-import { getDatabase, ref, get, update, push, set } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-database.js";
+import { getDatabase, ref, get, update, push, set, remove } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-database.js";
 import { getStorage, ref as storageRef, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-storage.js";
 
 const database = getDatabase();
@@ -121,10 +121,10 @@ export async function loadUserBooks(currentUser) {
                 savePriceButton.style.display = 'none';
             } catch (error) {
                 console.error('Error updating price:', error);
-                alert('Failed to update price. Please try again.');
+                console.log('Failed to update price. Please try again.');
             }
         } else {
-            alert('Invalid price or no book selected.');
+            console.log('Invalid price or no book selected.');
         }
     });
 }
@@ -203,7 +203,7 @@ export async function saveShippingDetailsBtn(currentUser) {
 }
 
 // Function to handle confirmPaymentButton click
-export async function confirmReqPaymentButton(currentUser, selectedChatKey) {
+export async function confirmReqPaymentButton(currentUser, selectedChatKey, renderedMessages = {}) {
     if (!currentUser) {
         alert('You must be logged in to send a payment slip.');
         return;
@@ -217,8 +217,6 @@ export async function confirmReqPaymentButton(currentUser, selectedChatKey) {
     const bookTitle = document.getElementById('selectedBookTitle').textContent;
     const bookPrice = parseFloat(document.getElementById('selectedBookPrice').value).toFixed(2);
     const receiverId = selectedChatKey.split('_').find(id => id !== currentUser.uid);
-
-    // Fetch the book image URL
     const bookImageUrl = document.getElementById('selectedBookImage').src;
 
     if (!bookTitle || !bookPrice || !bookImageUrl) {
@@ -227,7 +225,6 @@ export async function confirmReqPaymentButton(currentUser, selectedChatKey) {
     }
 
     try {
-        // Create the payment slip with formatted HTML message
         const paymentSlipMessage = `
             <div style="display: flex; flex-direction: column; align-items: center;">
                 <p><strong>Payment Slip</strong></p>
@@ -235,28 +232,85 @@ export async function confirmReqPaymentButton(currentUser, selectedChatKey) {
             </div>
         `;
 
-        const paymentSlip = {
-            bookTitle,
-            bookPrice,
-            bookImageUrl,
-            timestamp: Date.now(),
-            sender: currentUser.uid,
-            receiver: receiverId,
-            message: paymentSlipMessage, // Add formatted message
-        };
+        // Step 1: Check for an existing payment slip
+        const paymentSlipsSnapshot = await get(ref(database, 'paymentsslip/'));
+        let existingSlipKey = null;
 
-        const paymentRef = push(ref(database, 'paymentsslip/'));
-        const paymentKey = paymentRef.key;
+        if (paymentSlipsSnapshot.exists()) {
+            const paymentSlips = paymentSlipsSnapshot.val();
 
-        await set(paymentRef, paymentSlip);
+            for (const [key, slip] of Object.entries(paymentSlips)) {
+                if (
+                    slip.bookTitle === bookTitle &&
+                    slip.sender === currentUser.uid &&
+                    slip.receiver === receiverId
+                ) {
+                    existingSlipKey = key;
+                    break;
+                }
+            }
+        }
 
-        // Update each user's sent/received payment slips
-        await update(ref(database, `users/${currentUser.uid}/sentPaymentSlips/${paymentKey}`), paymentSlip);
-        await update(ref(database, `users/${receiverId}/receivedPaymentSlips/${paymentKey}`), paymentSlip);
+        let paymentKey = existingSlipKey;
 
-        // Notify users in the chat with the payment slip
+        // Step 2: Update the existing payment slip or create a new one
+        if (existingSlipKey) {
+            // Remove old payment slip message in the chat
+            const chatMessagesSnapshot = await get(ref(database, `chats/${selectedChatKey}`));
+            if (chatMessagesSnapshot.exists()) {
+                const chatMessages = chatMessagesSnapshot.val();
+        
+                for (const [messageKey, messageData] of Object.entries(chatMessages)) {
+                    if (messageData.paymentSlip === existingSlipKey) {
+                        await remove(ref(database, `chats/${selectedChatKey}/${messageKey}`));
+        
+                        // Ensure renderedMessages state is cleared for this key
+                        delete renderedMessages[messageKey];
+                        break; // Stop after removing the first matching message
+                    }
+                }
+            }
+        
+            // Update the existing payment slip in Firebase
+            await update(ref(database, `paymentsslip/${existingSlipKey}`), {
+                bookPrice,
+                timestamp: Date.now(),
+                message: paymentSlipMessage,
+            });
+        
+            // Update user-specific payment slip records
+            await update(ref(database, `users/${currentUser.uid}/sentPaymentSlips/${existingSlipKey}`), {
+                bookPrice,
+                timestamp: Date.now(),
+            });
+            await update(ref(database, `users/${receiverId}/receivedPaymentSlips/${existingSlipKey}`), {
+                bookPrice,
+                timestamp: Date.now(),
+            });
+        } else {
+            // Create a new payment slip
+            const newPaymentSlip = {
+                bookTitle,
+                bookPrice,
+                bookImageUrl,
+                timestamp: Date.now(),
+                sender: currentUser.uid,
+                receiver: receiverId,
+                message: paymentSlipMessage,
+            };
+
+            const paymentRef = push(ref(database, 'paymentsslip/'));
+            paymentKey = paymentRef.key;
+
+            await set(paymentRef, newPaymentSlip);
+
+            // Update each user's sent/received payment slips
+            await update(ref(database, `users/${currentUser.uid}/sentPaymentSlips/${paymentKey}`), newPaymentSlip);
+            await update(ref(database, `users/${receiverId}/receivedPaymentSlips/${paymentKey}`), newPaymentSlip);
+        }
+
+        // Notify the chat with the updated or new payment slip
         const chatRef = push(ref(database, `chats/${selectedChatKey}`));
-
         await set(chatRef, {
             sender: currentUser.uid,
             receiver: receiverId,
@@ -266,13 +320,13 @@ export async function confirmReqPaymentButton(currentUser, selectedChatKey) {
             read: false,
         });
 
-        console.log('Payment slip sent successfully.');
+        // After sending the payment slip, refresh the UI
+        await loadMessages(selectedChatKey);
     } catch (error) {
         console.error('Error sending payment slip:', error);
         alert('Failed to send the payment slip. Please try again.');
     }
 }
-
 
 // Function to view the payment slip in a modal
 export async function viewPaymentSlip(paymentSlipId) {
@@ -333,17 +387,16 @@ export async function paymentForTheBookIsSent(currentUser, selectedChatKey) {
     const bookPrice = document.getElementById('bookPrice').textContent.replace('Price: ₱', '').trim(); // Get the price dynamically
     const receiverId = selectedChatKey.split('_').find(id => id !== currentUser.uid); // Get the other user's ID
     const receiptImage = document.getElementById('receiptImage').files[0];
+    const paymentSlipModalElement = document.getElementById('paymentSlipModal'); // Reference to modal element
+    const paymentSlipModal = bootstrap.Modal.getInstance(paymentSlipModalElement) || new bootstrap.Modal(paymentSlipModalElement); // Ensure modal instance exists
     const timestamp = Date.now();
 
     // If there's a receipt image, upload it to Firebase Storage
     let receiptImageUrl = null;
     if (receiptImage) {
         const receiptStorageRef = storageRef(storage, `payment-receipts/${currentUser.uid}/${timestamp}-${receiptImage.name}`);
-        
         try {
-            // Upload the image to Firebase Storage
             const snapshot = await uploadBytes(receiptStorageRef, receiptImage);
-            // Get the download URL
             receiptImageUrl = await getDownloadURL(snapshot.ref);
         } catch (error) {
             console.error('Error uploading receipt image:', error);
@@ -352,57 +405,91 @@ export async function paymentForTheBookIsSent(currentUser, selectedChatKey) {
         }
     }
 
-    // Create the confirmationSlip object
     const confirmationSlip = {
         bookPrice,
         timestamp,
         sender: currentUser.uid,
         receiver: receiverId,
-        receiptImageUrl, // Save the image URL here
-        status: "awaiting confirmation", // Payment status
+        receiptImageUrl,
+        status: "awaiting confirmation",
     };
 
     try {
-        // Save the confirmationSlip in the database
-        const confirmationRef = push(ref(getDatabase(), 'paymenttoconfirm/'));
-        const confirmationKey = confirmationRef.key;
+        let existingSlipKey = null;
+        const confirmationSlipsSnapshot = await get(ref(database, `paymenttoconfirm/`));
 
-        await set(confirmationRef, confirmationSlip);
+        if (confirmationSlipsSnapshot.exists()) {
+            const confirmationSlips = confirmationSlipsSnapshot.val();
 
-        // Update sender and receiver records
-        await update(ref(getDatabase(), `users/${currentUser.uid}/sentPaymentConfirmSlips/${confirmationKey}`), confirmationSlip);
-        await update(ref(getDatabase(), `users/${receiverId}/receivedPaymentConfirmSlips/${confirmationKey}`), confirmationSlip);
+            for (const [key, slip] of Object.entries(confirmationSlips)) {
+                if (
+                    slip.sender === currentUser.uid &&
+                    slip.receiver === receiverId &&
+                    slip.bookPrice === bookPrice
+                ) {
+                    existingSlipKey = key;
+                    break;
+                }
+            }
+        }
 
-        // Notify the chat with the confirmation slip
+        if (existingSlipKey) {
+            const chatMessagesSnapshot = await get(ref(database, `chats/${selectedChatKey}`));
+            if (chatMessagesSnapshot.exists()) {
+                const chatMessages = chatMessagesSnapshot.val();
+                for (const [messageKey, messageData] of Object.entries(chatMessages)) {
+                    if (messageData.confirmationSlip === existingSlipKey) {
+                        await remove(ref(database, `chats/${selectedChatKey}/${messageKey}`));
+                        break;
+                    }
+                }
+            }
+
+            await update(ref(database, `paymenttoconfirm/${existingSlipKey}`), {
+                ...confirmationSlip,
+                timestamp,
+            });
+        } else {
+            const confirmationRef = push(ref(database, 'paymenttoconfirm/'));
+            const confirmationKey = confirmationRef.key;
+
+            await set(confirmationRef, { ...confirmationSlip, confirmationKey });
+            await update(ref(database, `users/${currentUser.uid}/sentPaymentConfirmSlips/${confirmationKey}`), confirmationSlip);
+            await update(ref(database, `users/${receiverId}/receivedPaymentConfirmSlips/${confirmationKey}`), confirmationSlip);
+
+            existingSlipKey = confirmationKey;
+        }
+
         const paymentSlipMessage = `
         <div style="display: flex; flex-direction: column; align-items: center;">
             <p><strong>Payment Sent</strong></p>
             <p><strong>Paid: ₱${bookPrice}</strong></p>
             <img src="/images/paymentcheck.gif" alt="Payment GIF" style="width: 200px; height: auto;">
-            <button class="btn btn-primary mt-2" onclick="confirmPaidPayment('${confirmationKey}')">Confirm Payment</button>
         </div>
         `;
-        
 
-        const chatRef = push(ref(getDatabase(), `chats/${selectedChatKey}`));
-
+        const chatRef = push(ref(database, `chats/${selectedChatKey}`));
         await set(chatRef, {
             sender: currentUser.uid,
             receiver: receiverId,
             message: paymentSlipMessage,
-            confirmationSlip: confirmationKey, // Link to the confirmation slip
-            timestamp: timestamp,
-            read: false, // Default to unread
+            confirmationSlip: existingSlipKey,
+            timestamp,
+            read: false,
         });
 
         console.log('Payment confirmation slip sent successfully.');
     } catch (error) {
         console.error('Error sending payment confirmation slip:', error);
         alert('Failed to send the payment confirmation slip. Please try again.');
+    } finally {
+        // Hide the modal after the operation
+        paymentSlipModal.hide();
     }
 }
 
-// Confirm Payment Function (to be invoked by the button in the message)
+
+
 // Confirm Payment Function (to be invoked by the button in the message)
 export async function confirmPaidPayment(confirmationKey) {
     if (!confirmationKey) {

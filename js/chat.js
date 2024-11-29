@@ -10,6 +10,7 @@ let selectedChatKey = '';
 let currentMessagesRef = null;
 let renderedMessages = {};
 
+
 document.addEventListener('DOMContentLoaded', async () => {
     currentUser = await checkAuth();
     if (!currentUser) return redirectToLogin();
@@ -101,7 +102,8 @@ function getLastMessage(chatMessages, currentUser) {
 
 async function loadChatList() {
     const chatList = document.getElementById('sellerChatTab');
-        
+    chatList.innerHTML = ''; // Clear existing chat tabs
+
     onValue(ref(database, 'chats/'), async (snapshot) => {
         const allChats = snapshot.val();
         chatList.innerHTML = '';
@@ -111,7 +113,7 @@ async function loadChatList() {
                 .filter(chatKey => chatKey.includes(currentUser.uid))
                 .map(chatKey => {
                     const otherUserId = getOtherUserId(chatKey);
-                    const lastMessage = getLastMessage(allChats[chatKey], currentUser);  // Pass currentUser here
+                    const lastMessage = getLastMessage(allChats[chatKey], currentUser);
                     return { chatKey, otherUserId, lastMessage };
                 });
 
@@ -119,13 +121,14 @@ async function loadChatList() {
 
             for (const chat of chatArray) {
                 const otherUser = await fetchUserDetails(chat.otherUserId);
-                createChatTab(chat.chatKey, otherUser, chat.lastMessage, chatList);
+                await createChatTab(chat.chatKey, otherUser, chat.lastMessage, chatList);
             }
         } else {
             chatList.innerHTML = '<li class="p-2 text-muted">No chats available.</li>';
         }
     });
 }
+
 
 
 function showChatBox() {
@@ -181,42 +184,48 @@ window.loadMessages = async function (chatKey) {
     currentMessagesRef = ref(database, `chats/${chatKey}`);
 
     // Reattach listener
-    currentMessagesListener = onValue(currentMessagesRef, async (snapshot) => {
-        const messages = snapshot.val();
-        if (messages) {
-            const messageKeys = Object.keys(messages);
-    
-            // Iterate over messages and render only new ones
-            for (const msgKey of messageKeys) {
-                if (!renderedMessages[msgKey]) {
-                    renderedMessages[msgKey] = true;
-    
-                    const msg = messages[msgKey];
-                    const isCurrentUser = msg.sender === currentUser.uid;
-                    const otherUserId = isCurrentUser ? msg.receiver : msg.sender;
-                    const otherUser = await fetchUserDetails(otherUserId);
-                    const profilePicture = isCurrentUser
-                        ? currentUser.profilePicture
-                        : otherUser.profilePicture || 'https://via.placeholder.com/60';
-                    const formattedTime = formatTimestamp(msg.timestamp);
-    
-                    // Append message to chat box
-                    chatWindow.innerHTML += createMessageElement(
-                        msg,
-                        isCurrentUser,
-                        profilePicture,
-                        formattedTime,
-                        otherUserId
-                    );
-                }
+// Inside the currentMessagesListener function in loadMessages
+currentMessagesListener = onValue(currentMessagesRef, async (snapshot) => {
+    const messages = snapshot.val();
+
+    // Clear existing messages from the chat window before rendering new ones
+    chatWindow.innerHTML = '';
+    renderedMessages = {}; // Reset rendered messages to prevent duplicates
+
+    if (messages) {
+        const messageKeys = Object.keys(messages);
+
+        for (const msgKey of messageKeys) {
+            if (!renderedMessages[msgKey]) {
+                renderedMessages[msgKey] = true;
+
+                const msg = messages[msgKey];
+                const isCurrentUser = msg.sender === currentUser.uid;
+                const otherUserId = isCurrentUser ? msg.receiver : msg.sender;
+                const otherUser = await fetchUserDetails(otherUserId);
+                const profilePicture = isCurrentUser
+                    ? currentUser.profilePicture
+                    : otherUser.profilePicture || 'https://via.placeholder.com/60';
+                const formattedTime = formatTimestamp(msg.timestamp);
+
+                // Append the message to the chat box
+                chatWindow.innerHTML += createMessageElement(
+                    msg,
+                    isCurrentUser,
+                    profilePicture,
+                    formattedTime,
+                    otherUserId
+                );
             }
-    
-            // Always scroll to the bottom after rendering
-            scrollToBottom();
-        } else {
-            chatWindow.innerHTML = '<p class="text-muted">No messages yet.</p>';
         }
-    });
+
+        // Always scroll to the bottom after rendering
+        scrollToBottom();
+    } else {
+        chatWindow.innerHTML = '<p class="text-muted">No messages yet.</p>';
+    }
+});
+
    
       await markMessagesAsRead(chatKey);
 };
@@ -229,20 +238,23 @@ function createMessageElement(msg, isCurrentUser, profilePicture, formattedTime,
         </div>
     ` : '';
 
+    // Show the "View Payment Slip" button only if the current user did NOT send the message
     const paymentSlipButton = msg.paymentSlip && !isCurrentUser ? ` 
         <button class="btn btn-sm btn-primary mt-2" onclick="viewPaymentSlip('${msg.paymentSlip}')">View Payment Slip</button>
     ` : '';
 
-    // Show "Confirm Payment" button only if the logged-in user is NOT the one who sent the confirmation
+    // Show the "Confirm Payment" button only if the current user did NOT send the message
     const confirmPaymentButton = msg.confirmationSlip && !isCurrentUser ? `
-        <button class="btn btn-primary mt-2" onclick="confirmPaidPayment('${msg.confirmationSlip}')">Confirm Payment</button>
+    <div style="display: flex; justify-content: center; margin-top: 10px;">
+        <button class="btn btn-primary" onclick="confirmPaidPayment('${msg.confirmationSlip}')">Confirm Payment</button>
+    </div>
     ` : '';
 
-    const paymentMessage = msg.message.includes('Payment Sent') ? `` : '';
 
+    // Determine if the logged-in user is viewing their own profile or someone else's
     const profileUrl = isCurrentUser 
-        ? `/manage-account.html?userId=${currentUser.uid}`
-        : `/manage-account.html?userId=${otherUserId}`;
+        ? `/manage-account.html?userId=${currentUser.uid}` // Redirect to logged-in user's profile
+        : `/manage-account.html?userId=${otherUserId}`;   // Redirect to the other user's profile
 
     return `
         <div class="d-flex flex-row ${isCurrentUser ? 'justify-content-end' : 'align-items-start'} mb-3">
@@ -250,9 +262,8 @@ function createMessageElement(msg, isCurrentUser, profilePicture, formattedTime,
                 <div class="me-3">
                     <p class="small p-2 text-white rounded-3 bg-secondary mb-1" style="font-family: monospace;">${msg.message}</p>
                     ${bookInfo}
-                    ${paymentSlipButton}
+                    ${paymentSlipButton} <!-- Conditionally rendered button -->
                     ${confirmPaymentButton} <!-- Conditionally rendered button -->
-                    ${paymentMessage}
                     <p class="small text-muted">${formattedTime}</p>
                 </div>
                 <a href="${profileUrl}" class="ms-3">
@@ -265,9 +276,8 @@ function createMessageElement(msg, isCurrentUser, profilePicture, formattedTime,
                 <div class="ms-3">
                     <p class="small p-2 mb-1 rounded-3 bg-body-secondary" style="font-family: monospace;">${msg.message}</p>
                     ${bookInfo}
-                    ${paymentSlipButton}
+                    ${paymentSlipButton} <!-- Conditionally rendered button -->
                     ${confirmPaymentButton} <!-- Conditionally rendered button -->
-                    ${paymentMessage}
                     <p class="small text-muted">${formattedTime}</p>
                 </div>
             `}
@@ -370,7 +380,7 @@ document.getElementById('confirmPaymentButton').addEventListener('click', async 
         return;
     }
 
-    await confirmReqPaymentButton(currentUser, selectedChatKey); // Calling the imported function
+    await confirmReqPaymentButton(currentUser, selectedChatKey, renderedMessages); // Calling the imported function
 });
 
 window.viewPaymentSlip = async function(paymentSlipId) {

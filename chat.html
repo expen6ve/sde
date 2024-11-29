@@ -187,7 +187,7 @@
       <div class="modal-body">
         <!-- Shipping Address Section -->
         <div class="mb-3">
-          <h6><b>Address</b></h6>
+          <h6><b>Permanent Address</b></h6>
           <div id="shippingAddressDisplay">
             <p id="shippingAddress" class="form-control-plaintext"></p>
           </div>
@@ -245,14 +245,35 @@
           <p id="slipGcashName" class="text-center mt-1 mb-1 text-body-secondary"></p>
           <p id="slipGcashNumber" class="text-center mt-1 mb-1 text-body-secondary"></p>
           <div class="lineseparator border border-top-1 custombg-bwhite"></div>
-
+          <div class="text-center">
+            <img id="receiptPreview" src=""  class="receipt-preview border mx-auto mt-1" style="height: 200px; object-fit: contain;" />
+          </div>
+          <div class="mb-4 form-section text-center">
+              <label for="receiptImage" class="form-label small">Upload GCash Receipt: (Optional)</label>
+              <input type="file" id="receiptImage" class="form-control form-control-sm" accept="image/*" />
+          </div>
+          <div class="lineseparator border border-top-1 custombg-bwhite"></div>
           <button type="button" class="btn btn-success mt-2 mx-auto d-block" id="paymentForTheBookIsSent">Confirm Payment and Send Shipping Details</button>
-
         </div>
       </div>
     </div>
   </div>
 </div>
+<div class="modal fade" id="receiptModal" tabindex="-1" aria-labelledby="receiptModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+          <div class="modal-header">
+              <h5 class="modal-title" id="receiptModalLabel">Confirm Payment</h5>
+              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body" id="receiptModalContent">
+              <!-- Modal content (image and button) will be dynamically inserted here -->
+          </div>
+      </div>
+  </div>
+</div>
+
+
 
 
 <script defer src="js/bootstrap.bundle.min.js"></script>
