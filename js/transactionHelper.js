@@ -464,7 +464,7 @@ export async function paymentForTheBookIsSent(currentUser, selectedChatKey) {
         <div style="display: flex; flex-direction: column; align-items: center;">
             <p><strong>Payment Sent</strong></p>
             <p><strong>Paid: ₱${bookPrice}</strong></p>
-            <img src="/images/paymentcheck.gif" alt="Payment GIF" style="width: 200px; height: auto;">
+            <img src="images/paymentcheck.gif" alt="Payment GIF" style="width: 200px; height: auto;">
         </div>
         `;
 
