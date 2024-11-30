@@ -173,62 +173,56 @@ window.loadMessages = async function (chatKey) {
 
     selectedChatKey = chatKey;
     const chatWindow = document.getElementById('chatBox');
-    chatWindow.innerHTML = '';
+    chatWindow.innerHTML = '';  // Clear the previous chat window content.
 
+    // Remove any existing listener before attaching a new one.
     if (currentMessagesRef) {
-        off(currentMessagesRef); 
-        currentMessagesRef = null;
+        off(currentMessagesRef);
     }
 
-    renderedMessages = {}; // Reset for new chat
+    renderedMessages = {}; // Reset for the new chat.
     currentMessagesRef = ref(database, `chats/${chatKey}`);
 
-    // Reattach listener
-// Inside the currentMessagesListener function in loadMessages
-currentMessagesListener = onValue(currentMessagesRef, async (snapshot) => {
-    const messages = snapshot.val();
+    currentMessagesListener = onValue(currentMessagesRef, async (snapshot) => {
+        const messages = snapshot.val();
+        
+        // Don't clear chatWindow here, just append new messages.
+        if (messages) {
+            const messageKeys = Object.keys(messages);
+            
+            for (const msgKey of messageKeys) {
+                if (!renderedMessages[msgKey]) {
+                    renderedMessages[msgKey] = true;
+                    const msg = messages[msgKey];
+                    const isCurrentUser = msg.sender === currentUser.uid;
+                    const otherUserId = isCurrentUser ? msg.receiver : msg.sender;
+                    const otherUser = await fetchUserDetails(otherUserId);
+                    const profilePicture = isCurrentUser
+                        ? currentUser.profilePicture
+                        : otherUser.profilePicture || 'https://via.placeholder.com/60';
+                    const formattedTime = formatTimestamp(msg.timestamp);
 
-    // Clear existing messages from the chat window before rendering new ones
-    chatWindow.innerHTML = '';
-    renderedMessages = {}; // Reset rendered messages to prevent duplicates
-
-    if (messages) {
-        const messageKeys = Object.keys(messages);
-
-        for (const msgKey of messageKeys) {
-            if (!renderedMessages[msgKey]) {
-                renderedMessages[msgKey] = true;
-
-                const msg = messages[msgKey];
-                const isCurrentUser = msg.sender === currentUser.uid;
-                const otherUserId = isCurrentUser ? msg.receiver : msg.sender;
-                const otherUser = await fetchUserDetails(otherUserId);
-                const profilePicture = isCurrentUser
-                    ? currentUser.profilePicture
-                    : otherUser.profilePicture || 'https://via.placeholder.com/60';
-                const formattedTime = formatTimestamp(msg.timestamp);
-
-                // Append the message to the chat box
-                chatWindow.innerHTML += createMessageElement(
-                    msg,
-                    isCurrentUser,
-                    profilePicture,
-                    formattedTime,
-                    otherUserId
-                );
+                    // Append message to chat window
+                    chatWindow.innerHTML += createMessageElement(
+                        msg,
+                        isCurrentUser,
+                        profilePicture,
+                        formattedTime,
+                        otherUserId
+                    );
+                }
             }
+            
+            // Scroll to the bottom after new messages are rendered
+            scrollToBottom();
+        } else {
+            chatWindow.innerHTML = '<p class="text-muted">No messages yet.</p>';
         }
+    });
 
-        // Always scroll to the bottom after rendering
-        scrollToBottom();
-    } else {
-        chatWindow.innerHTML = '<p class="text-muted">No messages yet.</p>';
-    }
-});
-
-   
-      await markMessagesAsRead(chatKey);
+    await markMessagesAsRead(chatKey);
 };
+
 
 function createMessageElement(msg, isCurrentUser, profilePicture, formattedTime, otherUserId) {
     const bookInfo = msg.bookTitle && msg.bookImageUrl ? ` 
