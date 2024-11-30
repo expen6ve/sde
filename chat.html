@@ -185,33 +185,49 @@
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <div class="modal-body">
-        <!-- Shipping Address Section -->
-        <div class="mb-3">
-          <h6><b>Permanent Address</b></h6>
-          <div id="shippingAddressDisplay">
-            <p id="shippingAddress" class="form-control-plaintext"></p>
-          </div>
-          <div id="shippingAddressEdit" class="d-none">
-            <input type="text" id="newStreet" class="form-control mb-2" placeholder="Street">
-            <input type="text" id="newBarangay" class="form-control mb-2" placeholder="Barangay">
-            <input type="text" id="newCity" class="form-control mb-2" placeholder="City">
-            <input type="text" id="newProvince" class="form-control mb-2" placeholder="Province">
-            <input type="text" id="newZipCode" class="form-control mb-2" placeholder="Zip Code">
-          </div>
+      <!-- Shipping Address Section -->
+      <div class="mb-3">
+        <h6><b>Permanent Address</b></h6>
+        <div id="shippingAddressDisplay">
+          <p id="shippingAddress" class="form-control-plaintext"></p>
         </div>
-
-        <!-- Edit and Save Buttons -->
-        <div id="editButtons" class="d-flex justify-content-between">
-          <button type="button" id="editShippingDetailsBtn" class="btn btn-primary">Edit</button>
-          <button type="button" id="saveShippingDetailsBtn" class="btn btn-success d-none">Save</button>
+        <div id="shippingAddressEdit" class="d-none">
+          <input type="text" id="newStreet" class="form-control mb-2" placeholder="Street">
+          <input type="text" id="newBarangay" class="form-control mb-2" placeholder="Barangay">
+          <input type="text" id="newCity" class="form-control mb-2" placeholder="City">
+          <input type="text" id="newProvince" class="form-control mb-2" placeholder="Province">
+          <input type="text" id="newZipCode" class="form-control mb-2" placeholder="Zip Code">
         </div>
       </div>
+
+      <!-- Additional Shipping Address Section -->
+      <div class="mb-3">
+        <h6><b>Additional Shipping Address</b></h6>
+        <div id="additionalShippingAddressDisplay">
+          <p id="additionalShippingAddress" class="form-control-plaintext"></p>
+        </div>
+        <div id="additionalShippingAddressEdit" class="d-none">
+          <input type="text" id="newAdditionalStreet" class="form-control mb-2" placeholder="Street">
+          <input type="text" id="newAdditionalBarangay" class="form-control mb-2" placeholder="Barangay">
+          <input type="text" id="newAdditionalCity" class="form-control mb-2" placeholder="City">
+          <input type="text" id="newAdditionalProvince" class="form-control mb-2" placeholder="Province">
+          <input type="text" id="newAdditionalZipCode" class="form-control mb-2" placeholder="Zip Code">
+          <input type="text" id="newLandmark" class="form-control mb-2" placeholder="Landmark">
+        </div>
+      </div>
+
+      <!-- Edit and Save Buttons -->
+      <div id="editButtons" class="d-flex justify-content-between">
+        <button type="button" id="editShippingDetailsBtn" class="btn btn-primary">Edit</button>
+        <button type="button" id="saveShippingDetailsBtn" class="btn btn-success d-none">Save</button>
+      </div>
+      </div>
+
+      <!-- Modal Footer -->
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
       </div>
-    </div>
-  </div>
-</div>
+
 
 <!-- Modal for viewing payment slip -->
 <div class="modal fade" id="paymentSlipModal" tabindex="-1" aria-labelledby="paymentSlipModalLabel" aria-hidden="true">

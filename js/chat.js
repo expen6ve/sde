@@ -58,26 +58,23 @@ async function createChatTab(chatKey, otherUser, lastMessage, chatList) {
     // Check if the last message is a payment slip and extract the paid amount or to pay amount
     let lastMessageText = lastMessage.message || 'No messages yet';
     
-    // Check if the last message includes payment information
     if (lastMessage.message && (lastMessage.message.includes('Paid: ₱') || lastMessage.message.includes('To Pay: ₱'))) {
-        // Extract the "Paid: ₱..." part of the message
         const paidAmountMatch = lastMessage.message.match(/Paid: ₱\d+(\.\d{2})?/);
         const toPayAmountMatch = lastMessage.message.match(/To Pay: ₱\d+(\.\d{2})?/);
         
         if (paidAmountMatch) {
-            lastMessageText = paidAmountMatch[0]; // This will set it to something like "Paid: ₱123.45"
+            lastMessageText = paidAmountMatch[0];
         } else if (toPayAmountMatch) {
-            lastMessageText = toPayAmountMatch[0]; // This will set it to something like "To Pay: ₱123.45"
+            lastMessageText = toPayAmountMatch[0];
         }
     }
 
-    // Check if the last message is read or not to conditionally hide/show
     const isRead = lastMessage.read || false;
 
     const chatTab = document.createElement('li');
     chatTab.classList.add('p-2', 'border-bottom');
     chatTab.innerHTML = `
-        <a href="#" onclick="loadMessages('${chatKey}'); return false;" class="d-flex justify-content-between align-items-center" style="text-decoration: none;">
+        <a href="#" class="d-flex justify-content-between align-items-center" style="text-decoration: none;">
             <div class="d-flex align-items-center">
                 <img src="${otherUserProfilePicture}" class="rounded-circle me-3" width="45" height="45" alt="User Profile" onerror="this.onerror=null; this.src='https://via.placeholder.com/60';">
                 <div>
@@ -86,8 +83,17 @@ async function createChatTab(chatKey, otherUser, lastMessage, chatList) {
                 </div>
             </div>
         </a>`;
+
     chatList.appendChild(chatTab);
+
+    // Add event listener for clicking the chat tab
+    chatTab.querySelector('a').addEventListener('click', (event) => {
+        event.preventDefault(); // Prevent default anchor behavior
+        showChatBox(); // Ensure the chat box is shown
+        loadMessages(chatKey); // Load the selected chat
+    });
 }
+
 
 
 

@@ -129,29 +129,6 @@ export async function loadUserBooks(currentUser) {
     });
 }
 
-
-export async function loadShippingDetails(currentUser) {
-    try {
-        const userSnapshot = await get(ref(database, `users/${currentUser.uid}`));
-        
-        if (userSnapshot.exists()) {
-            const userData = userSnapshot.val();
-            const address = userData.address;
-            const shippingAddress = `${address.street}, ${address.barangay}, ${address.city}, ${address.province} - ${address.zipCode}`;
-            document.getElementById('shippingAddress').textContent = shippingAddress;
-            document.getElementById('newStreet').value = address.street;
-            document.getElementById('newBarangay').value = address.barangay;
-            document.getElementById('newCity').value = address.city;
-            document.getElementById('newProvince').value = address.province;
-            document.getElementById('newZipCode').value = address.zipCode;
-        } else {
-            console.error("User data not found");
-        }
-    } catch (error) {
-        console.error("Error loading shipping details:", error);
-    }
-}
-
 export async function loadGcashDetails(currentUser) {
     try {
         const userSnapshot = await get(ref(database, `users/${currentUser.uid}/gcash`));
@@ -169,38 +146,95 @@ export async function loadGcashDetails(currentUser) {
     }
 }
 
+export async function loadShippingDetails(currentUser) {
+    try {
+        const userSnapshot = await get(ref(database, `users/${currentUser.uid}`));
+
+        if (userSnapshot.exists()) {
+            const userData = userSnapshot.val();
+            const address = userData.address;
+
+            // Permanent address fields
+            const shippingAddress = `${address.street}, ${address.barangay}, ${address.city}, ${address.province} - ${address.zipCode}`;
+            document.getElementById('shippingAddress').textContent = shippingAddress;
+            document.getElementById('newStreet').value = address.street;
+            document.getElementById('newBarangay').value = address.barangay;
+            document.getElementById('newCity').value = address.city;
+            document.getElementById('newProvince').value = address.province;
+            document.getElementById('newZipCode').value = address.zipCode;
+
+            // Additional shipping address section
+            const additionalAddress = userData.additionalAddress;
+            if (additionalAddress) {
+                const additionalShippingAddress = `${additionalAddress.street}, ${additionalAddress.barangay}, ${additionalAddress.city}, ${additionalAddress.province}, ${additionalAddress.zipCode} -  Landmark: ${additionalAddress.landmark}`;
+                document.getElementById('additionalShippingAddress').textContent = additionalShippingAddress;
+
+                // Populate editable fields
+                document.getElementById('newAdditionalStreet').value = additionalAddress.street;
+                document.getElementById('newAdditionalBarangay').value = additionalAddress.barangay;
+                document.getElementById('newAdditionalCity').value = additionalAddress.city;
+                document.getElementById('newAdditionalProvince').value = additionalAddress.province;
+                document.getElementById('newAdditionalZipCode').value = additionalAddress.zipCode;
+                document.getElementById('newLandmark').value = additionalAddress.landmark;
+
+                document.getElementById('additionalShippingAddressDisplay').classList.remove('d-none');
+                document.getElementById('additionalShippingAddressEdit').classList.add('d-none');
+            } else {
+                document.getElementById('additionalShippingAddress').textContent = "No additional address added.";
+                document.getElementById('additionalShippingAddressDisplay').classList.remove('d-none');
+                document.getElementById('additionalShippingAddressEdit').classList.add('d-none');
+            }
+        } else {
+            console.error("User data not found");
+        }
+    } catch (error) {
+        console.error("Error loading shipping details:", error);
+    }
+}
+
 export function editShippingDetailsBtn() {
-    document.getElementById('shippingAddressDisplay').classList.add('d-none');
-    document.getElementById('shippingAddressEdit').classList.remove('d-none');
+    // Keep Permanent Address static
+    document.getElementById('shippingAddressDisplay').classList.remove('d-none');
+    document.getElementById('shippingAddressEdit').classList.add('d-none');
+
+    // Show the editable fields for Additional Shipping Address
+    document.getElementById('additionalShippingAddressEdit').classList.remove('d-none');
     document.getElementById('editShippingDetailsBtn').classList.add('d-none');
     document.getElementById('saveShippingDetailsBtn').classList.remove('d-none');
 }
 
 export async function saveShippingDetailsBtn(currentUser) {
-    const updatedAddress = {
-        street: document.getElementById('newStreet').value,
-        barangay: document.getElementById('newBarangay').value,
-        city: document.getElementById('newCity').value,
-        province: document.getElementById('newProvince').value,
-        zipCode: document.getElementById('newZipCode').value
+    // Gather updated values for Additional Shipping Address
+    const updatedAdditionalAddress = {
+        street: document.getElementById('newAdditionalStreet').value,
+        barangay: document.getElementById('newAdditionalBarangay').value,
+        city: document.getElementById('newAdditionalCity').value,
+        province: document.getElementById('newAdditionalProvince').value,
+        zipCode: document.getElementById('newAdditionalZipCode').value,
+        landmark: document.getElementById('newLandmark').value // Include the landmark
     };
 
     try {
+        // Update the database with the new Additional Address details
         await update(ref(database, `users/${currentUser.uid}`), {
-            address: updatedAddress
+            additionalAddress: updatedAdditionalAddress
         });
 
-        const updatedShippingAddress = `${updatedAddress.street}, ${updatedAddress.barangay}, ${updatedAddress.city}, ${updatedAddress.province} - ${updatedAddress.zipCode}`;
-        document.getElementById('shippingAddress').textContent = updatedShippingAddress;
+        // Update the displayed Additional Shipping Address
+        const updatedAdditionalShippingAddress = `${updatedAdditionalAddress.street}, ${updatedAdditionalAddress.barangay}, ${updatedAdditionalAddress.city}, ${updatedAdditionalAddress.province}, Landmark: ${updatedAdditionalAddress.landmark} - ${updatedAdditionalAddress.zipCode}`;
+        document.getElementById('additionalShippingAddress').textContent = updatedAdditionalShippingAddress;
 
+        // Hide the editable fields and reset the buttons
         document.getElementById('shippingAddressDisplay').classList.remove('d-none');
-        document.getElementById('shippingAddressEdit').classList.add('d-none');
+        document.getElementById('additionalShippingAddressEdit').classList.add('d-none');
         document.getElementById('editShippingDetailsBtn').classList.remove('d-none');
         document.getElementById('saveShippingDetailsBtn').classList.add('d-none');
     } catch (error) {
         console.error('Error saving updated shipping details:', error);
     }
 }
+
+
 
 // Function to handle confirmPaymentButton click
 export async function confirmReqPaymentButton(currentUser, selectedChatKey, renderedMessages = {}) {
