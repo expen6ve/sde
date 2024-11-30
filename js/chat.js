@@ -251,10 +251,11 @@ function createMessageElement(msg, isCurrentUser, profilePicture, formattedTime,
     ` : '';
 
 
-    // Determine if the logged-in user is viewing their own profile or someone else's
+    // Use dynamic base URL to support subdirectory deployment
+    const baseUrl = window.location.origin + window.location.pathname.replace(/\/[^/]*$/, '');
     const profileUrl = isCurrentUser 
-        ? `/manage-account.html?userId=${currentUser.uid}` // Redirect to logged-in user's profile
-        : `/manage-account.html?userId=${otherUserId}`;   // Redirect to the other user's profile
+        ? `${baseUrl}/manage-account.html?userId=${currentUser.uid}` 
+        : `${baseUrl}/manage-account.html?userId=${otherUserId}`;
 
     return `
         <div class="d-flex flex-row ${isCurrentUser ? 'justify-content-end' : 'align-items-start'} mb-3">
