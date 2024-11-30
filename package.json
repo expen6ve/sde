@@ -1,6 +1,7 @@
 {
   "dependencies": {
     "bootstrap-icons": "^1.11.3",
-    "firebase": "^10.13.0"
+    "firebase": "^10.13.0",
+    "simple-datatables": "^9.2.1"
   }
 }
