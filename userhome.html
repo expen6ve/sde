@@ -90,21 +90,39 @@
         <!-- Send Message Modal -->
         <div class="modal fade" id="messageModal" tabindex="-1" aria-labelledby="messageModalLabel" aria-hidden="true">
             <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                <h5 class="modal-title" id="messageModalLabel">Send Message</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                <div class="modal-content">
+                    <!-- Modal Header -->
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="messageModalLabel">Send Message</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+
+                    <!-- Modal Body -->
+                    <div class="modal-body">
+                        <!-- Seller Profile Section -->
+                        <div class="d-flex align-items-center mb-3">
+                            <a id="sellerProfileLink" href="#" class="me-3" style="text-decoration: none;">
+                                <img id="sellerProfileIcon" src="" alt="Seller Profile" 
+                                    class="rounded-circle" style="width: 50px; height: 50px; object-fit: cover;">
+                            </a>
+                            <a id="sellerNameLink" href="#" style="text-decoration: none; color: black;">
+                                <h6 id="sellerName" class="mb-0"></h6>
+                            </a>
+                        </div>
+
+                        <!-- Message Input -->
+                        <textarea id="messageInput" class="form-control" rows="3" placeholder="Type your message..."></textarea>
+                    </div>
+
+                    <!-- Modal Footer -->
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                        <button type="button" id="sendMessageBtn" class="btn btn-primary">Send</button>
+                    </div>
                 </div>
-                <div class="modal-body">
-                <textarea id="messageInput" class="form-control" rows="3" placeholder="Type your message..."></textarea>
-                </div>
-                <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                <button type="button" id="sendMessageBtn" class="btn btn-primary">Send</button>
-                </div>
-            </div>
             </div>
         </div>
+
         <!-- More Info Modal -->
         <div class="modal fade" id="moreInfoModal" tabindex="-1" aria-labelledby="moreInfoModalLabel" aria-hidden="true">
             <div class="modal-dialog modal-lg">

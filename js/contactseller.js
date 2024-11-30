@@ -1,27 +1,49 @@
 import { getDatabase, ref, get, push, set } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-database.js";
 
-// Variables for message modal
 let selectedSellerId = null;
 let currentUser = null;
 const database = getDatabase();
 
-// Function to initialize the chat modal
-export function openChatModal(sellerId, currentUserId, bookTitle, bookImageUrl) {
+export async function openChatModal(sellerId, currentUserId, bookTitle, bookImageUrl) {
     selectedSellerId = sellerId; // Save selected seller
     currentUser = currentUserId; // Save current user
 
-    // Save book title and image for later use
+    // Save book details for later use
     window.selectedBookTitle = bookTitle;
     window.selectedBookImageUrl = bookImageUrl;
 
-    if (!selectedSellerId || !currentUser) {
-        console.error('Error: selectedSellerId or currentUser is not defined.');
-        return;
+    // Fetch seller information from the database
+    try {
+        const sellerSnapshot = await get(ref(database, `users/${sellerId}`));
+        if (sellerSnapshot.exists()) {
+            const sellerData = sellerSnapshot.val();
+
+            // Populate modal with seller's data
+            const sellerProfileIcon = document.getElementById('sellerProfileIcon');
+            const sellerName = document.getElementById('sellerName');
+
+            const baseUrl = window.location.origin + window.location.pathname.replace(/\/[^/]*$/, '');
+            const profileUrl = `${baseUrl}/manage-account.html?userId=${sellerId}`;
+
+            // Make the profile picture clickable
+            sellerProfileIcon.src = sellerData.profilePicture || 'default-profile.png'; // Default image if none
+            sellerProfileIcon.parentElement.href = profileUrl; // Set <a> tag's href
+
+            // Make the seller name clickable
+            sellerName.textContent = sellerData.firstName || 'Unknown Seller';
+            sellerName.parentElement.href = profileUrl; // Set <a> tag's href
+        } else {
+            console.error('Seller data not found.');
+        }
+    } catch (error) {
+        console.error('Error fetching seller information:', error);
     }
 
+    // Show the modal
     const modal = new bootstrap.Modal(document.getElementById('messageModal'));
     modal.show();
 }
+
 
 
 // Check if chat between two users exists
