@@ -1,5 +1,6 @@
 import { getDatabase, ref, get, onValue } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-database.js";
 import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js";
+import { removeLoginStatus } from './auth.js'; 
 import { checkAuth } from './auth.js';
 
 // Firebase initialization
@@ -39,8 +40,23 @@ export function updateProfile(user) {
 }
 
 export function handleSignOut() {
-    signOut(auth).then(() => window.location.href = 'index.html')
-        .catch(error => console.error("Error signing out:", error));
+    const user = auth.currentUser; // Get the current user before signing out
+
+    if (user) {
+        // Remove the user from the logged-in list
+        removeLoginStatus(user)
+            .then(() => {
+                // Sign out after successfully removing the user status
+                return signOut(auth);
+            })
+            .then(() => {
+                // Redirect to the index page after sign-out
+                window.location.href = 'index.html';
+            })
+            .catch(error => console.error("Error signing out or updating database:", error));
+    } else {
+        console.error("No user is currently signed in.");
+    }
 }
 
 function handleGenreDropdownClick(event) {
