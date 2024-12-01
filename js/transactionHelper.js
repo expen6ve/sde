@@ -522,8 +522,6 @@ export async function paymentForTheBookIsSent(currentUser, selectedChatKey) {
     }
 }
 
-
-
 // Confirm Payment Function (to be invoked by the button in the message)
 export async function confirmPaidPayment(confirmationKey) {
     if (!confirmationKey) {
@@ -545,7 +543,7 @@ export async function confirmPaidPayment(confirmationKey) {
             if (receiptImageUrl) {
                 const modalContent = document.getElementById('receiptModalContent');
                 modalContent.innerHTML = `
-                    <div style="text-align: center;">
+                    <div style="text-align: center; display: flex; flex-direction: column; justify-content: flex-end;">
                         <h5>Payment Receipt</h5>
                         <img src="${receiptImageUrl}" alt="Receipt Image" style="max-width: 100%; height: auto; margin-bottom: 1rem;">
                         <button id="continueConfirmPayment" class="btn btn-primary">Continue</button>
