@@ -91,9 +91,19 @@
             </ul>
         </li>                    
     </ul>        
-    <!-- Content Row -->
-    <div id="bookListContainer" class="row gx-4 gx-lg-5"></div>
+    <!-- My Listings Row -->
+    <div id="bookListContainer" class="row gx-4 gx-lg-5">
+        <!-- dynamically generated books here -->
+    </div>
+    <!-- My Sold Books Row -->
+    <h1 style="text-align: center;">Sold Books</h1>
+    <div id="soldBookListContainer" class="row gx-4 gx-lg-5">
+    </div>    
+    
 </div>
+
+
+
 <!-- Remove Listing Confirmation Modal -->
 <div class="modal fade" id="removeListingModal" tabindex="-1" aria-labelledby="removeListingModalLabel" aria-hidden="true">
     <div class="modal-dialog">
@@ -122,7 +132,7 @@
             </div>
             <div class="modal-body">
                 <form id="editListingForm">
-                    <!-- Profile Picture Upload and Preview -->
+                    <!-- Book Image  Upload and Preview -->
                     <div class="text-center">
                         <img id="profilePreview" src="images/default-avatar.png" alt="Book Image Preview" class="profile-preview" />
                     </div>
@@ -173,6 +183,39 @@
         </div>
     </div>
 </div>
-
+        <!-- View Purchase Details Modal -->
+        <div class="modal fade" id="viewDetailsModal" tabindex="-1" aria-labelledby="moreInfoModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="moreInfoModalLabel">Purchase Details</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="d-flex justify-content-center mb-3">
+                            <img id="moreInfoBookImage" src="" alt="Book Image" class="img-fluid" style="max-width: 300px; max-height: 300px; border-radius: 8px;">
+                        </div>
+                        <!-- Purchase Details (dateSold, sellerId, sold-books ID) -->
+                        <ul class="list-group">
+                            <li class="list-group-item"><strong>Buyer:</strong> <span id="buyerName"></span></li>
+                            <li class="list-group-item"><strong>Date Sold: </strong><span id="dateSold"></span></li>
+                            <li class="list-group-item"><strong>Purchase ID: </strong><span id="soldBooksId"></span></li>
+                        </ul>
+                        <div class="lineseparator border border-top-1 custombg-bwhite"></div>
+                        <!-- Book Details -->
+                        <ul class="list-group">
+                            <li class="list-group-item"><strong>Title: </strong><span id="moreInfoBookTitle"></span></li>
+                            <li class="list-group-item"><strong>Author: </strong><span id="moreInfoAuthor"></span></li>
+                            <li class="list-group-item"><strong>Genre: </strong><span id="moreInfoGenre"></span></li>
+                            <li class="list-group-item"><strong>Condition: </strong><span id="moreInfoCondition"></span></li>
+                            <li class="list-group-item"><strong>Sold for: </strong>₱<span id="moreInfoPrice"></span></li>
+                        </ul>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    </div>
+                </div>
+            </div>
+        </div>
 </body>
 </html>

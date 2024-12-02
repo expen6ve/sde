@@ -1,5 +1,6 @@
 import { checkAuth } from './auth.js';
 import { getDatabase, ref, onValue, query, orderByChild, equalTo, set, remove, get } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-database.js";
+import { getStorage, ref as storageRef, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-storage.js";
 import { initializeNavbar } from './navbar.js';
 
 const database = getDatabase();
@@ -20,7 +21,8 @@ const elements = {
     saveEditButton: document.getElementById('saveEditButton'),
     editModalCloseButton: document.querySelector('#editListingModal .btn-close'),
     confirmRemoveButton: document.getElementById('confirmRemoveButton'),
-    removeModalCloseButton: document.querySelector('#removeListingModal .btn-close') // Added close button reference
+    removeModalCloseButton: document.querySelector('#removeListingModal .btn-close'), // Added close button reference
+    soldBookListContainer: document.getElementById('soldBookListContainer')
 };
 
 let currentBookIdToEdit = null;
@@ -29,17 +31,17 @@ let bookData = {};
 let currentUser = null;
 let selectedGenre = null;
 
-// Initialize Navbar and Authentication
-document.addEventListener('DOMContentLoaded', async () => {
-    initializeNavbar();
-    currentUser = await checkAuth();
-    if (currentUser) {
-        elements.signInButton.style.display = 'none';
-        displayUserBooks(currentUser.uid);
-    } else {
-        elements.signInButton.style.display = 'block';
-    }
-});
+// // Initialize Navbar and Authentication
+// document.addEventListener('DOMContentLoaded', async () => {
+//     initializeNavbar();
+//     currentUser = await checkAuth();
+//     if (currentUser) {
+//         elements.signInButton.style.display = 'none';
+//         displayUserBooks(currentUser.uid);
+//     } else {
+//         elements.signInButton.style.display = 'block';
+//     }
+// });
 
 // Display books for the logged-in user
 function displayUserBooks(userId, searchTerm = '', sortBy = 'dateListed', genre = null) {
@@ -173,22 +175,40 @@ elements.bookImageInput.addEventListener('change', (event) => {
     }
 });
 
-// Save changes to book
+// Save changes to the book
 elements.saveEditButton.addEventListener('click', async () => {
     if (currentBookIdToEdit) {
         const bookRef = ref(database, `book-listings/${currentBookIdToEdit}`);
         const existingBookData = (await get(bookRef)).val();
 
-        const updatedBook = {
+        let updatedBook = {
             ...existingBookData,
             title: document.getElementById('editBookTitle').value,
             author: document.getElementById('editAuthor').value,
             genre: document.getElementById('editGenre').value,
             condition: document.getElementById('editCondition').value,
             description: document.getElementById('editDescription').value,
-            price: document.getElementById('editPrice').value
+            price: document.getElementById('editPrice').value,
         };
 
+        // Check if a new image is uploaded
+        const file = elements.bookImageInput.files[0];
+        if (file) {
+            // Upload image to Firebase Storage
+            const storage = getStorage();
+            const imageRef = storageRef(storage, `book-images/${currentBookIdToEdit}`);
+            
+            try {
+                const snapshot = await uploadBytes(imageRef, file);
+                const imageUrl = await getDownloadURL(snapshot.ref);
+                updatedBook.imageUrl = imageUrl; // Add image URL to the book data
+            } catch (error) {
+                console.error('Image upload failed:', error);
+                // Proceed without updating the image if upload fails
+            }
+        }
+
+        // Save the updated book data to Firebase Realtime Database
         await set(bookRef, updatedBook);
         closeModal();
         displayUserBooks(currentUser.uid);
@@ -199,3 +219,124 @@ elements.saveEditButton.addEventListener('click', async () => {
 function closeModal() {
     elements.editModalCloseButton.click();
 }
+
+// Display sold books for the logged-in user
+function displaySoldBooks(userId) {
+    const soldBooksQuery = query(ref(database, 'sold-books'), orderByChild('sellerId'), equalTo(userId));
+
+    onValue(soldBooksQuery, (snapshot) => {
+        const soldBooksData = snapshot.val() || {};
+        elements.soldBookListContainer.innerHTML = Object.keys(soldBooksData).length 
+            ? renderSoldBooks(Object.entries(soldBooksData)) 
+            : '<p>No sold books.</p>';
+    });
+}
+
+// Render the sold books
+function renderSoldBooks(soldBookEntries) {
+    return soldBookEntries.map(([id, book]) => {
+        return `
+            <div class="col-lg-3 col-md-6 mb-5">
+                <div class="card h-100 d-flex flex-column">
+                    <div class="card-body d-flex flex-column flex-grow-1">
+                        <div class="d-flex justify-content-center">
+                            <img src="${book.imageUrl || 'images/default-book.png'}" class="img-fluid" alt="Book Image" style="height: 200px; object-fit: cover;">
+                        </div>
+                        <h4 class="card-title mt-3 fs-5">${book.title} <span class="badge bg-secondary">Sold</span></h4>
+                        <p class="card-text"><strong>Author:</strong> ${book.author}</p>
+                        <p class="card-text"><strong>Condition:</strong> ${book.condition}</p>
+                        <p class="card-text"><strong>Price:</strong> ₱${book.price}</p>
+                    </div>
+                    <div class="d-flex justify-content-center mt-3"> <!-- Change here -->
+                        <button class="btn btn-info m-1 view-details-btn" data-id="${id}" data-bs-toggle="modal" data-bs-target="#viewDetailsModal">View Details</button>
+
+                    </div>
+                </div>
+            </div>
+`;
+    }).join('');
+}
+
+// Call this function in your DOMContentLoaded event to load sold books
+document.addEventListener('DOMContentLoaded', async () => {
+    initializeNavbar();
+    currentUser = await checkAuth();
+    if (currentUser) {
+        elements.signInButton.style.display = 'none';
+        displayUserBooks(currentUser.uid); // Display listings
+        displaySoldBooks(currentUser.uid); // Display sold books
+    } else {
+        elements.signInButton.style.display = 'block';
+    }
+});
+
+// Event listener for "View Details" button
+document.addEventListener('click', async (event) => {
+    const button = event.target;
+    if (button.matches('.btn-info[data-id]')) {
+        console.log('View Details button clicked');
+        const bookId = button.getAttribute('data-id');
+        console.log(`Book ID: ${bookId}`);
+        
+        try {
+            // Fetch sold book data from "sold-books" node
+            const soldBookRef = ref(database, `sold-books/${bookId}`);
+            const soldBookSnapshot = await get(soldBookRef);
+            if (soldBookSnapshot.exists()) {
+                const book = soldBookSnapshot.val();
+                console.log('Sold book data found:', book);
+
+                // Fetch buyer details
+                const buyerDetails = await fetchBuyerDetails(book.buyerId);
+                console.log('Buyer details fetched:', buyerDetails);
+
+                // Populate the modal
+                populateViewDetailsModal(book, buyerDetails, bookId);
+            } else {
+                console.error('No sold book data found for the given ID.');
+            }
+        } catch (error) {
+            console.error('Error fetching sold book data:', error);
+        }
+    }
+});
+
+
+// Fetch buyer details from the database
+async function fetchBuyerDetails(buyerId) {
+    console.log(`Fetching buyer details for buyerId: ${buyerId}`);
+    const userRef = ref(database, `users/${buyerId}`);
+    return new Promise((resolve) => {
+        onValue(userRef, (snapshot) => {
+            const buyerData = snapshot.val();
+            console.log('Buyer data snapshot:', buyerData);
+            resolve(buyerData || {});
+        }, { onlyOnce: true });
+    });
+}
+
+// Populate the "View Details" modal with book and buyer details
+function populateViewDetailsModal(book, buyer, bookId) {
+    console.log('Populating modal with book and buyer details...');
+    const modalEl = document.getElementById('viewDetailsModal');
+
+    // Set book details
+    document.getElementById('moreInfoBookImage').src = book.imageUrl || 'images/default-book.png';
+    document.getElementById('moreInfoBookTitle').textContent = book.title || 'N/A';
+    document.getElementById('moreInfoAuthor').textContent = book.author || 'N/A';
+    document.getElementById('moreInfoGenre').textContent = book.genre || 'N/A';
+    document.getElementById('moreInfoCondition').textContent = book.condition || 'N/A';
+    document.getElementById('moreInfoPrice').textContent = book.price || 'N/A';
+
+    // Set buyer details
+    document.getElementById('buyerName').textContent = `${buyer.firstName || 'N/A'} ${buyer.lastName || ''}`;
+    document.getElementById('dateSold').textContent = new Date(book.dateSold).toLocaleString() || 'N/A';
+    document.getElementById('soldBooksId').textContent = bookId || 'N/A';
+
+    console.log('Modal populated successfully.');
+
+    // Show the modal dynamically
+    const viewDetailsModal = bootstrap.Modal.getOrCreateInstance(modalEl);
+    viewDetailsModal.show();
+}
+
