@@ -243,30 +243,41 @@
           <!-- Book Details Card -->
           <h6 class="lead">Book Details</h6>
           <div class="d-flex flex-column align-items-center justify-content-center">
-          <div class="card h-100 mb-3">
-            <div class="card-body">
+            <div class="card h-100 mb-3">
+              <div class="card-body">
                 <div class="d-flex justify-content-center">
-                    <img id="bookImage" src="" class="img-fluid" alt="Book Image" style="width: 236px; object-fit: cover;">
+                  <img id="bookImage" src="" class="img-fluid" alt="Book Image" style="width: 236px; object-fit: cover;">
                 </div>
                 <h4 id="bookTitle" class="card-title mt-3 fs-5"></h4>
                 <h5 id="bookPrice" class="card-text mb-0 user-info-font"><strong>Price:</strong> ₱0.00</h5>
+              </div>
             </div>
           </div>
-          </div>
           <div class="lineseparator border border-top-1 custombg-bwhite"></div>
-
           <!-- GCash Details -->
           <h6 class="lead">Seller GCash Details</h6>
           <img src="" id="slipGcashQr" class="card-img-top mx-auto mt-1" style="height: 200px; object-fit: contain;">
           <p id="slipGcashName" class="text-center mt-1 mb-1 text-body-secondary"></p>
           <p id="slipGcashNumber" class="text-center mt-1 mb-1 text-body-secondary"></p>
           <div class="lineseparator border border-top-1 custombg-bwhite"></div>
+
+
+          <!-- Address Selection Dropdown (New) -->
+          <h6 class="lead">Select Address To Send</h6>
+          <div class="mb-3">
+            <select class="form-select" id="addressSelect">
+              <!-- These options are dynamically populated based on the user's addresses -->
+              <option value="address">Address</option>
+              <option value="additionalAddress">Additional Address</option>
+            </select>
+          </div>
+        
           <div class="text-center">
             <img id="receiptPreview" src=""  class="receipt-preview border mx-auto mt-1" style="height: 200px; object-fit: contain;" />
           </div>
           <div class="mb-4 form-section text-center">
-              <label for="receiptImage" class="form-label small">Upload GCash Receipt: (Optional)</label>
-              <input type="file" id="receiptImage" class="form-control form-control-sm" accept="image/*" />
+            <label for="receiptImage" class="form-label small">Upload GCash Receipt: (Optional)</label>
+            <input type="file" id="receiptImage" class="form-control form-control-sm" accept="image/*" />
           </div>
           <div class="lineseparator border border-top-1 custombg-bwhite"></div>
           <button type="button" class="btn btn-success mt-2 mx-auto d-block" id="paymentForTheBookIsSent">Confirm Payment and Send Shipping Details</button>
@@ -275,6 +286,7 @@
     </div>
   </div>
 </div>
+
 
 
 <div class="modal fade" id="receiptModal" tabindex="-1" aria-labelledby="receiptModalLabel" aria-hidden="true">

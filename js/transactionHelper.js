@@ -399,11 +399,43 @@ export async function paymentForTheBookIsSent(currentUser, selectedChatKey) {
 
     // Retrieve the bookId from session storage
     const bookId = sessionStorage.getItem('currentBookId');  // Fetch the stored bookId
-    console.log(bookId);
     if (!bookId) {
         alert('Error: Book ID not found.');
         return;
     }
+
+    // Get the selected address from the dropdown
+    const selectedAddress = document.getElementById('addressSelect').value;
+    console.log(selectedAddress);
+
+    // Fetch the selected address from the user data
+    let addressDetails;
+    const userSnapshot = await get(ref(database, `users/${currentUser.uid}`));
+    if (userSnapshot.exists()) {
+        const userData = userSnapshot.val();
+        if (selectedAddress === 'address') {
+            addressDetails = userData.address;
+        } else if (selectedAddress === 'additionalAddress' && userData.additionalAddress) {
+            addressDetails = userData.additionalAddress;
+        } else {
+            alert('Selected address is not available.');
+            return;
+        }
+    }
+
+    // Create the address string
+    const addressString = `${addressDetails.street}, ${addressDetails.barangay}, ${addressDetails.city}, ${addressDetails.province} - ${addressDetails.zipCode}`;
+    
+    const confirmationSlip = {
+        bookId,  // Include the bookId in the confirmation slip
+        bookPrice,
+        timestamp,
+        sender: currentUser.uid,
+        receiver: receiverId,
+        receiptImageUrl: null, // Initialize with null
+        address: addressString, // Add the selected address
+        status: "awaiting confirmation",
+    };
 
     // If there's a receipt image, upload it to Firebase Storage
     let receiptImageUrl = null;
@@ -419,23 +451,13 @@ export async function paymentForTheBookIsSent(currentUser, selectedChatKey) {
         }
     }
 
-    const confirmationSlip = {
-        bookId,  // Include the bookId in the confirmation slip
-        bookPrice,
-        timestamp,
-        sender: currentUser.uid,
-        receiver: receiverId,
-        receiptImageUrl,
-        status: "awaiting confirmation",
-    };
-
+    // Now, proceed to save the confirmation slip and send the message
     try {
         let existingSlipKey = null;
         const confirmationSlipsSnapshot = await get(ref(database, `paymenttoconfirm/`));
 
         if (confirmationSlipsSnapshot.exists()) {
             const confirmationSlips = confirmationSlipsSnapshot.val();
-
             for (const [key, slip] of Object.entries(confirmationSlips)) {
                 if (
                     slip.sender === currentUser.uid &&
@@ -463,6 +485,7 @@ export async function paymentForTheBookIsSent(currentUser, selectedChatKey) {
             await update(ref(database, `paymenttoconfirm/${existingSlipKey}`), {
                 ...confirmationSlip,
                 timestamp,
+                receiptImageUrl,
             });
         } else {
             const confirmationRef = push(ref(database, 'paymenttoconfirm/'));
@@ -479,6 +502,7 @@ export async function paymentForTheBookIsSent(currentUser, selectedChatKey) {
         <div style="display: flex; flex-direction: column; align-items: center;">
             <p><strong>Payment Sent</strong></p>
             <p><strong>Paid: ₱${bookPrice}</strong></p>
+            <p><strong>Shipping Address: </strong>${addressString}</p>
             <img src="images/paymentcheck.gif" alt="Payment GIF" style="width: 200px; height: auto;">
         </div>
         `;
@@ -502,6 +526,7 @@ export async function paymentForTheBookIsSent(currentUser, selectedChatKey) {
         paymentSlipModal.hide();
     }
 }
+
 
 // Confirm Payment Function (to be invoked by the button in the message)
 export async function confirmPaidPayment(confirmationKey) {
