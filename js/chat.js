@@ -229,7 +229,6 @@ window.loadMessages = async function (chatKey) {
     await markMessagesAsRead(chatKey);
 };
 
-
 function createMessageElement(msg, isCurrentUser, profilePicture, formattedTime, otherUserId) {
     const bookInfo = msg.bookTitle && msg.bookImageUrl ? ` 
         <div class="mt-2">

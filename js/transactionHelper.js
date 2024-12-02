@@ -329,20 +329,22 @@ export async function confirmReqPaymentButton(currentUser, selectedChatKey, rend
     }
 }
 
-
-
-
-// Function to view the payment slip in a modal
+// Modify viewPaymentSlip to extract and store the bookId globally
 export async function viewPaymentSlip(paymentSlipId) {
     try {
         const paymentSlipRef = ref(database, `paymentsslip/${paymentSlipId}`);
         const paymentSlipSnapshot = await get(paymentSlipRef);
-
+        console.log(paymentSlipId);
+        
         if (paymentSlipSnapshot.exists()) {
             const paymentSlip = paymentSlipSnapshot.val();
             const bookTitle = paymentSlip.bookTitle;
             const bookPrice = paymentSlip.bookPrice;
             const bookImageUrl = paymentSlip.bookImageUrl;
+            const bookId = paymentSlip.bookId;  // Fetch the bookId
+
+            // Store the bookId in a session variable or global variable
+            sessionStorage.setItem('currentBookId', bookId); // Using sessionStorage for simplicity
 
             document.getElementById('bookTitle').textContent = bookTitle;
             document.getElementById('bookPrice').textContent = `Price: ₱${parseFloat(bookPrice).toFixed(2)}`;
@@ -361,7 +363,6 @@ export async function viewPaymentSlip(paymentSlipId) {
                 document.getElementById('slipGcashName').textContent = `Name: ${gcashName}`;
                 document.getElementById('slipGcashNumber').textContent = `Number: ${gcashNumber}`;
                 document.getElementById('slipGcashQr').src = gcashQrCodeUrl;
-
             } else {
                 console.error("Seller details not found.");
             }
@@ -376,7 +377,8 @@ export async function viewPaymentSlip(paymentSlipId) {
         alert('Failed to load payment slip details.');
     }
 }
-//Function to send a paid payment confirmation slip
+
+// Function to send a paid payment confirmation slip
 export async function paymentForTheBookIsSent(currentUser, selectedChatKey) {
     if (!currentUser) {
         alert('You must be logged in to confirm payment.');
@@ -395,6 +397,14 @@ export async function paymentForTheBookIsSent(currentUser, selectedChatKey) {
     const paymentSlipModal = bootstrap.Modal.getInstance(paymentSlipModalElement) || new bootstrap.Modal(paymentSlipModalElement); // Ensure modal instance exists
     const timestamp = Date.now();
 
+    // Retrieve the bookId from session storage
+    const bookId = sessionStorage.getItem('currentBookId');  // Fetch the stored bookId
+    console.log(bookId);
+    if (!bookId) {
+        alert('Error: Book ID not found.');
+        return;
+    }
+
     // If there's a receipt image, upload it to Firebase Storage
     let receiptImageUrl = null;
     if (receiptImage) {
@@ -410,6 +420,7 @@ export async function paymentForTheBookIsSent(currentUser, selectedChatKey) {
     }
 
     const confirmationSlip = {
+        bookId,  // Include the bookId in the confirmation slip
         bookPrice,
         timestamp,
         sender: currentUser.uid,
@@ -507,7 +518,21 @@ export async function confirmPaidPayment(confirmationKey) {
 
         if (confirmationSlipSnapshot.exists()) {
             const confirmationSlip = confirmationSlipSnapshot.val();
-            const { receiptImageUrl } = confirmationSlip;
+            const { status, receiptImageUrl } = confirmationSlip;
+
+            // If the payment is already confirmed, display the "Payment has already been Confirmed" modal
+            if (status === "confirmed") {
+                const modalContent = document.getElementById('receiptModalContent');
+                modalContent.innerHTML = `
+                    <div style="text-align: center; display: flex; flex-direction: column; justify-content: flex-end;">
+                        <p><strong>Payment has already been confirmed.</strong></p>
+                    </div>
+                `;
+
+                const receiptModal = new bootstrap.Modal(document.getElementById('receiptModal'));
+                receiptModal.show();
+                return; // Exit the function if already confirmed
+            }
 
             // If a receipt image URL is present, display it in a modal
             if (receiptImageUrl) {
