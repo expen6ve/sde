@@ -95,6 +95,40 @@
     <div id="bookListContainer" class="row gx-4 gx-lg-5"></div>
 </div>
 
+        <!-- View Purchase Details Modal -->
+        <div class="modal fade" id="viewDetailsModal" tabindex="-1" aria-labelledby="moreInfoModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="moreInfoModalLabel">Purchase Details</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="d-flex justify-content-center mb-3">
+                            <img id="moreInfoBookImage" src="" alt="Book Image" class="img-fluid" style="max-width: 300px; max-height: 300px; border-radius: 8px;">
+                        </div>
+                        <!-- Purchase Details (dateSold, sellerId, sold-books ID) -->
+                        <ul class="list-group">
+                            <li class="list-group-item"><strong>Seller:</strong> <span id="sellerName"></span></li>
+                            <li class="list-group-item"><strong>Date Sold: </strong><span id="dateSold"></span></li>
+                            <li class="list-group-item"><strong>Purchase ID: </strong><span id="soldBooksId"></span></li>
+                        </ul>
+                        <div class="lineseparator border border-top-1 custombg-bwhite"></div>
+                        <!-- Book Details -->
+                        <ul class="list-group">
+                            <li class="list-group-item"><strong>Title: </strong><span id="moreInfoBookTitle"></span></li>
+                            <li class="list-group-item"><strong>Author: </strong><span id="moreInfoAuthor"></span></li>
+                            <li class="list-group-item"><strong>Genre: </strong><span id="moreInfoGenre"></span></li>
+                            <li class="list-group-item"><strong>Condition: </strong><span id="moreInfoCondition"></span></li>
+                            <li class="list-group-item"><strong>Price: </strong>₱<span id="moreInfoPrice"></span></li>
+                        </ul>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    </div>
+                </div>
+            </div>
+        </div>
 
 </body>
 </html>

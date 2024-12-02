@@ -1,5 +1,5 @@
 import { checkAuth } from './auth.js';
-import { getDatabase, ref, onValue, query, orderByChild, equalTo } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-database.js";
+import { getDatabase, ref, onValue, query, equalTo, orderByChild } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-database.js";
 import { initializeNavbar } from './navbar.js';
 
 const database = getDatabase();
@@ -14,14 +14,9 @@ const elements = {
         recent: document.getElementById('sortMostRecent'),
     },
     genreDropdownItems: document.querySelectorAll('#genreDropdown + .dropdown-menu .dropdown-item'),
-    genreHeading: document.getElementById('genreHeading'),
-    profilePreview: document.getElementById('profilePreview'),
-    bookImageInput: document.getElementById('bookImage'),
-    saveEditButton: document.getElementById('saveEditButton'),
-    editModalCloseButton: document.querySelector('#editListingModal .btn-close'),
-    confirmRemoveButton: document.getElementById('confirmRemoveButton'),
-    removeModalCloseButton: document.querySelector('#removeListingModal .btn-close') // Added close button reference
+    genreHeading: document.getElementById('genreHeading')
 };
+
 
 
 let bookData = {};
@@ -32,28 +27,35 @@ let selectedGenre = null;
 document.addEventListener('DOMContentLoaded', async () => {
     initializeNavbar();
     currentUser = await checkAuth();
+
     if (currentUser) {
         elements.signInButton.style.display = 'none';
-        displayUserBooks(currentUser.uid);
+        displayPurchasedBooks(currentUser.uid);
     } else {
         elements.signInButton.style.display = 'block';
     }
+
+    // Add an event listener to clean up the modal after it is closed
+    const viewDetailsModalEl = document.getElementById('viewDetailsModal');
+    viewDetailsModalEl.addEventListener('hidden.bs.modal', () => {
+        resetViewDetailsModal();
+    });
 });
 
-// Display books for the logged-in user
-function displayUserBooks(userId, searchTerm = '', sortBy = 'dateListed', genre = null) {
-    const queryRef = query(ref(database, 'book-listings'), orderByChild('userId'), equalTo(userId));
+// Display purchased books for the logged-in user
+function displayPurchasedBooks(userId, searchTerm = '', sortBy = 'dateSold', genre = null) {
+    const queryRef = query(ref(database, 'sold-books'), orderByChild('buyerId'), equalTo(userId));
 
     onValue(queryRef, (snapshot) => {
         bookData = snapshot.val() || {};
         elements.bookListContainer.innerHTML = Object.keys(bookData).length 
-            ? renderBooks(Object.entries(bookData), searchTerm, sortBy, genre) 
-            : '<p>No books available.</p>';
+            ? renderPurchasedBooks(Object.entries(bookData), searchTerm, sortBy, genre) 
+            : '<p>No purchased books found.</p>';
     });
 }
 
-// Render books based on filters
-function renderBooks(bookEntries, searchTerm, sortBy, genre) {
+// Render purchased books based on filters
+function renderPurchasedBooks(bookEntries, searchTerm, sortBy, genre) {
     const sortedBooks = bookEntries
         .map(([id, book]) => ({ id, ...book }))
         .filter(book => 
@@ -66,7 +68,7 @@ function renderBooks(bookEntries, searchTerm, sortBy, genre) {
         ? `Search Results for "${searchTerm}"`
         : genre 
         ? `Books in "${genre}"`
-        : "My Book Listings";
+        : "My Purchased Books";
 
     return sortedBooks.map(book => 
         `<div class="col-lg-3 col-md-6 mb-5">
@@ -80,40 +82,99 @@ function renderBooks(bookEntries, searchTerm, sortBy, genre) {
                     <p class="card-text"><strong>Condition:</strong> ${book.condition}</p>
                     <p class="card-text"><strong>Price:</strong> ₱${book.price}</p>
                 </div>
-                <div class="d-flex justify-content-between mt-3">
-                    <button class="btn btn-danger m-1 remove-listing" data-id="${book.id}" data-bs-toggle="modal" data-bs-target="#removeListingModal">Remove Listing</button>
-                    <button class="btn btn-secondary m-1 edit-listing" data-id="${book.id}" data-bs-toggle="modal" data-bs-target="#editListingModal">Edit Listing</button>
+                <div class="d-flex justify-content-center mt-3">
+                    <button class="btn btn-info m-1 view-details-btn" data-id="${book.id}" data-bs-toggle="modal" data-bs-target="#viewDetailsModal">View Details</button>
                 </div>
             </div>
-        </div>`
+        </div>
+`
     ).join('');
 }
+
+
 
 // Sort books based on the selected criteria
 function sortBooks(a, b, sortBy) {
     return sortBy === 'priceHighToLow' ? b.price - a.price :
            sortBy === 'priceLowToHigh' ? a.price - b.price :
-           new Date(b.dateListed) - new Date(a.dateListed);
+           new Date(b.dateSold) - new Date(a.dateSold);
 }
 
 // Search functionality
 elements.searchInput.addEventListener('input', (e) => {
     const searchTerm = e.target.value.trim();
-    if (currentUser) displayUserBooks(currentUser.uid, searchTerm, getSortOrder(), selectedGenre);
-});
-
-// Genre filter functionality
-elements.genreDropdownItems.forEach(item => {
-    item.addEventListener('click', (event) => {
-        selectedGenre = event.target.getAttribute('data-genre');
-        displayUserBooks(currentUser.uid, elements.searchInput.value.trim(), getSortOrder(), selectedGenre);
-    });
+    if (currentUser) displayPurchasedBooks(currentUser.uid, searchTerm, getSortOrder(), selectedGenre);
 });
 
 // Sort buttons functionality
 Object.entries(elements.sortButtons).forEach(([key, button]) => {
     button.addEventListener('click', () => {
-        const sortBy = key === 'low' ? 'priceLowToHigh' : key === 'high' ? 'priceHighToLow' : 'dateListed';
-        if (currentUser) displayUserBooks(currentUser.uid, elements.searchInput.value.trim(), sortBy, selectedGenre);
+        const sortBy = key === 'low' ? 'priceLowToHigh' : key === 'high' ? 'priceHighToLow' : 'dateSold';
+        if (currentUser) displayPurchasedBooks(currentUser.uid, elements.searchInput.value.trim(), sortBy, selectedGenre);
     });
 });
+
+// Helper function to get the current sort order (based on button clicked)
+function getSortOrder() {
+    // You can implement logic here based on the current button clicked
+    return 'dateSold'; // For example, return 'dateSold' by default
+}
+
+// Add an event listener to handle clicks on the "View Details" button
+document.addEventListener('click', async (event) => {
+    const button = event.target;
+    if (button.matches('.btn-info[data-id]')) {
+        const bookId = button.getAttribute('data-id');
+        const book = bookData[bookId];
+
+        if (book) {
+            const sellerDetails = await fetchSellerDetails(book.sellerId);
+            populateViewDetailsModal(book, sellerDetails, bookId);
+        }
+    }
+});
+
+// Fetch seller details from the database
+async function fetchSellerDetails(sellerId) {
+    const userRef = ref(database, `users/${sellerId}`);
+    return new Promise((resolve) => {
+        onValue(userRef, (snapshot) => {
+            resolve(snapshot.val() || {});
+        }, { onlyOnce: true });
+    });
+}
+
+// Reset modal fields after closing
+function resetViewDetailsModal() {
+    document.getElementById('moreInfoBookImage').src = '';
+    document.getElementById('moreInfoBookTitle').textContent = '';
+    document.getElementById('moreInfoAuthor').textContent = '';
+    document.getElementById('moreInfoGenre').textContent = '';
+    document.getElementById('moreInfoCondition').textContent = '';
+    document.getElementById('moreInfoPrice').textContent = '';
+    document.getElementById('dateSold').textContent = '';
+    document.getElementById('sellerName').textContent = '';
+    document.getElementById('soldBooksId').textContent = '';
+}
+
+// Populate the modal with book and seller details
+function populateViewDetailsModal(book, seller, bookId) {
+    const modalEl = document.getElementById('viewDetailsModal');
+
+    // Set book details
+    document.getElementById('moreInfoBookImage').src = book.imageUrl || 'images/default-book.png';
+    document.getElementById('moreInfoBookTitle').textContent = book.title || 'N/A';
+    document.getElementById('moreInfoAuthor').textContent = book.author || 'N/A';
+    document.getElementById('moreInfoGenre').textContent = book.genre || 'N/A';
+    document.getElementById('moreInfoCondition').textContent = book.condition || 'N/A';
+    document.getElementById('moreInfoPrice').textContent = book.price || 'N/A';
+
+    // Set seller and purchase details
+    document.getElementById('dateSold').textContent = new Date(book.dateSold).toLocaleString() || 'N/A';
+    document.getElementById('sellerName').textContent = `${seller.firstName || 'N/A'} ${seller.lastName || ''}`;
+    document.getElementById('soldBooksId').textContent = bookId || 'N/A';
+
+    // Show the modal dynamically
+    const viewDetailsModal = bootstrap.Modal.getOrCreateInstance(modalEl);
+    viewDetailsModal.show();
+}

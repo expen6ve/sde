@@ -567,7 +567,7 @@ export async function confirmPaidPayment(confirmationKey) {
             }
 
             const book = bookSnapshot.val();
-            const { title, author, price, imageUrl, userId } = book; // Get the userId from book-listings
+            const { title, author, price, imageUrl, userId, genre, condition } = book; // Get the userId from book-listings
 
             // Create a new entry in the "sold-books" node
             const soldBookRef = push(ref(database, `sold-books/`));
@@ -578,6 +578,8 @@ export async function confirmPaidPayment(confirmationKey) {
                 bookId: bookId,
                 title: title,
                 author: author,
+                condition: condition,
+                genre: genre,
                 price: price,
                 imageUrl: imageUrl,
                 sellerId: userId, // Correctly assign the sellerId from book-listings
@@ -589,6 +591,7 @@ export async function confirmPaidPayment(confirmationKey) {
             await update(ref(database, `users/${userId}/soldBooks/${soldBookKey}`), {
                 bookId: bookId,
                 title: title,
+                buyerId: sender,
                 price: price,
                 dateSold: new Date().toISOString(),
             });
