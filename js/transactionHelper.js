@@ -527,8 +527,6 @@ export async function paymentForTheBookIsSent(currentUser, selectedChatKey) {
     }
 }
 
-
-// Confirm Payment Function (to be invoked by the button in the message)
 export async function confirmPaidPayment(confirmationKey) {
     if (!confirmationKey) {
         console.error('No confirmation slip key provided.');
@@ -543,7 +541,7 @@ export async function confirmPaidPayment(confirmationKey) {
 
         if (confirmationSlipSnapshot.exists()) {
             const confirmationSlip = confirmationSlipSnapshot.val();
-            const { status, receiptImageUrl } = confirmationSlip;
+            const { status, bookId, sender } = confirmationSlip; // sender is the buyerId
 
             // If the payment is already confirmed, display the "Payment has already been Confirmed" modal
             if (status === "confirmed") {
@@ -559,35 +557,52 @@ export async function confirmPaidPayment(confirmationKey) {
                 return; // Exit the function if already confirmed
             }
 
-            // If a receipt image URL is present, display it in a modal
-            if (receiptImageUrl) {
-                const modalContent = document.getElementById('receiptModalContent');
-                modalContent.innerHTML = `
-                    <div style="text-align: center; display: flex; flex-direction: column; justify-content: flex-end;">
-                        <h5>Payment Receipt</h5>
-                        <img src="${receiptImageUrl}" alt="Receipt Image" style="max-width: 100%; height: auto; margin-bottom: 1rem;">
-                        <button id="continueConfirmPayment" class="btn btn-primary">Continue</button>
-                    </div>
-                `;
+            // Fetch the book details using the bookId
+            const bookRef = ref(database, `book-listings/${bookId}`);
+            const bookSnapshot = await get(bookRef);
 
-                const receiptModal = new bootstrap.Modal(document.getElementById('receiptModal'));
-                receiptModal.show();
-
-                // Handle the "Continue" button click
-                document.getElementById('continueConfirmPayment').addEventListener('click', async () => {
-                    // Update the status to confirmed
-                    await update(confirmationSlipRef, { status: "confirmed" });
-
-                    receiptModal.hide();
-                    console.log(`Payment confirmation slip ${confirmationKey} has been confirmed.`);
-                    alert('Payment confirmed successfully!');
-                });
-            } else {
-                // If no receipt image, immediately confirm the payment
-                await update(confirmationSlipRef, { status: "confirmed" });
-                console.log(`Payment confirmation slip ${confirmationKey} has been confirmed.`);
-                alert('Payment confirmed successfully!');
+            if (!bookSnapshot.exists()) {
+                alert('Book not found.');
+                return;
             }
+
+            const book = bookSnapshot.val();
+            const { title, author, price, imageUrl, userId } = book; // Get the userId from book-listings
+
+            // Create a new entry in the "sold-books" node
+            const soldBookRef = push(ref(database, `sold-books/`));
+            const soldBookKey = soldBookRef.key;
+
+            // Store the sold book details, including the buyerId
+            await set(soldBookRef, {
+                bookId: bookId,
+                title: title,
+                author: author,
+                price: price,
+                imageUrl: imageUrl,
+                sellerId: userId, // Correctly assign the sellerId from book-listings
+                buyerId: sender, // Store the buyerId (sender) from the confirmation slip
+                dateSold: new Date().toISOString(),
+            });
+
+            // Update the seller's "soldBooks" reference
+            await update(ref(database, `users/${userId}/soldBooks/${soldBookKey}`), {
+                bookId: bookId,
+                title: title,
+                price: price,
+                dateSold: new Date().toISOString(),
+            });
+
+            // Delete the book from the "book-listings" node
+            await remove(bookRef);
+
+            // Update the status to "confirmed"
+            await update(confirmationSlipRef, { status: "confirmed" });
+
+            console.log(`Payment confirmation slip ${confirmationKey} has been confirmed and book marked as sold.`);
+            alert('Payment confirmed successfully, book marked as sold, and listing deleted!');
+
+            // Optionally, you can display a message or modal to confirm the action
         } else {
             alert('Confirmation slip not found.');
         }
@@ -596,6 +611,3 @@ export async function confirmPaidPayment(confirmationKey) {
         alert('Failed to confirm the payment. Please try again.');
     }
 }
-
-
-
