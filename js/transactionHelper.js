@@ -627,6 +627,48 @@ export async function confirmPaidPayment(confirmationKey) {
                 });
             } else {
                 // If no receipt image, immediately confirm the payment
+                // Fetch the book details using the bookId
+                const bookRef = ref(database, `book-listings/${bookId}`);
+                const bookSnapshot = await get(bookRef);
+
+                if (!bookSnapshot.exists()) {
+                    alert('Book not found or has been Sold');
+                    return;
+                }
+
+                const book = bookSnapshot.val();
+                const { title, author, price, imageUrl, userId, genre, condition } = book; // Get the userId from book-listings
+
+                // Create a new entry in the "sold-books" node
+                const soldBookRef = push(ref(database, `sold-books/`));
+                const soldBookKey = soldBookRef.key;
+
+                // Store the sold book details, including the buyerId
+                await set(soldBookRef, {
+                    bookId: bookId,
+                    title: title,
+                    author: author,
+                    condition: condition,
+                    genre: genre,
+                    price: price,
+                    imageUrl: imageUrl,
+                    sellerId: userId, // Correctly assign the sellerId from book-listings
+                    buyerId: sender, // Store the buyerId (sender) from the confirmation slip
+                    dateSold: new Date().toISOString(),
+                });
+
+                // Update the seller's "soldBooks" reference
+                await update(ref(database, `users/${userId}/soldBooks/${soldBookKey}`), {
+                    bookId: bookId,
+                    title: title,
+                    buyerId: sender,
+                    price: price,
+                    dateSold: new Date().toISOString(),
+                });
+
+                // Delete the book from the "book-listings" node
+                await remove(bookRef);
+
                 await update(confirmationSlipRef, { status: "confirmed" });
                 console.log(`Payment confirmation slip ${confirmationKey} has been confirmed.`);
                 alert('Payment confirmed successfully!');

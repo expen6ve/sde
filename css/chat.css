@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap');
+
 body {
 background-color: antiquewhite;
 font-family: "Bona Nova SC", serif;
@@ -26,4 +28,141 @@ margin-top: -.75rem;
 #selectedBookImage {
 width: 466px;
 height: auto; /* Maintain aspect ratio */
+}
+
+
+#ratingModal {
+  font-family: 'Montserrat', sans-serif;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+  margin: 0;
+  overflow: hidden;
+  background-color: rgba(0, 0, 0, 0.5); /* Optional for modal background */
+}
+
+#ratingModal .panel {
+  background-color: white;
+  box-shadow: 0 0 7px rgba(0, 0, 0, 0.2);
+  border-radius: 5px;
+  font-size: 90%;
+  text-align: center;
+  padding: 30px 20px;
+  max-width: 300px;
+}
+
+#ratingModal .panel form {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+}
+
+#ratingModal fieldset, #ratingModal label {
+  margin: 0;
+  padding: 0;
+}
+
+#ratingModal h1 {
+  font-size: 22px;
+  margin: 10px;
+  font-weight: normal;
+}
+
+#ratingModal fieldset {
+  margin: 20px 0 40px;
+}
+
+#ratingModal .rating {
+  border: none;
+  float: left;
+}
+
+#ratingModal .rating > input {
+  display: none;
+}
+
+#ratingModal .rating > label:before {
+  margin: 5px;
+  font-size: 30px;
+  font-family: FontAwesome;
+  display: inline-block;
+  content: "\f005";
+}
+
+#ratingModal .rating > .half:before {
+  content: "\f089";
+  position: absolute;
+}
+
+#ratingModal .rating > label {
+  color: #ddd;
+  float: right;
+}
+
+#ratingModal .rating > input:checked ~ label,
+#ratingModal .rating:not(:checked) > label:hover,
+#ratingModal .rating:not(:checked) > label:hover ~ label {
+  color: #FFD700;
+}
+
+#ratingModal .rating > input:checked + label:hover,
+#ratingModal .rating > input:checked ~ label:hover,
+#ratingModal .rating > label:hover ~ input:checked ~ label,
+#ratingModal .rating > input:checked ~ label:hover ~ label {
+  color: #FFED85;
+}
+
+#ratingModal input, #ratingModal label {
+  cursor: pointer;
+}
+
+#ratingModal input[type="submit"] {
+  margin-top: 5px;
+  background-color: #302d2b;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  padding: 12px 30px;
+}
+
+#ratingModal input[type="submit"]:focus {
+  outline: 0;
+}
+
+#ratingModal input[type="submit"]:active {
+  transform: scale(0.98);
+}
+
+#ratingModal input[type="submit"]:disabled {
+  background-color: #ddd;
+  cursor: not-allowed;
+}
+
+#ratingModal .fa-heart {
+  color: red;
+  font-size: 30px;
+  margin-bottom: 10px;
+}
+
+#ratingModal .fa-heart:before {
+  content: "\f004";
+  font-family: FontAwesome;
+}
+#ratingModal textarea {
+  width: 100%;
+  margin-top: 10px;
+  padding: 10px;
+  font-family: 'Montserrat', sans-serif;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  resize: none;
+  font-size: 14px;
+  color: #333;
+}
+
+#ratingModal textarea:focus {
+  outline: none;
+  border-color: #302d2b;
 }

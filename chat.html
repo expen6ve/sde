@@ -93,7 +93,7 @@
                         <!-- Chat bubbles will be populated here -->
                       </div>
                       <div class="d-flex justify-content-start align-items-center pe-3 pt-3 mt-2">
-                        <input type="text" class="form-control form-control-lg me-1" id="writeMessage" placeholder="Type message" style="font-family: monospace; font-weight: normal;">
+                        <input type="text" class="form-control form-control-lg me-1" id="writeMessage" placeholder="Type a message" style="font-family: monospace; font-weight: normal;">
                         <div class="d-flex align-items-center">
                           <a id="sendMessageButton" class="text-muted" href="#!">
                             <i class="fas fa-paper-plane fa-lg"></i>
@@ -288,7 +288,7 @@
 </div>
 
 
-
+<!-- Receipt Modal when there is one -->
 <div class="modal fade" id="receiptModal" tabindex="-1" aria-labelledby="receiptModalLabel" aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered">
       <div class="modal-content">
@@ -303,7 +303,30 @@
   </div>
 </div>
 
-
+<!-- Rating and Review Modal -->
+<div class="modal" id="ratingReviewModal">
+  <div class="panel">
+    <div class="ratings-container">
+      <h1>How satisfied are you with buying the book from the seller?</h1>
+      <form action="" id="ratingForm">
+        <fieldset class="rating">
+          <input type="radio" id="star5" name="rating" value="5" /><label class="full" for="star5" title="5 stars"></label>
+          <input type="radio" id="star4half" name="rating" value="4.5" /><label class="half" for="star4half" title="4.5 stars"></label>
+          <input type="radio" id="star4" name="rating" value="4" /><label class="full" for="star4" title="4 stars"></label>
+          <input type="radio" id="star3half" name="rating" value="3.5" /><label class="half" for="star3half" title="3.5 stars"></label>
+          <input type="radio" id="star3" name="rating" value="3" /><label class="full" for="star3" title="3 stars"></label>
+          <input type="radio" id="star2half" name="rating" value="2.5" /><label class="half" for="star2half" title="2.5 stars"></label>
+          <input type="radio" id="star2" name="rating" value="2" /><label class="full" for="star2" title="2 stars"></label>
+          <input type="radio" id="star1half" name="rating" value="1.5" /><label class="half" for="star1half" title="1.5 stars"></label>
+          <input type="radio" id="star1" name="rating" value="1" /><label class="full" for="star1" title="1 star"></label>
+          <input type="radio" id="starhalf" name="rating" value="0.5" /><label class="half" for="starhalf" title="0.5 stars"></label>
+        </fieldset>
+        <textarea id="reviewText" name="reviewText" placeholder="Leave your review here..." rows="4"></textarea>
+        <input disabled type="submit" name="getVal" value="Send Review">
+      </form>
+    </div>
+  </div>
+</div>
 
 
 <script defer src="js/bootstrap.bundle.min.js"></script>
