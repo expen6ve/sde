@@ -330,7 +330,6 @@ export async function confirmReqPaymentButton(currentUser, selectedChatKey, rend
 }
 
 // Modify viewPaymentSlip to extract and store the bookId globally
-// Modify viewPaymentSlip to extract and store the bookId globally
 export async function viewPaymentSlip(paymentSlipId) {
     try {
         const paymentSlipRef = ref(database, `paymentsslip/${paymentSlipId}`);
