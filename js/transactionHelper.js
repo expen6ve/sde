@@ -330,6 +330,7 @@ export async function confirmReqPaymentButton(currentUser, selectedChatKey, rend
 }
 
 // Modify viewPaymentSlip to extract and store the bookId globally
+// Modify viewPaymentSlip to extract and store the bookId globally
 export async function viewPaymentSlip(paymentSlipId) {
     try {
         const paymentSlipRef = ref(database, `paymentsslip/${paymentSlipId}`);
@@ -342,6 +343,35 @@ export async function viewPaymentSlip(paymentSlipId) {
             const bookPrice = paymentSlip.bookPrice;
             const bookImageUrl = paymentSlip.bookImageUrl;
             const bookId = paymentSlip.bookId;  // Fetch the bookId
+
+            // Check if the book is already sold in the "sold-books" node
+            const soldBooksRef = ref(database, `sold-books`);
+            const soldBooksSnapshot = await get(soldBooksRef);
+            let isBookSold = false;
+
+            if (soldBooksSnapshot.exists()) {
+                const soldBooks = soldBooksSnapshot.val();
+                for (let key in soldBooks) {
+                    if (soldBooks[key].bookId === bookId) {
+                        isBookSold = true;
+                        break;
+                    }
+                }
+            }
+
+            // If the book is sold, show a modal with the message
+            if (isBookSold) {
+                const modalContent = document.getElementById('receiptModalContent');
+                modalContent.innerHTML = `
+                    <div style="text-align: center; display: flex; flex-direction: column; justify-content: flex-end;">
+                        <p><strong>Book is already paid or sold!</strong></p>
+                    </div>
+                `;
+
+                const receiptModal = new bootstrap.Modal(document.getElementById('receiptModal'));
+                receiptModal.show();
+                return; // Exit the function if the book is already sold
+            }
 
             // Store the bookId in a session variable or global variable
             sessionStorage.setItem('currentBookId', bookId); // Using sessionStorage for simplicity
@@ -377,6 +407,7 @@ export async function viewPaymentSlip(paymentSlipId) {
         alert('Failed to load payment slip details.');
     }
 }
+
 
 // Function to send a paid payment confirmation slip
 export async function paymentForTheBookIsSent(currentUser, selectedChatKey) {
