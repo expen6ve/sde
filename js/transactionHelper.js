@@ -644,6 +644,26 @@ export async function confirmPaidPayment(confirmationKey) {
                         dateSold: new Date().toISOString(),
                     });
 
+                    // After payment confirmation, send the feedback message to the buyer
+                    const feedbackMessage = `
+                    <div style="text-align: center; display: flex; flex-direction: column; align-items: center;">
+                        <p><strong>Thank you for your purchase!</strong></p>
+                        <p>We'd love to hear your feedback on the transaction. Please leave a review!</p>
+                        <button class="btn btn-primary" onclick="redirectToReviewPage('${bookId}')">Leave a Review</button>
+                    </div>
+                    `;
+
+                    const chatKey = `${sender}_${confirmationSlip.receiver}`; // Construct the chat key
+                    const chatRef = push(ref(database, `chats/${chatKey}`));
+
+                    await set(chatRef, {
+                        sender: confirmationSlip.receiver, // Current user is sending the message
+                        receiver: sender, // Buyer is the recipient
+                        message: feedbackMessage,
+                        timestamp: Date.now(),
+                        read: false,
+                    });
+
                     // Delete the book from the "book-listings" node
                     await remove(bookRef);
 
@@ -694,6 +714,26 @@ export async function confirmPaidPayment(confirmationKey) {
                     buyerId: sender,
                     price: price,
                     dateSold: new Date().toISOString(),
+                });
+
+                // After payment confirmation, send the feedback message to the buyer
+                const feedbackMessage = `
+                <div style="text-align: center; display: flex; flex-direction: column; align-items: center;">
+                    <p><strong>Thank you for your purchase!</strong></p>
+                    <p>We'd love to hear your feedback on the transaction. Please leave a review!</p>
+                    <button class="btn btn-primary" onclick="redirectToReviewPage('${bookId}')">Leave a Review</button>
+                </div>
+                `;
+
+                const chatKey = `${sender}_${confirmationSlip.receiver}`; // Construct the chat key
+                const chatRef = push(ref(database, `chats/${chatKey}`));
+
+                await set(chatRef, {
+                    sender: confirmationSlip.receiver, // Current user is sending the message
+                    receiver: sender, // Buyer is the recipient
+                    message: feedbackMessage,
+                    timestamp: Date.now(),
+                    read: false,
                 });
 
                 // Delete the book from the "book-listings" node
