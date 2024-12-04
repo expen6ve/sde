@@ -67,4 +67,39 @@ export function checkAuth() {
     });
 }
 
+// Function to check and restrict access to specific pages
+export function restrictAccess() {
+    const currentUrl = window.location.href;
+    const unrestrictedPages = ['genre.html']; // Pages everyone can access freely
+    const genreSubPages = currentUrl.includes("genre.html?genre="); // Check for genre subpages
+    const restrictedForLoggedIn = ['index.html', 'login.html', 'signup.html']; // Pages restricted for logged-in users
+
+    // Allow access to unrestricted pages and genre subpages
+    if (unrestrictedPages.some(page => currentUrl.includes(page)) || genreSubPages) {
+        return; // Allow access
+    }
+
+    // Check if the page is restricted for logged-in users
+    if (restrictedForLoggedIn.some(page => currentUrl.includes(page))) {
+        // Check if the user is logged in
+        checkAuth().then(user => {
+            if (user) {
+                // User is logged in, redirect to a genre page
+                window.location.href = 'userhome.html';
+            }
+        });
+    } else {
+        // Check if the user is authenticated for all other pages
+        checkAuth().then(user => {
+            if (!user) {
+                // User is not authenticated, redirect to index.html
+                window.location.href = 'index.html';
+            }
+        });
+    }
+}
+
+// Call restrictAccess on every page load
+restrictAccess();
+
 export { auth, signInWithEmailAndPassword, sendPasswordResetEmail };

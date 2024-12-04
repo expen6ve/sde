@@ -157,9 +157,6 @@ async function checkExistingChat(sellerId, currentUser) {
     }
 }
 
-
-
-
 async function updateUserRecentListings(userId) {
     const listingsRef = ref(database, 'book-listings');
     const snapshot = await get(listingsRef);
