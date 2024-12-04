@@ -751,3 +751,4 @@ export async function confirmPaidPayment(confirmationKey) {
         alert('Failed to confirm the payment. Please try again.');
     }
 }
+

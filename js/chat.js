@@ -55,13 +55,18 @@ async function createChatTab(chatKey, otherUser, lastMessage, chatList) {
     const otherUserName = otherUser ? `${otherUser.firstName} ${otherUser.lastName}` : 'Unknown User';
     const otherUserProfilePicture = otherUser?.profilePicture || 'https://via.placeholder.com/60';
 
-    // Check if the last message is a payment slip and extract the paid amount or to pay amount
+    // Default last message text
     let lastMessageText = lastMessage.message || 'No messages yet';
-    
-    if (lastMessage.message && (lastMessage.message.includes('Paid: ₱') || lastMessage.message.includes('To Pay: ₱'))) {
+
+    // Check if the last message includes "review"
+    if (lastMessage.message && lastMessage.message.includes('Thank you for your purchase!')) {
+        lastMessageText = "Seller wants your rate and review!";
+    } 
+    // Check if it's a payment slip with "Paid" or "To Pay"
+    else if (lastMessage.message && (lastMessage.message.includes('Paid: ₱') || lastMessage.message.includes('To Pay: ₱'))) {
         const paidAmountMatch = lastMessage.message.match(/Paid: ₱\d+(\.\d{2})?/);
         const toPayAmountMatch = lastMessage.message.match(/To Pay: ₱\d+(\.\d{2})?/);
-        
+
         if (paidAmountMatch) {
             lastMessageText = paidAmountMatch[0];
         } else if (toPayAmountMatch) {
@@ -93,6 +98,7 @@ async function createChatTab(chatKey, otherUser, lastMessage, chatList) {
         loadMessages(chatKey); // Load the selected chat
     });
 }
+
 
 
 
@@ -403,6 +409,8 @@ document.getElementById('editShippingDetailsBtn').addEventListener('click', () =
 document.getElementById('saveShippingDetailsBtn').addEventListener('click', async () => {
     await saveShippingDetailsBtn(currentUser);
 });
+
+
 
 const form = document.getElementById('ratingForm');
 
