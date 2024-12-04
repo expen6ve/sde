@@ -751,7 +751,3 @@ export async function confirmPaidPayment(confirmationKey) {
         alert('Failed to confirm the payment. Please try again.');
     }
 }
-function redirectToReviewPage(bookId, sellerId) {
-    // Redirect to the manage-account.html page with the seller's ID as a query parameter
-    window.location.href = `manage-account.html?sellerId=${sellerId}`;
-}

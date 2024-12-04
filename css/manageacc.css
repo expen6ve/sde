@@ -1,0 +1,23 @@
+.star-rating {
+  display: flex;
+  justify-content: center; /* Centers the stars horizontally */
+  gap: 10px; /* Increase the gap to make the stars a bit more spread out */
+  cursor: pointer;
+}
+
+.star-rating .star {
+  font-size: 3rem; /* Increased the font size for bigger stars */
+  color: #ddd;
+  transition: color 0.2s ease;
+}
+
+/* Hover effect for stars */
+.star-rating .star:hover,
+.star-rating .star.hover {
+  color: #FFD700;
+}
+
+/* Apply 'checked' class color after the star is clicked */
+.star-rating .star.checked {
+  color: #FFD700;
+}

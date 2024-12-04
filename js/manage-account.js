@@ -276,3 +276,87 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 });
 
+  // Star Rating JavaScript
+  const stars = document.querySelectorAll('.star-rating .star');
+  const ratingInput = document.getElementById('rating');
+
+  stars.forEach(star => {
+    star.addEventListener('click', function() {
+      const selectedRating = parseInt(this.getAttribute('data-index'));
+      ratingInput.value = selectedRating;
+      
+      // Update star display after selection
+      stars.forEach(star => {
+        star.classList.remove('checked');
+      });
+
+      for (let i = 0; i < selectedRating; i++) {
+        stars[i].classList.add('checked');
+      }
+    });
+
+    // Hover effect
+    star.addEventListener('mouseover', function() {
+      const hoveredRating = parseInt(this.getAttribute('data-index'));
+
+      // Highlight all stars up to the hovered one
+      stars.forEach(star => {
+        star.classList.remove('hover');
+      });
+
+      for (let i = 0; i < hoveredRating; i++) {
+        stars[i].classList.add('hover');
+      }
+    });
+
+    star.addEventListener('mouseout', function() {
+      // Remove hover effect when mouse leaves
+      stars.forEach(star => {
+        star.classList.remove('hover');
+      });
+    });
+  });
+
+ // Handle review submission
+document.getElementById('submitReviewBtn').addEventListener('click', async function() {
+    const rating = parseInt(ratingInput.value);
+    const reviewText = document.getElementById('reviewText').value.trim();
+    const sellerId = new URLSearchParams(window.location.search).get('userId');
+    const currentUser = await checkAuth();
+
+    // Validate input
+    if (rating === 0 || reviewText === '') {
+        alert('Please provide a rating and a review.');
+        return;
+    }
+
+    try {
+        // Create a new review object
+        const reviewData = {
+            sellerId: sellerId, // Seller ID from the URL
+            buyerId: currentUser.uid, // Current user as buyer
+            rating: rating, // Rating (1-5 stars)
+            reviewText: reviewText, // Review text
+            timestamp: Date.now(), // Timestamp for the review
+        };
+
+        // Push the review data to Firebase under 'feedbacks'
+        const feedbacksRef = ref(database, 'feedbacks');
+        const newFeedbackRef = push(feedbacksRef);
+        await set(newFeedbackRef, reviewData);
+
+        // Confirmation message
+        alert(`Review submitted! Rating: ${rating} stars. Review: ${reviewText}`);
+        
+        // Optionally, close the modal after submission
+        const reviewModal = bootstrap.Modal.getInstance(document.getElementById('reviewModal'));
+        reviewModal.hide();
+
+        // Optionally, redirect to the seller's profile or refresh the page
+        window.location.href = `manage-account.html?userId=${sellerId}`;
+    } catch (error) {
+        console.error('Error submitting review:', error);
+        alert('Failed to submit your review. Please try again.');
+    }
+});
+

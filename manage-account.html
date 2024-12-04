@@ -7,11 +7,12 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Bona+Nova+SC&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/css/select2.min.css" rel="stylesheet" />
     <link href="css/bootstrap.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="css/manageacc.css">
     <link href="css/userhome.css" rel="stylesheet" />
-    <script defer src="js/bootstrap.bundle.min.js"></script>
-    <script type="module" src="js/manage-account.js"></script>
     <style>
         .coverheight{
         height: 15rem;
@@ -102,15 +103,15 @@
                 </li>   
                 <li class="nav-item dropdown">
                     <a class="nav-link dropdown-toggle" href="#" id="profileDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                        <img src="images/profileicon.svg" alt="profileicon" style="width: 30px; height: 35px; object-fit: cover; border-radius: 50%">
+                        <img id="profileIcon" src="images/profileicon.svg" alt="profileicon" style="width: 30px; height: 35px; object-fit: cover; border-radius: 50%">
                     </a>                    
-                    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="profileDropdown">
+                    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="profileDropdown" id="profileDropdownMenu">
                         <!-- Placeholder for dynamic role-based items -->
                         <li id="roleBasedItem"></li>
                         <li><hr class="dropdown-divider"></li>
                         <li><a class="dropdown-item" href="#" id="signOut">Sign Out</a></li>
-                    </ul>                    
-                </li>                
+                    </ul> 
+                </li>                 
             </ul>
         </div>
     </div>
@@ -123,7 +124,7 @@
             <img id="userProfilePic" class="justify-content-end align-items-center" src="images/profileicon.svg" alt="profileicon" style="width: 11rem; height: 11rem; object-fit: cover; border-radius: 50%; position: relative; bottom: -7rem;">
         </div>
         <div class="d-flex flex-column custombg-bwhite pt-n1 rounded-bottom-3">
-            <button id="reviewRatingButton" type="button" class="btn btn-warning">Give a Review & Rating</button>
+            <button type="button" id="reviewRatingButton" class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#reviewModal">Give a Review & Rating</button>
             <h1 id="userFullName" class="h3 text-center mb-2" style="color:#535353;"></h1>
                 <div class="text-center">
                     <button id="editProfileButton" type="button" class="btn btn-info mx-auto" data-bs-toggle="modal" data-bs-target="#editProfileModal">Edit Profile</button>
@@ -301,6 +302,44 @@
                 </div>
             </div>
             </div>
-        </div>       
+        </div>
+        <!-- Rating and Review Modal -->
+        <div class="modal fade" id="reviewModal" tabindex="-1" aria-labelledby="reviewModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+              <div class="modal-content">
+                <div class="modal-header">
+                  <h5 class="modal-title" id="reviewModalLabel">Write a Review</h5>
+                  <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                  <!-- Star Rating -->
+                  <h4 class="text-center">How satisfied are you with your transaction with me?</h4>
+                  <div class="star-rating" id="starRating">
+                    <span class="star" data-index="1">&#9733;</span>
+                    <span class="star" data-index="2">&#9733;</span>
+                    <span class="star" data-index="3">&#9733;</span>
+                    <span class="star" data-index="4">&#9733;</span>
+                    <span class="star" data-index="5">&#9733;</span>
+                  </div>
+                  <input type="hidden" id="rating" value="0">
+                  
+                  <!-- Review Text Area -->
+                  <div class="mt-3">
+                    <label for="reviewText" class="form-label">Your Review</label>
+                    <textarea class="form-control" id="reviewText" rows="4" placeholder="Write your review here..."></textarea>
+                  </div>
+                </div>
+                <div class="modal-footer">
+                  <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                  <button type="button" class="btn btn-primary" id="submitReviewBtn">Submit Review</button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.min.js"></script>
+    <script defer src="js/bootstrap.bundle.min.js"></script>
+    <script type="module" src="js/manage-account.js"></script>              
 </body>
 </html>

@@ -406,45 +406,6 @@ document.getElementById('saveShippingDetailsBtn').addEventListener('click', asyn
     await saveShippingDetailsBtn(currentUser);
 });
 
-
-const form = document.getElementById('ratingForm');
-
-form.onsubmit = function (e) {
-  e.preventDefault();
-  const valueStars = document.querySelector('input[name="rating"]:checked').value;
-  const reviewText = document.getElementById('reviewText').value.trim();
-
-  showThankyou(valueStars, reviewText);
-};
-
-function showThankyou(val, review) {
-  const starText = val > 1 ? 'stars' : 'star';
-  const panel = document.querySelector('.panel');
-  panel.innerHTML = `
-    <span class="fa-heart"></span>
-    <h1>Thank you!</h1>
-    <br>
-    <strong>Feedback: ${val} ${starText}</strong>
-    <p>We'll use your feedback to improve our support.</p>
-  `;
-}
-
-
-function handleChange() {
-  const inputRatings = document.querySelectorAll('input[name="rating"]');
-  const submitBtn = document.querySelector('input[type="submit"]');
-  
-  inputRatings.forEach(input => {
-    input.addEventListener('change', () => {
-      if (input.checked === true) {
-        submitBtn.disabled = false;
-      }
-    })
-  })
-}
-
-handleChange();
-
 window.redirectToReviewPage = function(sellerId) {
     const currentUserId = currentUser.uid;  // Assuming `currentUser.uid` holds the current user's ID
 
