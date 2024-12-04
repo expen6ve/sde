@@ -30,8 +30,7 @@ width: 466px;
 height: auto; /* Maintain aspect ratio */
 }
 
-
-#ratingModal {
+#ratingReviewModal {
   font-family: 'Montserrat', sans-serif;
   display: flex;
   align-items: center;
@@ -40,9 +39,10 @@ height: auto; /* Maintain aspect ratio */
   margin: 0;
   overflow: hidden;
   background-color: rgba(0, 0, 0, 0.5); /* Optional for modal background */
+  pointer-events: auto; /* Allow interactions outside of modal */
 }
 
-#ratingModal .panel {
+#ratingReviewModal .modal-dialog {
   background-color: white;
   box-shadow: 0 0 7px rgba(0, 0, 0, 0.2);
   border-radius: 5px;
@@ -50,40 +50,47 @@ height: auto; /* Maintain aspect ratio */
   text-align: center;
   padding: 30px 20px;
   max-width: 300px;
+  pointer-events: auto; /* Only the modal content is interactive */
 }
 
-#ratingModal .panel form {
+/* Prevent background clickability */
+#ratingReviewModal .modal-backdrop {
+  pointer-events: none;
+}
+
+
+#ratingReviewModal .modal-dialog form {
   display: flex;
   align-items: center;
   justify-content: center;
   flex-direction: column;
 }
 
-#ratingModal fieldset, #ratingModal label {
+#ratingReviewModal fieldset, #ratingReviewModal label {
   margin: 0;
   padding: 0;
 }
 
-#ratingModal h1 {
+#ratingReviewModal h1 {
   font-size: 22px;
   margin: 10px;
   font-weight: normal;
 }
 
-#ratingModal fieldset {
+#ratingReviewModal fieldset {
   margin: 20px 0 40px;
 }
 
-#ratingModal .rating {
+#ratingReviewModal .rating {
   border: none;
   float: left;
 }
 
-#ratingModal .rating > input {
+#ratingReviewModal .rating > input {
   display: none;
 }
 
-#ratingModal .rating > label:before {
+#ratingReviewModal .rating > label:before {
   margin: 5px;
   font-size: 30px;
   font-family: FontAwesome;
@@ -91,34 +98,34 @@ height: auto; /* Maintain aspect ratio */
   content: "\f005";
 }
 
-#ratingModal .rating > .half:before {
+#ratingReviewModal .rating > .half:before {
   content: "\f089";
   position: absolute;
 }
 
-#ratingModal .rating > label {
+#ratingReviewModal .rating > label {
   color: #ddd;
   float: right;
 }
 
-#ratingModal .rating > input:checked ~ label,
-#ratingModal .rating:not(:checked) > label:hover,
-#ratingModal .rating:not(:checked) > label:hover ~ label {
+#ratingReviewModal .rating > input:checked ~ label,
+#ratingReviewModal .rating:not(:checked) > label:hover,
+#ratingReviewModal .rating:not(:checked) > label:hover ~ label {
   color: #FFD700;
 }
 
-#ratingModal .rating > input:checked + label:hover,
-#ratingModal .rating > input:checked ~ label:hover,
-#ratingModal .rating > label:hover ~ input:checked ~ label,
-#ratingModal .rating > input:checked ~ label:hover ~ label {
+#ratingReviewModal .rating > input:checked + label:hover,
+#ratingReviewModal .rating > input:checked ~ label:hover,
+#ratingReviewModal .rating > label:hover ~ input:checked ~ label,
+#ratingReviewModal .rating > input:checked ~ label:hover ~ label {
   color: #FFED85;
 }
 
-#ratingModal input, #ratingModal label {
+#ratingReviewModal input, #ratingReviewModal label {
   cursor: pointer;
 }
 
-#ratingModal input[type="submit"] {
+#ratingReviewModal input[type="submit"] {
   margin-top: 5px;
   background-color: #302d2b;
   color: white;
@@ -127,30 +134,30 @@ height: auto; /* Maintain aspect ratio */
   padding: 12px 30px;
 }
 
-#ratingModal input[type="submit"]:focus {
+#ratingReviewModal input[type="submit"]:focus {
   outline: 0;
 }
 
-#ratingModal input[type="submit"]:active {
+#ratingReviewModal input[type="submit"]:active {
   transform: scale(0.98);
 }
 
-#ratingModal input[type="submit"]:disabled {
+#ratingReviewModal input[type="submit"]:disabled {
   background-color: #ddd;
   cursor: not-allowed;
 }
 
-#ratingModal .fa-heart {
+#ratingReviewModal .fa-heart {
   color: red;
   font-size: 30px;
   margin-bottom: 10px;
 }
 
-#ratingModal .fa-heart:before {
+#ratingReviewModal .fa-heart:before {
   content: "\f004";
   font-family: FontAwesome;
 }
-#ratingModal textarea {
+#ratingReviewModal textarea {
   width: 100%;
   margin-top: 10px;
   padding: 10px;
@@ -162,7 +169,7 @@ height: auto; /* Maintain aspect ratio */
   color: #333;
 }
 
-#ratingModal textarea:focus {
+#ratingReviewModal textarea:focus {
   outline: none;
   border-color: #302d2b;
 }

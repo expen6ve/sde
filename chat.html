@@ -304,9 +304,9 @@
 </div>
 
 <!-- Rating and Review Modal -->
-<div class="modal" id="ratingReviewModal">
-  <div class="panel">
-    <div class="ratings-container">
+<div class="modal" id="ratingReviewModal" style="display: none;">
+  <div class="modal-dialog">
+    <div class="modal-content">
       <h1>How satisfied are you with buying the book from the seller?</h1>
       <form action="" id="ratingForm">
         <fieldset class="rating">
@@ -323,8 +323,26 @@
         </fieldset>
         <textarea id="reviewText" name="reviewText" placeholder="Leave your review here..." rows="4"></textarea>
         <input disabled type="submit" name="getVal" value="Send Review">
+        <!-- Add a close button to the modal in chat.html -->
+        <button class="close-btn" onclick="closeRatingReviewModal()">Close</button>
+        
       </form>
     </div>
+  </div>
+</div>
+
+<!-- Warning Modal -->
+<div class="modal fade" id="warningModal" tabindex="-1" aria-labelledby="warningModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+      <div class="modal-content">
+          <div class="modal-header">
+              <h5 class="modal-title" id="warningModalLabel">Warning</h5>
+              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body" id="warningModalContent">
+              <!-- Warning message content will be injected here -->
+          </div>
+      </div>
   </div>
 </div>
 

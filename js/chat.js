@@ -157,8 +157,6 @@ function scrollToBottom() {
     }
 }
 
-
-
 let currentMessagesListener = null;
 
 async function markMessagesAsRead(chatKey) {
@@ -320,8 +318,6 @@ window.confirmPaidPayment = async (chatKey) => {
     await confirmPaidPayment(chatKey);
 };
 
-
-
 function clearChatBox() {
     document.getElementById('chatBox').innerHTML = '<p class="text-muted">Select a chat to view messages.</p>';
 }
@@ -411,7 +407,6 @@ document.getElementById('saveShippingDetailsBtn').addEventListener('click', asyn
 });
 
 
-
 const form = document.getElementById('ratingForm');
 
 form.onsubmit = function (e) {
@@ -449,3 +444,25 @@ function handleChange() {
 }
 
 handleChange();
+
+window.redirectToReviewPage = function(sellerId) {
+    const currentUserId = currentUser.uid;  // Assuming `currentUser.uid` holds the current user's ID
+
+    // Check if the seller is the current user
+    if (sellerId === currentUserId) {
+        // Show a warning modal if the user tries to review themselves
+        const modalContent = document.getElementById('warningModalContent');
+        modalContent.innerHTML = `
+            <div style="text-align: center;">
+                <p><strong>You can't write a review and rate yourself!</strong></p>
+            </div>
+        `;
+
+        const warningModal = new bootstrap.Modal(document.getElementById('warningModal'));
+        warningModal.show();
+    } else {
+        // Redirect to the seller's profile page
+        window.location.href = `manage-account.html?userId=${sellerId}`;
+    }
+};
+

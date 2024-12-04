@@ -649,7 +649,7 @@ export async function confirmPaidPayment(confirmationKey) {
                     <div style="text-align: center; display: flex; flex-direction: column; align-items: center;">
                         <p><strong>Thank you for your purchase!</strong></p>
                         <p>We'd love to hear your feedback on the transaction. Please leave a review!</p>
-                        <button class="btn btn-primary" onclick="redirectToReviewPage('${bookId}')">Leave a Review</button>
+                        <button class="btn btn-primary" onclick="redirectToReviewPage('${confirmationSlip.receiver}')">Leave a Review</button>
                     </div>
                     `;
 
@@ -721,7 +721,7 @@ export async function confirmPaidPayment(confirmationKey) {
                 <div style="text-align: center; display: flex; flex-direction: column; align-items: center;">
                     <p><strong>Thank you for your purchase!</strong></p>
                     <p>We'd love to hear your feedback on the transaction. Please leave a review!</p>
-                    <button class="btn btn-primary" onclick="redirectToReviewPage('${bookId}')">Leave a Review</button>
+                    <button class="btn btn-primary" onclick="redirectToReviewPage('${confirmationSlip.receiver}')">Leave a Review</button>
                 </div>
                 `;
 
@@ -751,4 +751,7 @@ export async function confirmPaidPayment(confirmationKey) {
         alert('Failed to confirm the payment. Please try again.');
     }
 }
-
+function redirectToReviewPage(bookId, sellerId) {
+    // Redirect to the manage-account.html page with the seller's ID as a query parameter
+    window.location.href = `manage-account.html?sellerId=${sellerId}`;
+}
