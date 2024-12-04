@@ -32,7 +32,37 @@
             padding-top: 4rem;
             padding-bottom: 1rem;
         }
-      
+        #editProfileButton{
+        max-width: 300px; /* Optional: restrict maximum width */    
+        
+        }
+        #reviewRatingButton {
+        width: auto; /* Makes the button fit its content */
+        max-width: 300px; /* Optional: restrict maximum width */
+        display: inline-block; /* Prevents stretching */
+        position: absolute; /* Position it relative to the container */
+        top: 50%; /* Center vertically */
+        right: 1rem; /* Add spacing from the edge */
+        transform: translateY(-50%); /* Adjust for perfect centering */
+        }
+        .d-flex.flex-column.custombg-bwhite {
+        position: relative; /* Make the container a positioning reference */
+        }
+        #userProfilePic {
+            width: 11rem;
+            height: 11rem;
+            object-fit: cover;
+            border-radius: 50%;
+            position: relative; /* Maintain its relative positioning */
+            bottom: -7rem;
+            z-index: 10; /* Higher than the overlapping container */
+        }
+
+        .d-flex.flex-column.custombg-bwhite {
+            position: relative; /* Establish stacking context */
+            z-index: 1; /* Lower than #userProfilePic */
+        }
+                
       </style>  
 </head>
 <body>
@@ -93,8 +123,11 @@
             <img id="userProfilePic" class="justify-content-end align-items-center" src="images/profileicon.svg" alt="profileicon" style="width: 11rem; height: 11rem; object-fit: cover; border-radius: 50%; position: relative; bottom: -7rem;">
         </div>
         <div class="d-flex flex-column custombg-bwhite pt-n1 rounded-bottom-3">
+            <button id="reviewRatingButton" type="button" class="btn btn-warning">Give a Review & Rating</button>
             <h1 id="userFullName" class="h3 text-center mb-2" style="color:#535353;"></h1>
-            <button id="editProfileButton" type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#editProfileModal">Edit Profile</button>
+                <div class="text-center">
+                    <button id="editProfileButton" type="button" class="btn btn-info mx-auto" data-bs-toggle="modal" data-bs-target="#editProfileModal">Edit Profile</button>
+                </div>              
         </div>        
         <!-- Content Row -->
         <div class="container p-0">
