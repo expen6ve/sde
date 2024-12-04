@@ -47,10 +47,10 @@ async function fetchGCashDetails(userId) {
 
 async function updateUserProfile() {
     const params = new URLSearchParams(window.location.search);
-    const otherUserId = params.get('userId');
-    const currentUser = await checkAuth();
-    const userId = otherUserId || currentUser.uid;
-    const isCurrentUser = userId === currentUser.uid;
+    const otherUserId = params.get('userId'); // Extract 'userId' from the URL if present
+    const currentUser = await checkAuth(); // Get the currently logged-in user
+    const userId = otherUserId || currentUser.uid; // If no 'userId' is in the URL, use the logged-in user's ID
+    const isCurrentUser = userId === currentUser.uid; // Check if viewing own profile
 
     // Fetch user data and update the profile
     const userData = await fetchUserData(userId);
@@ -58,6 +58,12 @@ async function updateUserProfile() {
         updateDOMUserProfile(userData);
         await fetchGCashDetails(userId);
         await updateUserRecentListings(userId);
+
+        // Show or hide the "Give a Review & Rating" button based on profile ownership
+        const reviewRatingButton = document.getElementById('reviewRatingButton');
+        if (reviewRatingButton) {
+            reviewRatingButton.style.display = isCurrentUser ? 'none' : 'block';
+        }
 
         // Change the button text depending on whether it's the current user or another user
         const editProfileButton = document.querySelector('#editProfileButton');
@@ -72,7 +78,6 @@ async function updateUserProfile() {
                 editProfileButton.textContent = "Send a Message";
                 editProfileButton.removeAttribute('data-bs-toggle');
                 editProfileButton.removeAttribute('data-bs-target');
-                // You can add a message sending functionality here if needed
 
                 // Add event listener to open the modal
                 editProfileButton.addEventListener('click', () => openMessageModal(otherUserId));
@@ -80,6 +85,7 @@ async function updateUserProfile() {
         }
     }
 }
+
 
 function openMessageModal(receiverId) {
     // Set the selected seller's ID
@@ -318,10 +324,10 @@ document.addEventListener('DOMContentLoaded', async () => {
   });
 
  // Handle review submission
-document.getElementById('submitReviewBtn').addEventListener('click', async function() {
+ document.getElementById('submitReviewBtn').addEventListener('click', async function () {
     const rating = parseInt(ratingInput.value);
     const reviewText = document.getElementById('reviewText').value.trim();
-    const sellerId = new URLSearchParams(window.location.search).get('userId');
+    const sellerId = new URLSearchParams(window.location.search).get('userId'); // Get sellerId from URL
     const currentUser = await checkAuth();
 
     // Validate input
@@ -341,13 +347,16 @@ document.getElementById('submitReviewBtn').addEventListener('click', async funct
         };
 
         // Push the review data to Firebase under 'feedbacks'
-        const feedbacksRef = ref(database, 'feedbacks');
-        const newFeedbackRef = push(feedbacksRef);
+        const feedbacksRef = ref(database, `feedbacks/${sellerId}`);
+        const newFeedbackRef = push(feedbacksRef); // Generate a unique feedbackId within the seller's node
         await set(newFeedbackRef, reviewData);
+
+        // Print overall rating in the console
+        await getOverallRating(sellerId);
 
         // Confirmation message
         alert(`Review submitted! Rating: ${rating} stars. Review: ${reviewText}`);
-        
+
         // Optionally, close the modal after submission
         const reviewModal = bootstrap.Modal.getInstance(document.getElementById('reviewModal'));
         reviewModal.hide();
@@ -360,3 +369,23 @@ document.getElementById('submitReviewBtn').addEventListener('click', async funct
     }
 });
 
+// Function to calculate overall rating
+async function getOverallRating(sellerId) {
+    const feedbacksRef = ref(database, `feedbacks/${sellerId}`);
+    const snapshot = await get(feedbacksRef);
+
+    if (snapshot.exists()) {
+        const feedbacks = snapshot.val();
+        const ratings = Object.values(feedbacks).map(feedback => feedback.rating);
+
+        // Calculate average rating
+        const totalRatings = ratings.reduce((sum, rating) => sum + rating, 0);
+        const overallRating = ratings.length > 0 ? (totalRatings / ratings.length).toFixed(2) : 0;
+
+        console.log(`Overall Rating for seller ${sellerId}: ${overallRating}`);
+        return overallRating;
+    } else {
+        console.log(`No feedbacks found for seller ${sellerId}`);
+        return 0; // No feedbacks, so rating is 0
+    }
+}
