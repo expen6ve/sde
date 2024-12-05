@@ -84,8 +84,11 @@ async function fetchAndDisplayFeedbacks(userId) {
             // Feedback card HTML
             const feedbackHTML = `
                 <div class="feedback-card mb-3 p-3 border rounded bg-light" style="width: 100%;">
-                    <h5 class="buyer-name text-primary">${buyerFirstName} ${buyerLastName}</h5> <!-- Display firstName instead of buyerId -->
-                    <div class="rating mb-2">${stars}</div>
+                    <h5 class="buyer-name text-primary">${buyerFirstName} ${buyerLastName}</h5> 
+                    <div class="rating mb-2">
+                        ${stars} <span class="rating-number">(${rating} stars)</span>
+                    </div>
+                    <div class="lineseparator border border-top-1 custombg-bwhite"></div>
                     <p class="review-text text-secondary" style="font-size: 1.2rem;">${reviewText}</p>
                 </div>
             `;
@@ -96,6 +99,7 @@ async function fetchAndDisplayFeedbacks(userId) {
         feedbackContainer.innerHTML = '<p>No feedback available.</p>';
     }
 }
+
 
 async function updateUserProfile() {
     const params = new URLSearchParams(window.location.search);
@@ -111,6 +115,7 @@ async function updateUserProfile() {
         await fetchGCashDetails(userId);
         await updateUserRecentListings(userId);
         await fetchAndDisplayFeedbacks(userId); // Fetch and display feedbacks
+        displayOverallRating(userId);
 
         // Show or hide the "Give a Review & Rating" button based on profile ownership
         const reviewRatingButton = document.getElementById('reviewRatingButton');
@@ -478,7 +483,6 @@ document.getElementById('submitReviewBtn').addEventListener('click', async funct
     }
 });
 
-
 // Function to calculate overall rating
 async function getOverallRating(sellerId) {
     const feedbacksRef = ref(database, `feedbacks/${sellerId}`);
@@ -490,7 +494,7 @@ async function getOverallRating(sellerId) {
 
         // Calculate average rating
         const totalRatings = ratings.reduce((sum, rating) => sum + rating, 0);
-        const overallRating = ratings.length > 0 ? (totalRatings / ratings.length).toFixed(2) : 0;
+        const overallRating = ratings.length > 0 ? (totalRatings / ratings.length).toFixed(1) : 0;
 
         console.log(`Overall Rating for seller ${sellerId}: ${overallRating}`);
         return overallRating;
@@ -498,5 +502,15 @@ async function getOverallRating(sellerId) {
         console.log(`No feedbacks found for seller ${sellerId}`);
         return 0; // No feedbacks, so rating is 0
     }
+}
+
+async function displayOverallRating(sellerId) {
+    const overallRatingElement = document.getElementById('overallRating');
+    
+    // Fetch the overall rating value
+    const overallRating = await getOverallRating(sellerId);
+
+    // Update the element's content
+    overallRatingElement.textContent = parseFloat(overallRating).toFixed(1);
 }
 

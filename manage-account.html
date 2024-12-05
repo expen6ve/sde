@@ -178,11 +178,16 @@
                 </div>
         
                 <!-- Feedbacks Column -->
-                <div class="col-7 ps-0 pe-0 custombg-bwhite rounded-top-3">
+                <div class="col-7 ps-0 pe-0 custombg-bwhite rounded-top-3 position-relative">
+                    <!-- Circle with text -->
+                    <div class="circle-text position-absolute top-0 end-0" id="circletext">
+                        <p style="font-size: 15px; margin-bottom: 0px; font-weight: bold;">Overall Rating</p>
+                        <h2 id="overallRating"></h2>
+                    </div>                    
                     <h4 class="content-column-first title text-center" style="color:#535353;">Feedbacks</h4>
-                        <div class="ms-2" id="userFeedbacks">
-                        </div>
-                </div>                
+                    <div class="ms-2" id="userFeedbacks"></div>
+                </div>
+               
             </div>
             <!-- Recent Book Listings  -->
             <div class="custombg-bwhite rounded-top-3 pe-3 ps-3 mt-3">

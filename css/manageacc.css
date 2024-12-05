@@ -61,4 +61,26 @@
   padding-right: 10px; /* Space for scrollbar */
   box-sizing: border-box; /* Include padding in total width/height */
 }
+.circle-text {
+  width: 110px; /* Diameter of the circle */
+  height: 110px; /* Diameter of the circle */
+  background-color: #f39c12; /* Circle background color */
+  color: white; /* Text color */
+  display: flex;
+  flex-direction: column; /* Stack items vertically */
+  justify-content: center; /* Center items vertically */
+  align-items: center; /* Center items horizontally */
+  border-radius: 50%; /* Makes it a circle */
+  text-align: center;
+  position: absolute;
+  top: 50%; /* Start at 50% of the parent's height */
+  transform: translateY(-30%); /* Shift the circle upwards by 50% of its own height */
+  z-index: 10; /* Ensure it stays above other elements */
+}
+
+
+
+.position-relative {
+  position: relative; /* Ensure the parent container is positioned for absolute positioning */
+}
 
