@@ -54,3 +54,11 @@
 .custombg-bwhite {
   flex-grow: 1; /* Ensures columns stretch equally */
 }
+
+#userFeedbacks {
+  max-height: 300px; /* Adjust this value as needed */
+  overflow-y: auto;  /* Vertical scrolling */
+  padding-right: 10px; /* Space for scrollbar */
+  box-sizing: border-box; /* Include padding in total width/height */
+}
+

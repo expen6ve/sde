@@ -45,6 +45,58 @@ async function fetchGCashDetails(userId) {
     }
 }
 
+async function fetchAndDisplayFeedbacks(userId) {
+    const feedbacksRef = ref(database, `feedbacks/${userId}`);
+    const snapshot = await get(feedbacksRef);
+    const feedbackContainer = document.getElementById('userFeedbacks');
+
+    feedbackContainer.innerHTML = ''; // Clear existing content
+
+    if (snapshot.exists()) {
+        const feedbacks = snapshot.val();
+        const feedbackKeys = Object.keys(feedbacks);
+
+        // Sort feedbacks by timestamp in descending order (most recent first)
+        feedbackKeys.sort((a, b) => feedbacks[b].timestamp - feedbacks[a].timestamp);
+
+        // Loop through feedbacks and generate HTML
+        for (const feedbackKey of feedbackKeys) {
+            const { buyerId, rating, reviewText } = feedbacks[feedbackKey];
+
+            // Fetch the buyer's first name from the users node
+            const buyerRef = ref(database, `users/${buyerId}`);
+            const buyerSnapshot = await get(buyerRef);
+
+            let buyerFirstName = "Unknown"; // Default value if no data found
+            let buyerLastName = "Unknown"; // Default value if no data found
+            if (buyerSnapshot.exists()) {
+                const buyerData = buyerSnapshot.val();
+                buyerFirstName = buyerData.firstName; // Get the first name of the buyer
+                buyerLastName = buyerData.lastName; // Get the last name of the buyer
+            }
+
+            // Generate star ratings dynamically
+            const stars = Array(5)
+                .fill('<i class="fa fa-star text-muted" style="font-size: 1.5rem;"></i>') // Unfilled star
+                .map((star, index) => index < rating ? '<i class="fa fa-star text-warning" style="font-size: 1.5rem;"></i>' : star) // Filled star
+                .join('');
+
+            // Feedback card HTML
+            const feedbackHTML = `
+                <div class="feedback-card mb-3 p-3 border rounded bg-light" style="width: 100%;">
+                    <h5 class="buyer-name text-primary">${buyerFirstName} ${buyerLastName}</h5> <!-- Display firstName instead of buyerId -->
+                    <div class="rating mb-2">${stars}</div>
+                    <p class="review-text text-secondary" style="font-size: 1.2rem;">${reviewText}</p>
+                </div>
+            `;
+
+            feedbackContainer.innerHTML += feedbackHTML; // Append feedback card
+        }
+    } else {
+        feedbackContainer.innerHTML = '<p>No feedback available.</p>';
+    }
+}
+
 async function updateUserProfile() {
     const params = new URLSearchParams(window.location.search);
     const otherUserId = params.get('userId'); // Extract 'userId' from the URL if present
@@ -58,6 +110,7 @@ async function updateUserProfile() {
         updateDOMUserProfile(userData);
         await fetchGCashDetails(userId);
         await updateUserRecentListings(userId);
+        await fetchAndDisplayFeedbacks(userId); // Fetch and display feedbacks
 
         // Show or hide the "Give a Review & Rating" button based on profile ownership
         const reviewRatingButton = document.getElementById('reviewRatingButton');
@@ -336,12 +389,59 @@ document.addEventListener('DOMContentLoaded', async () => {
   });
 
  // Handle review submission
- document.getElementById('submitReviewBtn').addEventListener('click', async function () {
+// Step 1: Check the transactions
+async function getTransactionCount(currentUserId, sellerId) {
+    const soldBooksRef = ref(database, 'sold-books');
+    const snapshot = await get(soldBooksRef);
+    
+    if (!snapshot.exists()) return 0;  // If no transactions exist, return 0
+    
+    const transactions = snapshot.val();
+    let transactionCount = 0;
+    
+    // Step 2: Check if current user and seller have completed a transaction together
+    Object.values(transactions).forEach(transaction => {
+        if ((transaction.buyerId === currentUserId && transaction.sellerId === sellerId) || 
+            (transaction.buyerId === sellerId && transaction.sellerId === currentUserId)) {
+            transactionCount++;  // Count matching transactions
+        }
+    });
+
+    return transactionCount;
+}
+
+// Step 3: Check if the user can give a review based on the transaction count
+async function canGiveReview(currentUserId, sellerId) {
+    const transactionCount = await getTransactionCount(currentUserId, sellerId);
+    const feedbacksRef = ref(database, `feedbacks/${sellerId}`);
+    const feedbackSnapshot = await get(feedbacksRef);
+    
+    if (feedbackSnapshot.exists()) {
+        const feedbacks = feedbackSnapshot.val();
+        const feedbackGiven = Object.values(feedbacks).filter(feedback => feedback.buyerId === currentUserId).length;
+        
+        if (feedbackGiven >= transactionCount) {
+            alert("You have already given feedback for all transactions with this seller.");
+            return false;  // Can't give more feedback
+        }
+    }
+
+    return true;  // Can give feedback
+}
+
+// Step 4: Handle the review submission process
+document.getElementById('submitReviewBtn').addEventListener('click', async function () {
+    const sellerId = new URLSearchParams(window.location.search).get('userId'); // Get sellerId from URL
+    const currentUser = await checkAuth();  // Get the logged-in user
+    
+    // Step 5: Check if the user has exceeded their feedback limit
+    const isAllowed = await canGiveReview(currentUser.uid, sellerId);
+    
+    if (!isAllowed) return;  // Prevent submitting feedback if the limit is reached
+
     const rating = parseInt(ratingInput.value);
     const reviewText = document.getElementById('reviewText').value.trim();
-    const sellerId = new URLSearchParams(window.location.search).get('userId'); // Get sellerId from URL
-    const currentUser = await checkAuth();
-
+    
     // Validate input
     if (rating === 0 || reviewText === '') {
         alert('Please provide a rating and a review.');
@@ -349,37 +449,35 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     try {
-        // Create a new review object
+        // Create the review object
         const reviewData = {
-            sellerId: sellerId, // Seller ID from the URL
-            buyerId: currentUser.uid, // Current user as buyer
-            rating: rating, // Rating (1-5 stars)
-            reviewText: reviewText, // Review text
-            timestamp: Date.now(), // Timestamp for the review
+            sellerId: sellerId,
+            buyerId: currentUser.uid,
+            rating: rating,
+            reviewText: reviewText,
+            timestamp: Date.now(),
         };
 
-        // Push the review data to Firebase under 'feedbacks'
+        // Push the review data to Firebase
         const feedbacksRef = ref(database, `feedbacks/${sellerId}`);
-        const newFeedbackRef = push(feedbacksRef); // Generate a unique feedbackId within the seller's node
+        const newFeedbackRef = push(feedbacksRef);
         await set(newFeedbackRef, reviewData);
 
-        // Print overall rating in the console
-        await getOverallRating(sellerId);
-
-        // Confirmation message
+        // Success message
         alert(`Review submitted! Rating: ${rating} stars. Review: ${reviewText}`);
 
-        // Optionally, close the modal after submission
+        // Optionally, close the modal
         const reviewModal = bootstrap.Modal.getInstance(document.getElementById('reviewModal'));
         reviewModal.hide();
 
-        // Optionally, redirect to the seller's profile or refresh the page
+        // Refresh or redirect page after submission
         window.location.href = `manage-account.html?userId=${sellerId}`;
     } catch (error) {
         console.error('Error submitting review:', error);
         alert('Failed to submit your review. Please try again.');
     }
 });
+
 
 // Function to calculate overall rating
 async function getOverallRating(sellerId) {
@@ -401,3 +499,4 @@ async function getOverallRating(sellerId) {
         return 0; // No feedbacks, so rating is 0
     }
 }
+
