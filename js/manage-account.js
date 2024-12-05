@@ -167,35 +167,47 @@ async function updateUserRecentListings(userId) {
     const listingsRef = ref(database, 'book-listings');
     const snapshot = await get(listingsRef);
     const userRecentListingElement = document.getElementById('userRecentListing');
-    userRecentListingElement.innerHTML = '';  // Clear existing content
+    userRecentListingElement.innerHTML = ''; // Clear existing content
 
     if (snapshot.exists()) {
         const allListings = snapshot.val();
+
+        // Filter and sort listings by the user
         const userListings = Object.keys(allListings)
             .filter(key => allListings[key].userId === userId)
             .map(key => ({ id: key, ...allListings[key] }))
-            .sort((a, b) => new Date(b.dateListed) - new Date(a.dateListed));
+            .sort((a, b) => new Date(b.dateListed) - new Date(a.dateListed)); // Most recent first
 
         if (userListings.length) {
-            const { title, author, condition, price, imageUrl } = userListings[0];
-            userRecentListingElement.innerHTML = `
-                <div class="card h-100 mb-3">
-                    <div class="card-body">
-                        <div class="d-flex justify-content-center">
-                            <img src="${imageUrl || 'images/default-book.png'}" class="img-fluid" alt="Book Image" style="height: 200px; object-fit: cover;">
+            // Create cards for each listing
+            userListings.forEach(listing => {
+                const { title, author, condition, price, imageUrl } = listing;
+
+                const cardHTML = `
+                    <div class="card h-100 mb-3">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-center">
+                                <img src="${imageUrl || 'images/default-book.png'}" class="img-fluid" alt="Book Image" style="height: 200px; object-fit: cover;">
+                            </div>
+                            <h4 class="card-title mt-3 fs-5">${title}</h4>
+                            <p class="card-text mb-0 user-info-font"><strong>Author:</strong> ${author}</p>
+                            <p class="card-text mb-0 user-info-font"><strong>Condition:</strong> ${condition}</p>
+                            <p class="card-text mb-0 user-info-font"><strong>Price:</strong> ₱${price}</p>
                         </div>
-                        <h4 class="card-title mt-3 fs-5">${title}</h4>
-                        <p class="card-text mb-0 user-info-font"><strong>Author:</strong> ${author}</p>
-                        <p class="card-text mb-0 user-info-font"><strong>Condition:</strong> ${condition}</p>
-                        <p class="card-text mb-0 user-info-font"><strong>Price:</strong> ₱${price}</p>
                     </div>
-                </div>
                 `;
+
+                // Append card to the listing container
+                userRecentListingElement.innerHTML += cardHTML;
+            });
         } else {
             userRecentListingElement.innerHTML = '<p>No recent listings available.</p>';
         }
+    } else {
+        userRecentListingElement.innerHTML = '<p>No recent listings available.</p>';
     }
 }
+
 
 // Handle profile update
 document.getElementById('saveProfileChangesButton').addEventListener('click', async () => {

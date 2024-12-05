@@ -21,3 +21,15 @@
 .star-rating .star.checked {
   color: #FFD700;
 }
+#userRecentListing {
+    display: flex; /* Use flexbox for alignment */
+    flex-wrap: wrap; /* Allow items to wrap to the next row if necessary */
+    gap: 20px; /* Add spacing between the items */
+    justify-content: space-around; /* Distribute items evenly */
+}
+
+.card {
+    flex: 1 1 calc(33.333% - 20px); /* Make each card take up a third of the width with spacing */
+    max-width: calc(33.333% - 20px);
+    box-sizing: border-box; /* Ensure padding and borders are included in the size */
+}
