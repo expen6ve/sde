@@ -514,3 +514,131 @@ async function displayOverallRating(sellerId) {
     overallRatingElement.textContent = parseFloat(overallRating).toFixed(1);
 }
 
+document.getElementById("verificationForm").addEventListener("submit", async (e) => {
+    e.preventDefault(); // Prevent default form submission
+    
+    // Get the logged-in user's ID
+    const auth = await checkAuth(); // Assuming checkAuth returns an object
+    const userId = auth?.uid;
+
+    if (!userId || typeof userId !== "string") {
+        alert("You need to be logged in to submit this form.");
+        return;
+    }
+
+    // Get form values
+    const fullName = getElementValue("fullName");
+    const fullAddress = getElementValue("fullAddress");
+    const dob = getElementValue("dob");
+    const idType = getElementValue("idType");
+    const idNumber = getElementValue("idNumber");
+
+    // Get file inputs
+    const idFile = document.getElementById("idUpload").files[0];
+    const selfieFile = document.getElementById("selfieUpload").files[0];
+
+    if (!idFile || !selfieFile) {
+        alert("Please upload all required files.");
+        return;
+    }
+
+    try {
+        // Upload files to Firebase Storage
+        const idFilePath = `verification/${userId}/idFile-${Date.now()}`;
+        const selfieFilePath = `verification/${userId}/selfieFile-${Date.now()}`;
+
+        const idFileRef = storageRef(storage, idFilePath);
+        const selfieFileRef = storageRef(storage, selfieFilePath);
+
+        // Upload ID file
+        await uploadBytes(idFileRef, idFile);
+        const idFileUrl = await getDownloadURL(idFileRef);
+
+        // Upload selfie file
+        await uploadBytes(selfieFileRef, selfieFile);
+        const selfieFileUrl = await getDownloadURL(selfieFileRef);
+
+        // Save data to Firebase Realtime Database
+        const verificationRef = ref(database, `verificationtoconfirm/${userId}`);
+        await set(verificationRef, {
+            fullName,
+            fullAddress,
+            dob,
+            idType,
+            idNumber,
+            idFileUrl,
+            selfieFileUrl,
+            verifyStatus: "pending",
+            timestamp: new Date().toISOString(), // Optional: track submission time
+        });
+
+        alert("Verification form submitted successfully!");
+        document.getElementById("verificationForm").reset(); // Reset the form
+    } catch (error) {
+        console.error("Error uploading files or saving data:", error);
+        alert("An error occurred while submitting your verification form. Please try again.");
+    }
+});
+
+document.addEventListener("DOMContentLoaded", async () => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const profileUserId = urlParams.get("userId"); // The user ID from the URL
+    const currentUser = await checkAuth();  // Get the logged-in user
+
+    if (!currentUser) {
+        console.error("User not authenticated.");
+        return;
+    }
+
+    // Extract the user ID (uid) from the current user object
+    const currentUserId = currentUser.uid;
+
+    // If no userId in URL, assume it's the logged-in user's profile
+    const actualProfileUserId = profileUserId || currentUserId;
+
+    // Debugging log to check the value of actualProfileUserId
+    console.log("Profile User ID:", actualProfileUserId);
+    
+    // Ensure the ID is a string and not an object
+    if (typeof actualProfileUserId !== 'string') {
+        console.error("Invalid user ID: must be a string");
+        return;
+    }
+
+    const verifyButtonContainer = document.getElementById("verifyButtonContainer");
+    const customerStatusContainer = document.getElementById("customerStatusContainer");
+
+    // Fetch verification status for the profile being viewed
+    const verificationRef = ref(database, `verificationtoconfirm/${actualProfileUserId}`);
+    const snapshot = await get(verificationRef);
+    const verificationData = snapshot.exists() ? snapshot.val() : null;
+    const isVerified = verificationData?.verifyStatus === "verified";
+
+    // Determine if the logged-in user is viewing their own profile
+    const isOwnProfile = currentUserId === actualProfileUserId;
+
+    if (isOwnProfile) {
+        // Logged-in user viewing their own profile
+        if (isVerified) {
+            // If verified, show customer_status
+            verifyButtonContainer.classList.add("d-none");
+            customerStatusContainer.classList.remove("d-none");
+        } else {
+            // If not verified, show "Verify" button
+            verifyButtonContainer.classList.remove("d-none");
+            customerStatusContainer.classList.add("d-none");
+        }
+    } else {
+        // Logged-in user viewing another user's profile
+        if (isVerified) {
+            // If the other user is verified, show customer_status
+            verifyButtonContainer.classList.add("d-none");
+            customerStatusContainer.classList.remove("d-none");
+        } else {
+            // If the other user is not verified, hide both
+            verifyButtonContainer.classList.add("d-none");
+            customerStatusContainer.classList.add("d-none");
+        }
+    }
+});
+

@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+    <title>Selling Form</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Bona+Nova+SC&display=swap" rel="stylesheet">
+    <link href="css/bootstrap.min.css" rel="stylesheet" />
+    <link href="css/userhome.css" rel="stylesheet" />
+    <script defer src="js/bootstrap.bundle.min.js"></script>
+    <script type="module" src="js/navbar.js"></script>
+</head>
+<body>
+<!-- Responsive navbar -->
+<nav class="navbar navbar-expand-lg">
+    <div class="container px-5">
+        <a class="navbar-brand fs-2 text-muted d-flex align-items-center" href="userhome.html">
+            Eco-Reads
+            <img src="images/logo.png" alt="Eco-Reads Logo" class="ms-2" style="width: 50px; height: auto;">
+        </a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarSupportedContent">
+            <ul class="navbar-nav ms-auto mb-2 mb-lg-0 d-flex align-items-center">
+                <li class="nav-item">
+                    <a class="nav-link active" aria-current="page" href="userhome.html">Booksfeed</a>
+                </li>
+                <!-- Genre Dropdown -->
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                    Genre
+                    </a>
+                    <ul class="dropdown-menu" id="genreDropdown">
+                    <li><a class="dropdown-item" href="#" data-genre="Action">Action</a></li>
+                    <li><hr class="dropdown-divider"></li>
+                    <li><a class="dropdown-item" href="#" data-genre="Romance">Romance</a></li>
+                    <li><hr class="dropdown-divider"></li>
+                    <li><a class="dropdown-item" href="#" data-genre="Horror">Horror</a></li>
+                    </ul>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" id="messagesLink" href="chat.html">Messages</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="sellingform.html">SELL A BOOK</a>
+                </li>   
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" id="profileDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        <img src="images/profileicon.svg" alt="profileicon" style="width: 30px; height: 35px; object-fit: cover; border-radius: 50%">
+                    </a>                    
+                    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="profileDropdown" id="profileDropdownMenu">
+                        <!-- Placeholder for dynamic role-based items -->
+                        <li id="roleBasedItem"></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item" href="#" id="signOut">Sign Out</a></li>
+                    </ul>                    
+                </li>                
+            </ul>
+        </div>
+    </div>
+</nav>
+<h3 class="text-center text-muted mt-5">Scan QR or Use Gcash Number Below to Pay for Subscription!</h3>
+<div class="subscribe container py-3 h-100 rounded shadow-lg" style="width: 60rem; transform: translateY(7%);">
+    <h3 class="text-center mt-5"><strong>Subscription Fee: ₱250</strong></h3>
+    <!-- QR Code Image -->
+    <div class="text-center mb-3">
+        <img src="images/adminqr.png" alt="QR Code" class="img-fluid" style="max-width: 300px;">
+    </div>
+    <!-- Name Field (Text) -->
+    <div class="text-center">
+        <h4 id="name">Zayne Salvaña</h4> <!-- This is a non-editable text field for Name -->
+    </div>
+
+    <!-- Number Field (Text) -->
+    <div class="text-center">
+        <h4 id="number">09366838099</h4> <!-- This is a non-editable text field for Number -->
+    </div>
+
+    <!-- Transaction Reference Number (Input Field) -->
+    <div class="mb-3">
+        <label for="transactionRef" class="form-label"><strong>Transaction Reference Number</strong></label>
+        <input type="number" class="form-control" id="transactionRef" placeholder="Enter Reference Number">
+    </div>
+    
+        <!--  Picture Upload  -->
+    <div class="mb-4 form-section text-center">
+        <label for="bookImage" class="form-label">Upload GCash Transaction Receipt</label>
+        <input type="file" id="bookImage" class="form-control form-control-sm" accept="image/*" />
+    </div>
+    <!-- Subscribe Button -->
+    <button class="btn btn-primary w-50 d-block mx-auto">Subscribe</button>
+</div>
+
+
+</body>
+</html>
