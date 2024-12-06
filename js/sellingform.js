@@ -15,6 +15,41 @@ async function checkUserAuthentication() {
 }
 
 document.addEventListener('DOMContentLoaded', async () => {
+    await checkUserAuthentication();
+    initializeNavbar();
+
+    const user = await checkAuth();
+    const userId = user.uid;
+
+    const subscribeAlert = document.getElementById('subscribeAlert');
+
+    // Check subscription status
+    try {
+        const subscriptionRef = ref(database, `subscription/${userId}`);
+        const snapshot = await get(subscriptionRef);
+
+        if (snapshot.exists()) {
+            const subscriptionData = snapshot.val();
+            const { status } = subscriptionData;
+
+            if (status === 'subscribed') {
+                // Hide the subscribe alert if the subscription is subscribed
+                subscribeAlert.classList.add('d-none');
+            } else {
+                // Show the subscribe alert (already visible by default in HTML)
+                subscribeAlert.classList.remove('d-none');
+            }
+        } else {
+            // No subscription found, show the alert (default behavior)
+            subscribeAlert.classList.remove('d-none');
+        }
+    } catch (error) {
+        console.error('Error checking subscription status:', error);
+        alert('Failed to verify subscription status. Please try again later.');
+    }
+});
+
+document.addEventListener('DOMContentLoaded', async () => {
     const user = await checkAuth();
     if (!user) {
         window.location.href = 'login.html';
@@ -186,62 +221,106 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     });
 
-    // Handle "Continue" button in the modal
-    document.getElementById('confirmSubmissionBtn').addEventListener('click', async () => {
-        try {
-            const user = await checkAuth();
-            const userId = user.uid; // Get the logged-in user's ID
-            
-            // Upload the image to Firebase Storage
-            const file = bookImageInput.files[0];
-            let imageUrl = '';
-    
-            if (file) {
-                const imageStorageRef = storageRef(storage, `book-images/${Date.now()}-${file.name}`);
-                await uploadBytes(imageStorageRef, file);
-                imageUrl = await getDownloadURL(imageStorageRef);
-            }
-    
-            // Create the data object with user ID and date-listed
-            const bookData = {
-                title: bookTitleInput.value,
-                author: authorInput.value,
-                genre: genreInput.value,
-                condition: conditionInput.value,
-                description: descriptionInput.value,
-                price: parseFloat(priceInput.value).toFixed(2),
-                imageUrl: imageUrl,
-                userId: userId, // Associate the book with the logged-in user
-                dateListed: new Date().toISOString() // Add the current date and time
-            };
-    
-            // Save the data to Firebase Realtime Database
-            const newBookRef = ref(database, `book-listings/${Date.now()}`);
-            await set(newBookRef, bookData);
-    
-            // Assign "seller" role to the user after adding the book
-            await updateUserRole(userId);
-    
-            console.log('Book listing added successfully!');
-    
-            // Reset the form
-            bookTitleInput.value = '';
-            authorInput.value = '';
-            genreInput.value = '';
-            conditionInput.value = '';
-            descriptionInput.value = '';
-            priceInput.value = '';
-            bookImageInput.value = '';
-            reviewBookImage.src = 'images/default-avatar.png'; // Reset image preview
-    
-            // Close the modal
-            const modalInstance = bootstrap.Modal.getInstance(document.getElementById('formReviewModal'));
-            modalInstance.hide();
-        } catch (error) {
-            console.error('Error adding book listing:', error);
-            alert('Failed to add the book listing. Please try again.');
+// Function to check how many books a user has listed this month
+async function getMonthlyListingsCount(userId) {
+    const currentMonth = new Date().toISOString().slice(0, 7); // Format: YYYY-MM
+    const listingsRef = ref(database, `book-listings`);
+    const snapshot = await get(listingsRef);
+
+    if (!snapshot.exists()) return 0;
+
+    const listings = snapshot.val();
+    let count = 0;
+
+    for (const key in listings) {
+        const listing = listings[key];
+        if (
+            listing.userId === userId &&
+            listing.dateListed.startsWith(currentMonth) // Check if listed in the current month
+        ) {
+            count++;
         }
-    });
+    }
+
+    return count;
+}
+
+// Modified "Confirm Submission" button handler
+document.getElementById('confirmSubmissionBtn').addEventListener('click', async () => {
+    try {
+        const user = await checkAuth();
+        const userId = user.uid; // Get the logged-in user's ID
+
+        // Check subscription status
+        const subscriptionRef = ref(database, `subscription/${userId}`);
+        const subscriptionSnapshot = await get(subscriptionRef);
+        let isSubscribed = false;
+
+        if (subscriptionSnapshot.exists()) {
+            const { status } = subscriptionSnapshot.val();
+            isSubscribed = status === 'subscribed';
+        }
+
+        // Get the current number of monthly listings
+        const monthlyListingsCount = await getMonthlyListingsCount(userId);
+
+        // Enforce limit for non-subscribed users
+        if (!isSubscribed && monthlyListingsCount >= 1) {
+            alert('You are limited to 1 book listing per month as a non-subscribed user. Subscribe to list more.');
+            return;
+        }
+
+        // Upload the image to Firebase Storage
+        const file = bookImageInput.files[0];
+        let imageUrl = '';
+
+        if (file) {
+            const imageStorageRef = storageRef(storage, `book-images/${Date.now()}-${file.name}`);
+            await uploadBytes(imageStorageRef, file);
+            imageUrl = await getDownloadURL(imageStorageRef);
+        }
+
+        // Create the data object with user ID and date-listed
+        const bookData = {
+            title: bookTitleInput.value,
+            author: authorInput.value,
+            genre: genreInput.value,
+            condition: conditionInput.value,
+            description: descriptionInput.value,
+            price: parseFloat(priceInput.value).toFixed(2),
+            imageUrl: imageUrl,
+            userId: userId, // Associate the book with the logged-in user
+            dateListed: new Date().toISOString() // Add the current date and time
+        };
+
+        // Save the data to Firebase Realtime Database
+        const newBookRef = ref(database, `book-listings/${Date.now()}`);
+        await set(newBookRef, bookData);
+
+        // Assign "seller" role to the user after adding the book
+        await updateUserRole(userId);
+
+        console.log('Book listing added successfully!');
+
+        // Reset the form
+        bookTitleInput.value = '';
+        authorInput.value = '';
+        genreInput.value = '';
+        conditionInput.value = '';
+        descriptionInput.value = '';
+        priceInput.value = '';
+        bookImageInput.value = '';
+        reviewBookImage.src = 'images/default-avatar.png'; // Reset image preview
+
+        // Close the modal
+        const modalInstance = bootstrap.Modal.getInstance(document.getElementById('formReviewModal'));
+        modalInstance.hide();
+    } catch (error) {
+        console.error('Error adding book listing:', error);
+        alert('Failed to add the book listing. Please try again.');
+    }
+});
+
     
 });
 

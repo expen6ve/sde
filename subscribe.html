@@ -9,8 +9,6 @@
     <link href="https://fonts.googleapis.com/css2?family=Bona+Nova+SC&display=swap" rel="stylesheet">
     <link href="css/bootstrap.min.css" rel="stylesheet" />
     <link href="css/userhome.css" rel="stylesheet" />
-    <script defer src="js/bootstrap.bundle.min.js"></script>
-    <script type="module" src="js/navbar.js"></script>
 </head>
 <body>
 <!-- Responsive navbar -->
@@ -91,9 +89,12 @@
         <input type="file" id="bookImage" class="form-control form-control-sm" accept="image/*" />
     </div>
     <!-- Subscribe Button -->
-    <button class="btn btn-primary w-50 d-block mx-auto">Subscribe</button>
+    <button id="subscribeButton" class="btn btn-primary w-50 d-block mx-auto">Subscribe</button>
+
 </div>
 
-
+<script defer src="js/bootstrap.bundle.min.js"></script>
+<script type="module" src="js/subscribe.js"></script>
+<script type="module" src="js/navbar.js"></script>
 </body>
 </html>
