@@ -24,7 +24,6 @@ window.addEventListener('DOMContentLoaded', () => {
         get(usersRef).then(snapshot => {
             if (snapshot.exists()) {
                 const users = snapshot.val();
-                console.log(users);  // Verify the structure of users in the console
 
                 const rows = [];
                 for (const key in users) {
@@ -68,7 +67,7 @@ window.addEventListener('DOMContentLoaded', () => {
                                 <i class="material-icons check-icon">check_circle</i>
                             </a>
                         `,
-                        `<a href="#" class="settingsUser" title="Settings"><i class="material-icons">&#xE8B8;</i></a>
+                        `<a href="#" class="settingsUser" data-id="${key}" title="Settings"><i class="material-icons">&#xE8B8;</i></a>
                          <a href="#" class="deleteUser" data-id="${key}" title="Delete"><i class="material-icons">&#xE5C9;</i></a>`
                     ]);
                 }
@@ -382,3 +381,282 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 });
+document.addEventListener('click', (event) => {
+    if (event.target.closest('.settingsUser')) {
+        const userId = event.target.closest('.settingsUser').getAttribute('data-id');
+        const userRef = ref(database, `users/${userId}`);
+
+        get(userRef).then(snapshot => {
+            if (snapshot.exists()) {
+                const user = snapshot.val();
+
+                // Open the userDetailsModal
+                const userDetailsModalElement = document.getElementById('userDetailsModal');
+                const userDetailsModal = new bootstrap.Modal(userDetailsModalElement);
+                
+                // Close the userDetailsModal if it's already open
+                const existingUserDetailsModal = bootstrap.Modal.getInstance(userDetailsModalElement);
+                if (existingUserDetailsModal) {
+                    existingUserDetailsModal.hide();
+                }
+
+                userDetailsModal.show();
+
+                // Cleanup when the userDetailsModal is hidden
+                userDetailsModalElement.addEventListener('hidden.bs.modal', () => {
+                    // Reset modal content to avoid lingering data
+                    userDetailsModalElement.querySelector('#userBasicDetailsBtn').removeEventListener('click', showUserBasicDetails);
+                    userDetailsModalElement.querySelector('#userAddressBtn').removeEventListener('click', showUserAddressDetails);
+                });
+
+                // Show basic user details in the modal
+                const showUserBasicDetails = () => {
+                    document.getElementById('profilePicture').src = user.profilePicture;
+                    document.getElementById('email').value = user.email;
+                    document.getElementById('password').value = user.password;
+                    document.getElementById('firstName').value = user.firstName;
+                    document.getElementById('lastName').value = user.lastName;
+                    document.getElementById('age').value = user.age;
+                    document.getElementById('gender').value = user.gender;
+                    document.getElementById('birthDay').value = user.birthDate.day;
+                    document.getElementById('birthMonth').value = user.birthDate.month;
+                    document.getElementById('birthYear').value = user.birthDate.year;
+
+                    const userBasicDetailsModal = new bootstrap.Modal(document.getElementById('userBasicDetailsModal'));
+                    userBasicDetailsModal.show();
+                };
+
+                document.getElementById('userBasicDetailsBtn').addEventListener('click', showUserBasicDetails);
+
+                // Handle the Edit button
+                document.getElementById('basicEditButton').addEventListener('click', () => {
+                    // Enable the input fields for editing
+                    document.getElementById('email').disabled = false;
+                    document.getElementById('password').disabled = false;
+                    document.getElementById('firstName').disabled = false;
+                    document.getElementById('lastName').disabled = false;
+                    document.getElementById('age').disabled = false;
+                    document.getElementById('gender').disabled = false;
+                    document.getElementById('birthDay').disabled = false;
+                    document.getElementById('birthMonth').disabled = false;
+                    document.getElementById('birthYear').disabled = false;
+
+                    // Enable Save button
+                    document.getElementById('basicSaveButton').disabled = false;
+                });
+
+                // Handle the Save button
+                document.getElementById('basicSaveButton').addEventListener('click', () => {
+                    // Retrieve updated values from the form
+                    const updatedUser = {
+                        email: document.getElementById('email').value,
+                        password: document.getElementById('password').value,
+                        firstName: document.getElementById('firstName').value,
+                        lastName: document.getElementById('lastName').value,
+                        age: document.getElementById('age').value,
+                        gender: document.getElementById('gender').value,
+                        birthDate: {
+                            day: document.getElementById('birthDay').value,
+                            month: document.getElementById('birthMonth').value,
+                            year: document.getElementById('birthYear').value,
+                        },
+                    };
+
+                    // Update the data in Firebase
+                    update(userRef, updatedUser).then(() => {
+                        console.log("User data updated successfully!");
+
+                        // Reload the user data after saving the changes
+                        get(userRef).then(snapshot => {
+                            if (snapshot.exists()) {
+                                const updatedUserData = snapshot.val();
+                                
+                                // Update the fields with the new data
+                                document.getElementById('email').value = updatedUserData.email;
+                                document.getElementById('password').value = updatedUserData.password;
+                                document.getElementById('firstName').value = updatedUserData.firstName;
+                                document.getElementById('lastName').value = updatedUserData.lastName;
+                                document.getElementById('age').value = updatedUserData.age;
+                                document.getElementById('gender').value = updatedUserData.gender;
+                                document.getElementById('birthDay').value = updatedUserData.birthDate.day;
+                                document.getElementById('birthMonth').value = updatedUserData.birthDate.month;
+                                document.getElementById('birthYear').value = updatedUserData.birthDate.year;
+                            }
+                        });
+
+                        // Disable the inputs and Save button again
+                        document.getElementById('email').disabled = true;
+                        document.getElementById('password').disabled = true;
+                        document.getElementById('firstName').disabled = true;
+                        document.getElementById('lastName').disabled = true;
+                        document.getElementById('age').disabled = true;
+                        document.getElementById('gender').disabled = true;
+                        document.getElementById('birthDay').disabled = true;
+                        document.getElementById('birthMonth').disabled = true;
+                        document.getElementById('birthYear').disabled = true;
+                        document.getElementById('basicSaveButton').disabled = true;
+
+                        // Close the modal after saving
+                        const userBasicDetailsModal = bootstrap.Modal.getInstance(document.getElementById('userBasicDetailsModal'));
+                        userBasicDetailsModal.show();
+                    }).catch(error => {
+                        console.error("Error updating user data:", error);
+                    });
+                });
+
+                // Attach the event listener for userBasicDetailsBtn
+                document.getElementById('userBasicDetailsBtn').addEventListener('click', showUserBasicDetails);
+                // Show gcash details in the modal when userGCashDetailsBtn is clicked
+                const showUserGCashDetails = () => {
+                    // Check if 'user.gcash' exists, and if not, set to an empty object
+                    const gcash = user.gcash || {};
+                
+                    // Populate the address fields with the user's gcash data, if it exists
+                    document.getElementById('gcashQrCode').src = gcash.qrCodeUrl;
+                    document.getElementById('gcashName').value = gcash.gcashname || '';
+                    document.getElementById('gcashNumber').value = gcash.gcashnum || '';
+
+                
+                
+                    const userGCashModal = new bootstrap.Modal(document.getElementById('userGcashModal'));
+                    userGCashModal.show();
+                };
+                
+
+                // Attach the event listener for userAddressBtn
+                document.getElementById('userGCashDetailsBtn').addEventListener('click', showUserGCashDetails);
+
+
+                // Show address details in the modal when userAddressBtn is clicked
+                const showUserAddressDetails = () => {
+                    // Check if 'user.address' exists, and if not, set to an empty object
+                    const address = user.address || {};
+                    const additionalAddress = user.additionalAddress || {};
+                
+                    // Populate the address fields with the user's address data, if it exists
+                    document.getElementById('addressStreet').value = address.street || '';
+                    document.getElementById('addressBarangay').value = address.barangay || '';
+                    document.getElementById('addressCity').value = address.city || '';
+                    document.getElementById('addressProvince').value = address.province || '';
+                    document.getElementById('addressZipCode').value = address.zipCode || '';
+                
+                    document.getElementById('additionalStreet').value = additionalAddress.street || '';
+                    document.getElementById('additionalBarangay').value = additionalAddress.barangay || '';
+                    document.getElementById('additionalCity').value = additionalAddress.city || '';
+                    document.getElementById('additionalProvince').value = additionalAddress.province || '';
+                    document.getElementById('additionalZipCode').value = additionalAddress.zipCode || '';
+                    document.getElementById('additionalLandmark').value = additionalAddress.landmark || '';
+                
+                    const userAddressModal = new bootstrap.Modal(document.getElementById('userAddressModal'));
+                    userAddressModal.show();
+                };
+                
+
+                // Attach the event listener for userAddressBtn
+                document.getElementById('userAddressBtn').addEventListener('click', showUserAddressDetails);
+
+                // Handle the Edit button for user address
+                document.getElementById('addressEditButton').addEventListener('click', () => {
+                    // Enable the input fields for editing
+                    document.getElementById('addressStreet').disabled = false;
+                    document.getElementById('addressBarangay').disabled = false;
+                    document.getElementById('addressCity').disabled = false;
+                    document.getElementById('addressProvince').disabled = false;
+                    document.getElementById('addressZipCode').disabled = false;
+
+                    document.getElementById('additionalStreet').disabled = false;
+                    document.getElementById('additionalBarangay').disabled = false;
+                    document.getElementById('additionalCity').disabled = false;
+                    document.getElementById('additionalProvince').disabled = false;
+                    document.getElementById('additionalZipCode').disabled = false;
+                    document.getElementById('additionalLandmark').disabled = false;
+
+                    // Enable Save button
+                    document.getElementById('addressSaveButton').disabled = false;
+                });
+
+                // Handle the Save button for user address
+                    document.getElementById('addressSaveButton').addEventListener('click', () => {
+                        // Retrieve updated values from the address form
+                        const updatedAddress = {
+                            street: document.getElementById('addressStreet').value,
+                            barangay: document.getElementById('addressBarangay').value,
+                            city: document.getElementById('addressCity').value,
+                            province: document.getElementById('addressProvince').value,
+                            zipCode: document.getElementById('addressZipCode').value
+                        };
+
+                        // Retrieve updated values for the additional address
+                        const updatedAdditionalAddress = {
+                            street: document.getElementById('additionalStreet').value,
+                            barangay: document.getElementById('additionalBarangay').value,
+                            city: document.getElementById('additionalCity').value,
+                            province: document.getElementById('additionalProvince').value,
+                            zipCode: document.getElementById('additionalZipCode').value,
+                            landmark: document.getElementById('additionalLandmark').value
+                        };
+
+                        // Prepare the updates for both the main address and additional address
+                        const updates = {
+                            'address': updatedAddress,  // Main address
+                            'additionalAddress': updatedAdditionalAddress // Additional address
+                        };
+
+                        // Update both the main address and additional address in Firebase
+                        update(userRef, updates).then(() => {
+                            console.log("User address updated successfully!");
+
+                            // Reload the user data after saving the changes
+                            get(userRef).then(snapshot => {
+                                if (snapshot.exists()) {
+                                    const updatedUserData = snapshot.val();
+
+                                    // Update the modal inputs with new address data
+                                    document.getElementById('addressStreet').value = updatedUserData.address.street || '';
+                                    document.getElementById('addressBarangay').value = updatedUserData.address.barangay || '';
+                                    document.getElementById('addressCity').value = updatedUserData.address.city || '';
+                                    document.getElementById('addressProvince').value = updatedUserData.address.province || '';
+                                    document.getElementById('addressZipCode').value = updatedUserData.address.zipCode || '';
+
+                                    // Update the modal inputs with new additional address data
+                                    document.getElementById('additionalStreet').value = updatedUserData.additionalAddress.street || '';
+                                    document.getElementById('additionalBarangay').value = updatedUserData.additionalAddress.barangay || '';
+                                    document.getElementById('additionalCity').value = updatedUserData.additionalAddress.city || '';
+                                    document.getElementById('additionalProvince').value = updatedUserData.additionalAddress.province || '';
+                                    document.getElementById('additionalZipCode').value = updatedUserData.additionalAddress.zipCode || '';
+                                    document.getElementById('additionalLandmark').value = updatedUserData.additionalAddress.landmark || '';
+                                }
+                            });
+
+                            // Disable the inputs and Save button again
+                            document.getElementById('addressStreet').disabled = true;
+                            document.getElementById('addressBarangay').disabled = true;
+                            document.getElementById('addressCity').disabled = true;
+                            document.getElementById('addressProvince').disabled = true;
+                            document.getElementById('addressZipCode').disabled = true;
+
+                            document.getElementById('additionalStreet').disabled = true;
+                            document.getElementById('additionalBarangay').disabled = true;
+                            document.getElementById('additionalCity').disabled = true;
+                            document.getElementById('additionalProvince').disabled = true;
+                            document.getElementById('additionalZipCode').disabled = true;
+                            document.getElementById('additionalLandmark').disabled = true;
+
+                            document.getElementById('addressSaveButton').disabled = true;
+
+                            // Close the modal after saving
+                            const userAddressModal = bootstrap.Modal.getInstance(document.getElementById('userAddressModal'));
+                            userAddressModal.show();  // Close modal after saving
+                        }).catch(error => {
+                            console.error("Error updating user address:", error);
+                        });
+                    });
+                    
+
+            }
+        }).catch(error => {
+            console.error("Error getting user data: ", error);
+        });
+    }
+});
+

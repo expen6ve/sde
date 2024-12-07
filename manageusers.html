@@ -223,7 +223,192 @@
                         </div>
                     </div>
                 </div>
+                <!-- Preview User Details Buttons Modal -->
+                <div class="modal fade" id="userDetailsModal" tabindex="-1" aria-labelledby="userDetailsModalLabel" aria-hidden="true">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="userDetailsModalLabel">User Details</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body text-center">
+                                <p>Select the type of details to display:</p>
+                                <div class="d-grid gap-3">
+                                    <button type="button" class="btn btn-primary" id="userBasicDetailsBtn">User Basic Details</button>
+                                    <button type="button" class="btn btn-secondary" id="userAddressBtn">User Address</button>
+                                    <button type="button" class="btn btn-success" id="userGCashDetailsBtn">User GCash Details</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- User Basic Details Modal -->
+                <div class="modal fade" id="userBasicDetailsModal" tabindex="-1" aria-labelledby="userBasicDetailsModalLabel" aria-hidden="true">
+                    <div class="modal-dialog modal-lg">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="userBasicDetailsModalLabel">User Basic Details</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body">
+                                <div class="text-center mb-4">
+                                    <img id="profilePicture" src="" alt="Profile Picture" class="rounded-circle" style="width: 150px; height: 150px; object-fit: cover;">
+                                </div>
+                                <form id="userBasicDetailsForm">
+                                    <div class="row mb-3">
+                                        <div class="col-md-6">
+                                            <label for="email" class="form-label">Email</label>
+                                            <input type="email" id="email" class="form-control" disabled>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label for="password" class="form-label">Password</label>
+                                            <input type="text" id="password" class="form-control" disabled>
+                                        </div>
+                                    </div>
+                                    <div class="row mb-3">
+                                        <div class="col-md-6">
+                                            <label for="firstName" class="form-label">First Name</label>
+                                            <input type="text" id="firstName" class="form-control" disabled>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label for="lastName" class="form-label">Last Name</label>
+                                            <input type="text" id="lastName" class="form-control" disabled>
+                                        </div>
+                                    </div>
+                                    <div class="row mb-3">
+                                        <div class="col-md-6">
+                                            <label for="age" class="form-label">Age</label>
+                                            <input type="number" id="age" class="form-control" disabled>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label for="gender" class="form-label">Gender</label>
+                                            <input type="text" id="gender" class="form-control" disabled>
+                                        </div>
+                                    </div>
+                                    <div class="mb-8">
+                                        <label for="birthDate" class="form-label">Birth Date</label>
+                                        <div class="d-flex gap-2">
+                                            <input type="number" id="birthDay" class="form-control" placeholder="Day" min="1" max="31" disabled>
+                                            <input type="text" id="birthMonth" class="form-control" placeholder="Month" disabled>
+                                            <input type="number" id="birthYear" class="form-control" placeholder="Year" min="1900" max="2100" disabled>
+                                        </div>
+                                    </div>
+                                </form>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" id="basicEditButton" class="btn btn-primary">Edit</button>
+                                <button type="button" id="basicSaveButton" class="btn btn-success" disabled>Save</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                 <!-- User Address Modal -->
+                <div class="modal fade" id="userAddressModal" tabindex="-1" aria-labelledby="userAddressModalLabel" aria-hidden="true">
+                    <div class="modal-dialog modal-lg">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="userAddressModalLabel">User Address</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body">
+                                <form id="userAddressForm">
+                                    <div class="row mb-3">
+                                        <div class="col-md-6">
+                                            <label for="addressStreet" class="form-label">Street</label>
+                                            <input type="text" id="addressStreet" class="form-control" disabled>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label for="addressBarangay" class="form-label">Barangay</label>
+                                            <input type="text" id="addressBarangay" class="form-control" disabled>
+                                        </div>
+                                    </div>
+                                    <div class="row mb-3">
+                                        <div class="col-md-6">
+                                            <label for="addressCity" class="form-label">City</label>
+                                            <input type="text" id="addressCity" class="form-control" disabled>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label for="addressProvince" class="form-label">Province</label>
+                                            <input type="text" id="addressProvince" class="form-control" disabled>
+                                        </div>
+                                    </div>
+                                    <div class="row mb-3">
+                                        <div class="col-md-6">
+                                            <label for="addressZipCode" class="form-label">Zip Code</label>
+                                            <input type="text" id="addressZipCode" class="form-control" disabled>
+                                        </div>
+                                    </div>
 
+                                    <hr>
+                                    <div class="modal-header m-0 p-0">
+                                        <h5 class="modal-title" id="userAddressModalLabel">Additional Address</h5>
+                                    </div>
+                                    <div class="row mb-3">
+                                        <div class="col-md-6">
+                                            <label for="additionalStreet" class="form-label">Street</label>
+                                            <input type="text" id="additionalStreet" class="form-control" disabled>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label for="additionalBarangay" class="form-label">Barangay</label>
+                                            <input type="text" id="additionalBarangay" class="form-control" disabled>
+                                        </div>
+                                    </div>
+                                    <div class="row mb-3">
+                                        <div class="col-md-6">
+                                            <label for="additionalCity" class="form-label">City</label>
+                                            <input type="text" id="additionalCity" class="form-control" disabled>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label for="additionalProvince" class="form-label">Province</label>
+                                            <input type="text" id="additionalProvince" class="form-control" disabled>
+                                        </div>
+                                    </div>
+                                    <div class="row mb-3">
+                                        <div class="col-md-6">
+                                            <label for="additionalZipCode" class="form-label">Zip Code</label>
+                                            <input type="text" id="additionalZipCode" class="form-control" disabled>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label for="additionalLandmark" class="form-label">Landmark</label>
+                                            <input type="text" id="additionalLandmark" class="form-control" disabled>
+                                        </div>
+                                    </div>
+                                </form>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" id="addressEditButton" class="btn btn-primary">Edit</button>
+                                <button type="button" id="addressSaveButton" class="btn btn-success" disabled>Save</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+               <!-- User GCash Details Modal -->
+                <div class="modal fade" id="userGcashModal" tabindex="-1" aria-labelledby="userGcashModalLabel" aria-hidden="true">
+                    <div class="modal-dialog modal-lg">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="userGcashModalLabel">User GCash Details</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body">
+                                <!-- QR Code -->
+                                <div class="text-center mb-4">
+                                    <img id="gcashQrCode" src="" alt="GCash QR Code" class="img-fluid" style="max-width: 250px;">
+                                </div>
+                                <form id="userGcashDetailsForm">
+                                    <div class="mb-3">
+                                        <label for="gcashName" class="form-label">GCash Name</label>
+                                        <input type="text" id="gcashName" class="form-control" disabled>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="gcashNumber" class="form-label">GCash Number</label>
+                                        <input type="text" id="gcashNumber" class="form-control" disabled>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
 
 <script src="https://cdn.jsdelivr.net/npm/simple-datatables-classic@latest" type="text/javascript"></script>
 <script type="module" src="js/admin.js"></script>
