@@ -122,14 +122,15 @@ const uploadProfilePicture = async (userId, file) => {
     return await getDownloadURL(imageRef);
 };
 
-// Save user data to Firebase
+// Save user data to Firebase with dateCreated
 const saveUserData = (userId, data) => {
     const userRef = ref(database, `users/${userId}`);
-    const userWithRole = {
+    const userWithRoleAndDate = {
         ...data,
-        role: 'buyer'  // Assign default "buyer" role
+        role: 'buyer', // Assign default "buyer" role
+        dateCreated: new Date().toISOString() // Add the current date and time as dateCreated
     };
-    return set(userRef, userWithRole);
+    return set(userRef, userWithRoleAndDate);
 };
 
 // Event Listeners for registration
@@ -151,7 +152,7 @@ formElements.registerButton.addEventListener("click", async (e) => {
         // Upload profile picture and get the URL
         const profilePictureUrl = await uploadProfilePicture(user.uid, formElements.profilePicture.files[0]);
 
-        // Save user data including the default "buyer" role and dynamic age
+        // Save user data including the default "buyer" role and dynamic age, and add dateCreated
         const userData = { ...getFormData(), age: calculateAge(), profilePicture: profilePictureUrl };
         await saveUserData(user.uid, userData);
 

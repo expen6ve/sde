@@ -1,37 +1,47 @@
-import { getDatabase, ref, set, get } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-database.js";
+import { getDatabase, ref, set, get, update } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-database.js";
 import { getStorage, ref as storageRef, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-storage.js";
 import { checkAuth } from "./auth.js"; // Ensure this path matches your project structure
+import { initializeNavbar, handleSignOut } from './navbar.js';
 
 document.addEventListener("DOMContentLoaded", () => {
     const subscribeButton = document.getElementById("subscribeButton");
+    const signOutButton = document.getElementById('signOut');
+
+    // Initialize sign-out button event listener once the DOM is loaded
+    if (signOutButton) {
+        signOutButton.addEventListener('click', handleSignOut);
+    }
 
     subscribeButton.addEventListener("click", async () => {
         // Retrieve the current user
         const user = await checkAuth();
         if (!user) {
-            alert("You must be logged in to subscribe.");
+            window.location.href = 'index.html'; // Redirect if not logged in
             return;
         }
 
+        initializeNavbar();
+    
         const userId = user.uid;
 
         // Firebase database setup
         const database = getDatabase();
         const subscriptionRef = ref(database, `subscription/${userId}`);
+        const userRef = ref(database, `users/${userId}`);
 
         try {
             // Check for existing subscription
             const snapshot = await get(subscriptionRef);
             if (snapshot.exists()) {
                 const subscriptionData = snapshot.val();
-                const { status, timestamp, expireDate } = subscriptionData;
+                const { subStatus, timestamp, expireDate } = subscriptionData;
 
-                if (status === "pending") {
+                if (subStatus === "pending") {
                     alert("You have already subscribed and are awaiting confirmation.");
                     return;
                 }
 
-                if (status === "confirmed") {
+                if (subStatus === "confirmed") {
                     const subscriptionDate = new Date(timestamp);
                     const expirationDate = new Date(expireDate);
 
@@ -62,12 +72,19 @@ document.addEventListener("DOMContentLoaded", () => {
             const expireDate = new Date();
             expireDate.setMonth(currentDate.getMonth() + 1);
 
-            await set(subscriptionRef, {
+            const subscriptionData = {
                 transactionRef,
-                status: "pending",
+                subStatus: "pending",
                 imageUrl,
                 timestamp: currentDate.toISOString(),
                 expireDate: expireDate.toISOString()
+            };
+
+            await set(subscriptionRef, subscriptionData);
+
+            // Step 3: Update the user's node with a copy of the subscription status
+            await update(userRef, {
+                subStatus: subscriptionData.subStatus
             });
 
             // Success message and redirection
@@ -79,3 +96,4 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     });
 });
+

@@ -30,9 +30,9 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         if (snapshot.exists()) {
             const subscriptionData = snapshot.val();
-            const { status } = subscriptionData;
+            const { subStatus } = subscriptionData;
 
-            if (status === 'subscribed') {
+            if (subStatus === 'subscribed') {
                 // Hide the subscribe alert if the subscription is subscribed
                 subscribeAlert.classList.add('d-none');
             } else {
@@ -257,8 +257,8 @@ document.getElementById('confirmSubmissionBtn').addEventListener('click', async 
         let isSubscribed = false;
 
         if (subscriptionSnapshot.exists()) {
-            const { status } = subscriptionSnapshot.val();
-            isSubscribed = status === 'subscribed';
+            const { subStatus } = subscriptionSnapshot.val();
+            isSubscribed = subStatus === 'subscribed';
         }
 
         // Get the current number of monthly listings

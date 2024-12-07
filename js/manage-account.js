@@ -516,7 +516,7 @@ async function displayOverallRating(sellerId) {
 
 document.getElementById("verificationForm").addEventListener("submit", async (e) => {
     e.preventDefault(); // Prevent default form submission
-    
+
     // Get the logged-in user's ID
     const auth = await checkAuth(); // Assuming checkAuth returns an object
     const userId = auth?.uid;
@@ -558,7 +558,10 @@ document.getElementById("verificationForm").addEventListener("submit", async (e)
         await uploadBytes(selfieFileRef, selfieFile);
         const selfieFileUrl = await getDownloadURL(selfieFileRef);
 
-        // Save data to Firebase Realtime Database
+        // Define verifyStatus
+        const verifyStatus = "pending";
+
+        // Save verification data to Firebase Realtime Database
         const verificationRef = ref(database, `verificationtoconfirm/${userId}`);
         await set(verificationRef, {
             fullName,
@@ -568,8 +571,14 @@ document.getElementById("verificationForm").addEventListener("submit", async (e)
             idNumber,
             idFileUrl,
             selfieFileUrl,
-            verifyStatus: "pending",
+            verifyStatus,
             timestamp: new Date().toISOString(), // Optional: track submission time
+        });
+
+        // Update the user's "verifyStatus" in the "users" node
+        const userRef = ref(database, `users/${userId}`);
+        await update(userRef, {
+            verifyStatus
         });
 
         alert("Verification form submitted successfully!");
@@ -579,6 +588,7 @@ document.getElementById("verificationForm").addEventListener("submit", async (e)
         alert("An error occurred while submitting your verification form. Please try again.");
     }
 });
+
 
 document.addEventListener("DOMContentLoaded", async () => {
     const urlParams = new URLSearchParams(window.location.search);

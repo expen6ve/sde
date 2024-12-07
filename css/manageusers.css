@@ -1,8 +1,14 @@
 body {
-    color: #566787;
-    background: #f5f5f5;
-    font-family: 'Varela Round', sans-serif;
-    font-size: 13px;
+    margin: 0;
+    font-family: var(--bs-body-font-family);
+    font-size: var(--bs-body-font-size);
+    font-weight: var(--bs-body-font-weight);
+    line-height: var(--bs-body-line-height);
+    color: var(--bs-body-color);
+    text-align: var(--bs-body-text-align);
+    background-color: var(--bs-body-bg);
+    -webkit-text-size-adjust: 100%;
+    -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
 }
 .table-responsive {
     margin: 30px 0;
@@ -57,7 +63,7 @@ table.table tr th, table.table tr td {
     vertical-align: middle;
 }
 table.table tr th:first-child {
-    width: 60px;
+    width: 100px;
 }
 table.table tr th:last-child {
     width: 100px;
@@ -68,15 +74,21 @@ table.table-striped tbody tr:nth-of-type(odd) {
 table.table-striped.table-hover tbody tr:hover {
     background: #f5f5f5;
 }
+
 table.table th i {
     font-size: 13px;
     margin: 0 5px;
     cursor: pointer;
 }	
-table.table td:last-child i {
-    opacity: 0.9;
-    font-size: 22px;
-    margin: 0 5px;
+table.table td:last-child {
+    white-space: nowrap;
+    display: flex;
+    justify-content: space-evenly;
+    align-items: center;
+    padding: 0;
+    max-width: 200px;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 table.table td a {
     font-weight: bold;
@@ -94,7 +106,8 @@ table.table td a.delete {
     color: #F44336;
 }
 table.table td i {
-    font-size: 19px;
+    font-size: 20px;
+    margin: 0 5px;
 }
 table.table .avatar {
     border-radius: 50%;
@@ -136,24 +149,16 @@ table.table .avatar {
     text-align: center;
     padding: 0 6px;
 }
-.pagination li a:hover {
-    color: #666;
-}	
-.pagination li.active a, .pagination li.active a.page-link {
-    background: #03A9F4;
-}
-.pagination li.active a:hover {        
-    background: #0397d6;
-}
-.pagination li.disabled i {
-    color: #ccc;
-}
-.pagination li i {
-    font-size: 16px;
-    padding-top: 6px
-}
 .hint-text {
     float: left;
     margin-top: 10px;
     font-size: 13px;
+}
+/* Make the 2nd, 3rd, 4th, and 5th columns fit their content */
+table.table tr td:nth-child(2),
+table.table tr td:nth-child(3),
+table.table tr td:nth-child(4),
+table.table tr td:nth-child(5) {
+    width: auto;
+    white-space: nowrap; /* Prevent wrapping of content */
 }

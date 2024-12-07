@@ -1,5 +1,6 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js";
-import { getDatabase, ref, update } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-database.js";
+import { getDatabase, ref, get } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-database.js";
+import { getAuth, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js";
 
 const firebaseConfig = {
     apiKey: "AIzaSyCN8NcVQNRjAF_A86a8NfxC9Audivokuso",
@@ -13,24 +14,55 @@ const firebaseConfig = {
 
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
-
-// Get Database Instance
+const auth = getAuth(app);
 const database = getDatabase(app);
 
-// User ID of the admin
-const userId = "rUyyshozoAMNyuXJ0HHpdRg4LL33";
+// Get the logout button
+const logoutButton = document.getElementById("logoutButton");
 
-// Function to set the user as an admin
-async function setAdmin() {
-    const userRef = ref(database, `users/${userId}`);
-    try {
-        await update(userRef, {
-            role: "admin" // or isAdmin: true
-        });
-        console.log(`User ${userId} is now an admin.`);
-    } catch (error) {
-        console.error("Error updating admin status:", error);
+// Function to check if the user is an admin
+async function checkAdminAccess(user) {
+    const userRef = ref(database, `users/${user.uid}`);
+    const snapshot = await get(userRef);
+
+    if (snapshot.exists()) {
+        const userData = snapshot.val();
+
+        // Check if the user has 'admin' role
+        if (userData.role !== "admin") {
+            // If the user is not an admin, redirect to a non-admin page (e.g., home)
+            window.location.href = "index.html"; // Or any other non-admin page
+        }
+    } else {
+        // If user data doesn't exist, assume no access
+        window.location.href = "login.html";
     }
 }
 
-setAdmin();
+// Firebase listener for auth state
+onAuthStateChanged(auth, (user) => {
+    if (user) {
+        // Check if the logged-in user has admin role
+        checkAdminAccess(user);
+    } else {
+        // If no user is logged in, redirect to login page
+        window.location.href = "login.html";
+    }
+});
+
+// Function to handle logout
+logoutButton.addEventListener("click", async (e) => {
+    e.preventDefault(); // Prevent default link behavior
+
+    try {
+        // Log out the user
+        await signOut(auth);
+        console.log("User signed out successfully.");
+
+        // Redirect to the login page
+        window.location.href = "login.html";
+    } catch (error) {
+        console.error("Error during sign out:", error);
+        alert("An error occurred while logging out. Please try again.");
+    }
+});
