@@ -1,5 +1,5 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js";
-import { getDatabase, ref, get, update } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-database.js";
+import { getDatabase, ref, get, update, remove } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-database.js";
 
 const firebaseConfig = {
     apiKey: "AIzaSyCN8NcVQNRjAF_A86a8NfxC9Audivokuso",
@@ -68,8 +68,8 @@ window.addEventListener('DOMContentLoaded', () => {
                                 <i class="material-icons check-icon">check_circle</i>
                             </a>
                         `,
-                        `<a href="#" class="settings" title="Settings"><i class="material-icons">&#xE8B8;</i></a>
-                         <a href="#" class="delete" title="Delete"><i class="material-icons">&#xE5C9;</i></a>`
+                        `<a href="#" class="settingsUser" title="Settings"><i class="material-icons">&#xE8B8;</i></a>
+                         <a href="#" class="deleteUser" data-id="${key}" title="Delete"><i class="material-icons">&#xE5C9;</i></a>`
                     ]);
                 }
 
@@ -206,9 +206,179 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 });
+document.addEventListener('DOMContentLoaded', () => {
+    const userTable = document.getElementById('userTable');
+    if (userTable) {
+        userTable.addEventListener('click', function(event) {
+            const button = event.target.closest('.subscribe-status-btn');
+            if (button) {
+                event.preventDefault(); // Prevent default anchor action
 
+                const userId = button.getAttribute('data-id');
 
+                // Create references to both the user and subscription nodes
+                const subscriptionRef = ref(database, `subscription/${userId}`);
+                const userRef = ref(database, `users/${userId}`);
 
-$(document).ready(function(){
-    $('[data-toggle="tooltip"]').tooltip();
+                // Fetch subscription data from the "subscription" node
+                get(subscriptionRef).then(snapshot => {
+                    if (snapshot.exists()) {
+                        const subscriptionData = snapshot.val();
+
+                        // Update the modal with subscription data
+                        document.getElementById('imageUrlPreview').src = subscriptionData.imageUrl;
+                        document.getElementById('transactionReference').textContent = subscriptionData.transactionRef;
+
+                        // Show the modal
+                        const userSubscribeDetailsModal = new bootstrap.Modal(document.getElementById('userSubscribeDetailsModal'));
+                        userSubscribeDetailsModal.show();
+
+                        // Handle the "Approve" button click
+                        document.getElementById('subApproveButton').addEventListener('click', function() {
+                            const updates = {
+                                subStatus: 'subscribed', // Set status to 'subscribed'
+                            };
+
+                            // Update the "users" node with the 'subscribed' status
+                            update(userRef, updates).then(() => {
+                                console.log(`User ${userId} subscribed successfully!`);
+
+                                // Optionally, you can update the "subscription" node as well
+                                update(subscriptionRef, { subStatus: 'subscribed' }).then(() => {
+                                    console.log(`Subscription status for user ${userId} updated successfully.`);
+                                }).catch(error => {
+                                    console.error('Error updating subscription status in subscription:', error);
+                                });
+
+                                // Close the modal
+                                userSubscribeDetailsModal.hide();
+                            }).catch(error => {
+                                console.error('Error updating user subscription status:', error);
+                            });
+                        });
+
+                        // Handle the "Reject" button click
+                        document.getElementById('subRejectButton').addEventListener('click', function() {
+                            const rejectionMessage = document.getElementById('subscriptionNotes').value.trim();
+
+                            // Check if a rejection message is provided
+                            if (rejectionMessage !== "") {
+                                const updates = {
+                                    subStatus: 'denied',  // Set status to 'denied'
+                                    rejectionMessage: rejectionMessage, // Save rejection reason
+                                };
+
+                                // Update the "users" node with the 'denied' status
+                                update(userRef, { subStatus: 'denied' }).then(() => {
+                                    console.log(`User ${userId} subscription rejected.`);
+
+                                    // Optionally, you can update the "subscription" node with the rejection reason
+                                    update(subscriptionRef, updates).then(() => {
+                                        console.log(`Rejection details saved for user ${userId}.`);
+                                    }).catch(error => {
+                                        console.error('Error updating rejection details in subscription:', error);
+                                    });
+
+                                    // Close the modal
+                                    userSubscribeDetailsModal.hide();
+                                }).catch(error => {
+                                    console.error('Error updating user subscription status:', error);
+                                });
+                            } else {
+                                alert("Please provide a reason for rejection.");
+                            }
+                        });
+                    } else {
+                        console.log('No subscription data found for user.');
+                    }
+                }).catch((error) => {
+                    console.error("Error fetching subscription data:", error);
+                });
+            }
+        });
+    }
+});
+document.addEventListener('DOMContentLoaded', () => {
+    const userTable = document.getElementById('userTable');
+
+    if (userTable) {
+        userTable.addEventListener('click', function(event) {
+            const button = event.target.closest('.deleteUser');
+            if (button) {
+                event.preventDefault(); // Prevent default anchor action
+
+                const userId = button.getAttribute('data-id');  // Get the user ID from the data attribute
+                const userRow = button.closest('tr');  // Get the row of the user being deleted
+
+                // Show the confirmation modal
+                const deleteUserModal = new bootstrap.Modal(document.getElementById('deleteUserModal'));
+                deleteUserModal.show();
+
+                // Handle the "Yes, Delete" button click
+                document.getElementById('confirmDeleteButton').addEventListener('click', function() {
+                    // Get references to the user and all related data
+                    const userRef = ref(database, `users/${userId}`);
+                    const subscriptionRef = ref(database, `subscription/${userId}`);
+                    const verificationRef = ref(database, `verificationtoconfirm/${userId}`);
+                    const bookListingsRef = ref(database, `book-listings`); // Reference to the book listings node
+
+                    // Fetch all book listings to find books by this user
+                    get(bookListingsRef).then(snapshot => {
+                        if (snapshot.exists()) {
+                            const bookListings = snapshot.val();
+                            const deletePromises = [];
+
+                            // Loop through the book listings and check for userId match
+                            for (const bookKey in bookListings) {
+                                if (bookListings[bookKey].userId === userId) {
+                                    const bookRef = ref(database, `book-listings/${bookKey}`);
+                                    deletePromises.push(remove(bookRef)); // Add delete promise to array
+                                }
+                            }
+
+                            // Wait for all book deletions to complete
+                            Promise.all(deletePromises)
+                                .then(() => {
+                                    // Proceed with deleting the user and other related data
+                                    return Promise.all([
+                                        remove(userRef),
+                                        remove(subscriptionRef),
+                                        remove(verificationRef)
+                                    ]);
+                                })
+                                .then(() => {
+                                    console.log(`User ${userId} and all related data, including book listings, have been deleted successfully.`);
+
+                                    // Remove the row from the table
+                                    if (userRow) {
+                                        userRow.remove();
+                                    }
+
+                                    // Close the modal
+                                    deleteUserModal.hide();
+
+                                    // Optionally, refresh the user table or update UI
+                                    alert("User and their listings deleted successfully.");
+                                })
+                                .catch((error) => {
+                                    console.error('Error deleting user data or books:', error);
+                                    alert("Error deleting user or their listings. Please try again.");
+                                });
+                        } else {
+                            console.log('No book listings found for user.');
+                            // Proceed with deleting the user if no books are found
+                            return Promise.all([
+                                remove(userRef),
+                                remove(subscriptionRef),
+                                remove(verificationRef)
+                            ]);
+                        }
+                    }).catch((error) => {
+                        console.error("Error fetching book listings:", error);
+                        alert("Error fetching book listings. Please try again.");
+                    });
+                });
+            }
+        });
+    }
 });
