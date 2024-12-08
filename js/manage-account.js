@@ -652,3 +652,38 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
 });
 
+document.addEventListener('DOMContentLoaded', async () => {
+    const user = await checkAuth();
+    const userId = user?.uid;
+    const verifyRejectedAlert = document.getElementById('verifyRejectedAlert');
+    const whyRejectedLink = document.getElementById('whyRejectedLink');
+    const rejectionModal = new bootstrap.Modal(document.getElementById('rejectionModal'));
+    const rejectionMessageBody = document.getElementById('rejectionMessageBody');
+
+    // Check user's verification status
+    const verificationRef = ref(database, `verificationtoconfirm/${userId}`);
+    const snapshot = await get(verificationRef);
+
+    if (snapshot.exists()) {
+        const verificationData = snapshot.val();
+        const { verifyStatus, rejectionMessage } = verificationData;
+
+        if (verifyStatus === "denied") {
+            // Show the rejection alert
+            verifyRejectedAlert.classList.remove('d-none');
+
+            // Handle "Click Here Why" link click to show rejection message in the modal
+            whyRejectedLink.addEventListener('click', (e) => {
+                e.preventDefault();
+                // Display the rejection message in the modal
+                rejectionMessageBody.textContent = rejectionMessage || "No additional information available.";
+                rejectionModal.show();
+            });
+        } else {
+            // Hide the rejection alert if verification is not denied
+            verifyRejectedAlert.classList.add('d-none');
+        }
+    } else {
+        console.error("Verification data not found.");
+    }
+});

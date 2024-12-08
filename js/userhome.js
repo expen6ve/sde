@@ -52,45 +52,48 @@ function displayRecentlyListedBooks() {
                     });
 
                     booksArray.forEach(([bookId, book]) => {
-                        bookListContainer.innerHTML += `
-                        <div class="col-lg-3 col-md-6 mb-5">
-                            <div class="card h-100 d-flex flex-column">
-                                <div class="card-body d-flex flex-column">
-                                    <div class="d-flex justify-content-center">
-                                        <img src="${book.imageUrl || 'images/default-book.png'}" class="img-fluid" alt="Book Image" style="height: 200px; object-fit: cover;">
+                        // Only display books with 'approved' status
+                        if (book.bookStatus === 'approved') {
+                            bookListContainer.innerHTML += `
+                            <div class="col-lg-3 col-md-6 mb-5">
+                                <div class="card h-100 d-flex flex-column">
+                                    <div class="card-body d-flex flex-column">
+                                        <div class="d-flex justify-content-center">
+                                            <img src="${book.imageUrl || 'images/default-book.png'}" class="img-fluid" alt="Book Image" style="height: 200px; object-fit: cover;">
+                                        </div>
+                                        <div class="d-flex justify-content-center mt-3">
+                                            <button class="btn custom-btn">Add to Favorites</button>
+                                        </div>
+                                        <h4 class="card-title mt-3 fs-5">${book.title}</h4>
+                                        <p class="card-text"><strong>Author:</strong> ${book.author}</p>
+                                        <p class="card-text"><strong>Seller:</strong> ${userNames[book.userId] || 'Unknown'}</p>
+                                        <p class="card-text"><strong>Condition:</strong> ${book.condition}</p>
+                                        <p class="card-text"><strong>Price:</strong> ₱${book.price}</p>
+                                        
+                                        <!-- More Info button to open modal -->
+                                        <div class="mt-2 mb-2">
+                                            <button class="btn btn-primary w-100" onclick="openMoreInfoModal('${bookId}')">More Info</button>
+                                        </div>
+                        
+                                        <!-- Conditionally render Contact Seller button -->
+                                        ${
+                                            book.userId !== currentUser.uid
+                                                ? `<div class="mt-auto">
+                                                    <button class="btn btn-success w-100" 
+                                                            data-seller="${book.userId}" 
+                                                            data-title="${book.title}" 
+                                                            data-image="${book.imageUrl || 'images/default-book.png'}" 
+                                                            onclick="openChatModal('${book.userId}', '${currentUser.uid}', '${book.title}', '${book.imageUrl || 'images/default-book.png'}')">
+                                                        Contact Seller
+                                                    </button>
+                                                   </div>`
+                                                : ''
+                                        }
                                     </div>
-                                    <div class="d-flex justify-content-center mt-3">
-                                        <button class="btn custom-btn">Add to Favorites</button>
-                                    </div>
-                                    <h4 class="card-title mt-3 fs-5">${book.title}</h4>
-                                    <p class="card-text"><strong>Author:</strong> ${book.author}</p>
-                                    <p class="card-text"><strong>Seller:</strong> ${userNames[book.userId] || 'Unknown'}</p>
-                                    <p class="card-text"><strong>Condition:</strong> ${book.condition}</p>
-                                    <p class="card-text"><strong>Price:</strong> ₱${book.price}</p>
-                                    
-                                    <!-- More Info button to open modal -->
-                                    <div class="mt-2 mb-2">
-                                        <button class="btn btn-primary w-100" onclick="openMoreInfoModal('${bookId}')">More Info</button>
-                                    </div>
-                    
-                                    <!-- Conditionally render Contact Seller button -->
-                                    ${
-                                        book.userId !== currentUser.uid
-                                            ? `<div class="mt-auto">
-                                                <button class="btn btn-success w-100" 
-                                                        data-seller="${book.userId}" 
-                                                        data-title="${book.title}" 
-                                                        data-image="${book.imageUrl || 'images/default-book.png'}" 
-                                                        onclick="openChatModal('${book.userId}', '${currentUser.uid}', '${book.title}', '${book.imageUrl || 'images/default-book.png'}')">
-                                                    Contact Seller
-                                                </button>
-                                               </div>`
-                                            : ''
-                                    }
                                 </div>
                             </div>
-                        </div>
-                        `;
+                            `;
+                        }
                     });
                 }
             });
@@ -99,7 +102,6 @@ function displayRecentlyListedBooks() {
         }
     });
 }
-
 
 // Open More Info modal
 window.openMoreInfoModal = function(bookId) {

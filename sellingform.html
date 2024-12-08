@@ -63,6 +63,12 @@
         </div>
     </div>
 </nav>
+<!-- Existing subscription rejection alert -->
+<div class="d-flex justify-content-center mt-5 p-0 d-none" id="subscribeRejectedAlert">
+    <div class="alert alert-danger text-center" role="alert">
+        <h4 class="p-0 m-0">Your subscription was denied! <a href="#" class="alert-link" style="text-decoration: none;" id="whyRejectedLink">Click Here Why</a></h4>
+    </div>
+</div>
 <div class="d-flex justify-content-center mt-5 p-0 d-none" id="subscribeAlert">
     <div class="alert alert-info text-center" role="alert">
         <h4 class="p-0 m-0">Subscribe now to remove book listing limit and unlock other features! <a href="subscribe.html" class="alert-link" style="text-decoration: none;">Click Here</a></h4>
@@ -238,6 +244,22 @@
         </div>
     </div>
 </div>
-
+<!-- Bootstrap Modal for rejection message -->
+<div class="modal fade" id="rejectionModal" tabindex="-1" aria-labelledby="rejectionModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="rejectionModalLabel">Your Subscription Denied</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body" id="rejectionMessageBody">
+                <!-- The rejection message will be inserted here -->
+            </div>
+            <div class="modal-footer">
+                <a href="subscribe.html" class="btn btn-primary">Subscribe Again</a>
+            </div>
+        </div>
+    </div>
+</div>
 </body>
 </html>

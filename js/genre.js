@@ -72,7 +72,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 });
 
-
 // Initialize Navbar
 document.addEventListener('DOMContentLoaded', initializeNavbar);
 
@@ -125,13 +124,13 @@ function displayBooks(genre = null, searchTerm = null, sortBy = 'dateListed') {
                     Object.keys(userData).forEach(userId => {
                         userNames[userId] = userData[userId].firstName || 'Unknown';
                     });
-                    
+
                     genreHeading.textContent = searchTerm
                         ? `Search Results for "${searchTerm}"`
                         : genre
                             ? `Books in "${genre}"`
                             : "All Books";
-                    
+
                     const sortedBooks = Object.keys(bookData).map(key => ({
                         id: key,
                         ...bookData[key]
@@ -145,7 +144,9 @@ function displayBooks(genre = null, searchTerm = null, sortBy = 'dateListed') {
 
                     // Display the books in cards
                     sortedBooks.forEach(book => {
-                        if ((!genre || book.genre === genre) &&
+                        // Only display books with 'approved' status
+                        if (book.bookStatus === 'approved' &&
+                            (!genre || book.genre === genre) &&
                             (!searchTerm || book.title.toLowerCase().includes(searchTerm.toLowerCase()))) {
                             bookListContainer.innerHTML += `
                                 <div class="col-lg-3 col-md-6 mb-5">
@@ -168,7 +169,7 @@ function displayBooks(genre = null, searchTerm = null, sortBy = 'dateListed') {
                                             </div>
                                             
                                             <!-- Conditionally render the Contact Seller button -->
-                                            ${currentUser && currentUser.uid !== book.userId ? `
+                                            ${currentUser && currentUser.uid !== book.userId ? ` 
                                                 <div class="mt-auto">
                                                     <button class="btn btn-success w-100" 
                                                             data-seller="${book.userId}" 
@@ -184,7 +185,6 @@ function displayBooks(genre = null, searchTerm = null, sortBy = 'dateListed') {
                             `;
                         }
                     });
-                    
 
                 } else {
                     bookListContainer.innerHTML = '<p>No books available.</p>';
@@ -195,6 +195,7 @@ function displayBooks(genre = null, searchTerm = null, sortBy = 'dateListed') {
         }
     });
 }
+
 
 // Open More Info modal
 window.openMoreInfoModal = function(bookId) {

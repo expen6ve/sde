@@ -29,6 +29,7 @@ export function updateProfile(user) {
             let dropdownItems = '<a class="dropdown-item" href="manage-account.html">Manage Account</a>';
             dropdownItems += '<a class="dropdown-item" href="purchases.html">Purchases</a>';
             dropdownItems += '<a class="dropdown-item" href="favorites.html">Favorites</a>';
+            dropdownItems += '<a class="dropdown-item" href="changepassemail.html">Change Password or Email</a>';
             if (role === "seller") {
                 dropdownItems += '<a class="dropdown-item" href="my-listings.html">My Listings</a>';
             }

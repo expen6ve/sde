@@ -28,36 +28,42 @@ export async function loadUserBooks(currentUser) {
     try {
         const booksSnapshot = await get(ref(database, 'book-listings/'));
         if (booksSnapshot.exists()) {
-            const books = Object.entries(booksSnapshot.val()).filter(([key, book]) => book.userId === currentUser.uid);
+            // Filter for books owned by the user and with bookStatus of "approved"
+            const books = Object.entries(booksSnapshot.val())
+                .filter(([key, book]) => book.userId === currentUser.uid && book.bookStatus === "approved");
 
             bookDropdown.innerHTML = '';
-            books.forEach(([key, book]) => {
-                const listItem = document.createElement('li');
-                listItem.className = 'list-group-item';
-                listItem.textContent = book.title;
-                listItem.style.cursor = 'pointer';
-                listItem.addEventListener('click', async () => {
-                    // Reset the selected book details
-                    clearBookDetails();
+            if (books.length > 0) {
+                books.forEach(([key, book]) => {
+                    const listItem = document.createElement('li');
+                    listItem.className = 'list-group-item';
+                    listItem.textContent = book.title;
+                    listItem.style.cursor = 'pointer';
+                    listItem.addEventListener('click', async () => {
+                        // Reset the selected book details
+                        clearBookDetails();
 
-                    // Update the search box
-                    bookSearch.value = book.title;
-                    bookDropdown.style.display = 'none';
+                        // Update the search box
+                        bookSearch.value = book.title;
+                        bookDropdown.style.display = 'none';
 
-                    // Fetch the latest book details from the database
-                    const bookDetails = (await get(ref(database, `book-listings/${key}`))).val();
-                    
-                    // Display selected book details
-                    selectedBookDetails.style.display = 'block';
-                    selectedBookImage.src = bookDetails.imageUrl;
-                    selectedBookImage.alt = bookDetails.title;
-                    selectedBookTitle.textContent = bookDetails.title;
-                    selectedBookPrice.value = bookDetails.price; // Set the latest price
-                    selectedBookDetails.setAttribute('data-book-id', key); // Store the unique book ID
-                    selectedBookKey = key; // Store the selected book's key
+                        // Fetch the latest book details from the database
+                        const bookDetails = (await get(ref(database, `book-listings/${key}`))).val();
+                        
+                        // Display selected book details
+                        selectedBookDetails.style.display = 'block';
+                        selectedBookImage.src = bookDetails.imageUrl;
+                        selectedBookImage.alt = bookDetails.title;
+                        selectedBookTitle.textContent = bookDetails.title;
+                        selectedBookPrice.value = bookDetails.price; // Set the latest price
+                        selectedBookDetails.setAttribute('data-book-id', key); // Store the unique book ID
+                        selectedBookKey = key; // Store the selected book's key
+                    });
+                    bookDropdown.appendChild(listItem);
                 });
-                bookDropdown.appendChild(listItem);
-            });
+            } else {
+                bookDropdown.innerHTML = '<li class="list-group-item text-muted">No approved books found</li>';
+            }
 
             bookSearch.addEventListener('input', () => {
                 const query = bookSearch.value.toLowerCase();
@@ -129,7 +135,6 @@ export async function loadUserBooks(currentUser) {
         }
     });
 }
-
 
 export async function loadGcashDetails(currentUser) {
     try {

@@ -17,38 +17,51 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const database = getDatabase(app);
 
-// Get the logout button
-const logoutButton = document.getElementById("logoutButton");
+// Function to restrict access based on role
+async function restrictAccess() {
+    const user = auth.currentUser;
 
-// Function to check if the user is an admin
-async function checkAdminAccess(user) {
-    const userRef = ref(database, `users/${user.uid}`);
-    const snapshot = await get(userRef);
-
-    if (snapshot.exists()) {
-        const userData = snapshot.val();
-
-        // Check if the user has 'admin' role
-        if (userData.role !== "admin") {
-            // If the user is not an admin, redirect to a non-admin page (e.g., home)
-            window.location.href = "index.html"; // Or any other non-admin page
-        }
-    } else {
-        // If user data doesn't exist, assume no access
+    if (!user) {
+        // If user is not logged in, redirect to login page
         window.location.href = "login.html";
+        return;
+    }
+
+    try {
+        // Get the user's role from the database
+        const userRef = ref(database, `users/${user.uid}`);
+        const userSnapshot = await get(userRef);
+
+        if (!userSnapshot.exists()) {
+            throw new Error("User data not found in the database.");
+        }
+
+        const userData = userSnapshot.val();
+        const userRole = userData.role;
+
+        // Check the user's role
+        if (userRole === "buyer" || userRole === "seller") {
+            window.location.href = "userhome.html"; // Redirect to an unauthorized page
+        }
+    } catch (error) {
+        console.error("Error checking user role:", error.message);
+        alert("An error occurred while checking permissions.");
+        window.location.href = "login.html"; // Redirect to login if there's an issue
     }
 }
 
-// Firebase listener for auth state
+// Listen for authentication state changes and restrict access
 onAuthStateChanged(auth, (user) => {
     if (user) {
-        // Check if the logged-in user has admin role
-        checkAdminAccess(user);
+        restrictAccess();
+        console.log("The logged in user is:", user.email);
     } else {
-        // If no user is logged in, redirect to login page
         window.location.href = "login.html";
     }
 });
+// Get the logout button
+const logoutButton = document.getElementById("logoutButton");
+
 
 // Function to handle logout
 logoutButton.addEventListener("click", async (e) => {

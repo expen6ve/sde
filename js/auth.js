@@ -1,6 +1,6 @@
-import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, sendPasswordResetEmail } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js";
+import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, sendPasswordResetEmail, updatePassword } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js";
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js";
-import { getDatabase, ref, set, remove, onValue, increment } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-database.js";
+import { getDatabase, ref, set, remove, increment } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-database.js";
 
 const firebaseConfig = {
     apiKey: "AIzaSyCN8NcVQNRjAF_A86a8NfxC9Audivokuso",
@@ -101,5 +101,27 @@ export function restrictAccess() {
 
 // Call restrictAccess on every page load
 restrictAccess();
+
+// Update password in Firebase Authentication and Database
+export async function updatePasswordInFirebase(user, newPassword) {
+    try {
+        const auth = getAuth();
+        const currentUser = auth.currentUser;
+
+        // Update password in Firebase Authentication
+        await updatePassword(currentUser, newPassword);
+
+        // Update password in Firebase Realtime Database (if stored there too)
+        const db = getDatabase();
+        const userRef = ref(db, 'users/' + currentUser.uid);
+        await update(userRef, {
+            password: newPassword // Assuming the password is stored here
+        });
+
+    } catch (error) {
+        console.error('Error updating password in Firebase:', error);
+        throw error;
+    }
+}
 
 export { auth, signInWithEmailAndPassword, sendPasswordResetEmail };

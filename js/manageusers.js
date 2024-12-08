@@ -1,6 +1,9 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js";
-import { getDatabase, ref, get, update, remove } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-database.js";
+import { getDatabase, ref, get, update, remove, set } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-database.js";
+import { getStorage, ref as storageRef, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-storage.js";
+import { getAuth, createUserWithEmailAndPassword, sendEmailVerification } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js";
 
+// Firebase configuration and initialization
 const firebaseConfig = {
     apiKey: "AIzaSyCN8NcVQNRjAF_A86a8NfxC9Audivokuso",
     authDomain: "sde-ecoread.firebaseapp.com",
@@ -13,6 +16,126 @@ const firebaseConfig = {
 
 const app = initializeApp(firebaseConfig);
 const database = getDatabase(app);
+const storage = getStorage(app);
+const auth = getAuth(app); // Initialize Firebase Authentication
+
+
+// Open the modal when "Add New User" is clicked 
+document.getElementById('showAddUsersModal').addEventListener('click', () => {
+    const addUserModal = new bootstrap.Modal(document.getElementById('addUserModal'));
+    addUserModal.show();
+});
+
+// Save Profile to Firebase when the Save button is clicked
+document.getElementById('addSaveProfileBtn').addEventListener('click', async (e) => {
+    e.preventDefault(); // Prevent form submission or page reload
+    // Collect the form data
+    const email = document.getElementById('addEmail').value;
+    const password = document.getElementById('addPassword').value;
+    const firstName = document.getElementById('addFirstName').value;
+    const lastName = document.getElementById('addLastName').value;
+    const dob = document.getElementById('addDob').value;
+    const gender = document.querySelector('input[name="gender"]:checked')?.value;
+    const phone = document.getElementById('addPhone').value;
+    const street = document.getElementById('addStreet').value;
+    const barangay = document.getElementById('addBarangay').value;
+    const zipCode = document.getElementById('addZipCode').value;
+    const city = document.getElementById('addCity').value;
+    const province = document.getElementById('addProvince').value;
+    const profilePicture = document.getElementById('addProfilePicture').files[0];
+
+    if (!email || !password || !firstName || !lastName || !dob || !gender || !phone || !profilePicture) {
+        alert("Please fill in all fields.");
+        return;
+    }
+
+    // Prepare the user's birth date
+    const [year, month, day] = dob.split("-");
+    const birthDate = { year, month, day };
+
+    // Calculate the age based on the birthdate
+    const currentDate = new Date();
+    let age = currentDate.getFullYear() - parseInt(year);
+    const m = currentDate.getMonth() + 1; // JavaScript months are 0-based
+    const d = currentDate.getDate();
+
+    // Adjust the age if the birthday hasn't occurred yet this year
+    if (m < parseInt(month) || (m === parseInt(month) && d < parseInt(day))) {
+        age--;
+    }
+
+    try {
+        // Upload the profile picture to Firebase Storage
+        const userId = Date.now(); // Unique user ID (you can replace this with a proper unique ID generator)
+        const profilePicRef = storageRef(storage, `profilePictures/${userId}/${profilePicture.name}`);
+        await uploadBytes(profilePicRef, profilePicture);
+
+        // Get the URL of the uploaded profile picture
+        const profilePicUrl = await getDownloadURL(profilePicRef);
+
+        // Create the user with Firebase Authentication
+        const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+        const user = userCredential.user;
+
+        // Send email verification
+        await sendEmailVerification(user);
+        alert("A verification email has been sent to the user.");
+
+        // Prepare the user data object
+        const userData = {
+            email,
+            firstName,
+            lastName,
+            birthDate,
+            age, // Use the calculated age
+            gender,
+            role: "buyer",
+            phone,
+            address: {
+                street,
+                barangay,
+                zipCode,
+                city,
+                province
+            },
+            profilePicture: profilePicUrl,
+            dateCreated: new Date().toISOString(),
+        };
+
+        // Save the user data to Firebase Realtime Database with UID as the key
+        await set(ref(database, `users/${user.uid}`), userData);
+
+        // Close the modal after saving the user
+        const addUserModal = bootstrap.Modal.getInstance(document.getElementById('addUserModal'));
+        addUserModal.hide();
+
+        // Reset the form
+        document.getElementById('addProfileForm').reset();
+
+        alert("User added successfully!");
+    } catch (error) {
+        console.error("Error creating user:", error.message);
+        alert("There was an error creating the user: " + error.message);
+    }
+});
+
+// Profile picture preview logic
+document.getElementById('addProfilePicture').addEventListener('change', function(event) {
+    const file = event.target.files[0]; // Get the selected file
+    const reader = new FileReader();
+
+    // Ensure the file is an image
+    if (file && file.type.startsWith('image')) {
+        reader.onload = function(e) {
+            const imageUrl = e.target.result;
+            const profilePreview = document.getElementById('addProfilePreview');
+            profilePreview.src = imageUrl; // Set the preview image's src to the selected file's data URL
+        };
+        reader.readAsDataURL(file); // Read the image file as a data URL
+    } else {
+        alert("Please select a valid image file.");
+    }
+});
 
 window.addEventListener('DOMContentLoaded', () => {
     const userTable = document.getElementById('userTable');

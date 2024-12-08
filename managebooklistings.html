@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<title>Manage Book Listings</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto|Varela+Round">
+<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css">
+<link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+<link href="https://cdn.jsdelivr.net/npm/simple-datatables-classic@latest/dist/style.css" rel="stylesheet" type="text/css">
+<link rel="stylesheet" href="css/adminstyles.css" />
+<script src="https://use.fontawesome.com/releases/v6.3.0/js/all.js" crossorigin="anonymous"></script>
+<script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/js/bootstrap.min.js"></script>
+<link rel="stylesheet" href="css/manageusers.css">
+</head>
+<body class="sb-nav-fixed">
+    <nav class="sb-topnav navbar navbar-expand navbar-dark bg-dark">
+        <!-- Navbar Brand-->
+        <a class="navbar-brand ps-3" href="admin.html">Back to Dashboard</a>
+        <!-- Sidebar Toggle-->
+        <button class="btn btn-link btn-sm order-1 order-lg-0 me-4 me-lg-0" id="sidebarToggle" href="#!"><i class="fas fa-bars"></i></button>
+        <!-- Navbar (aligned to the right) -->
+        <ul class="navbar-nav ms-auto">
+            <li class="nav-item dropdown">
+                <a class="nav-link dropdown-toggle" id="navbarDropdown" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                    <i class="fas fa-user fa-fw"></i>
+                </a>
+                <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
+                    <li><a id="logoutButton" class="dropdown-item" href="#!">Logout</a></li>
+                </ul>
+            </li>
+        </ul>
+    </nav>
+    
+    <div id="layoutSidenav">
+        <div id="layoutSidenav_nav">
+            <nav class="sb-sidenav accordion sb-sidenav-dark" id="sidenavAccordion">
+                <div class="sb-sidenav-menu">
+                    <div class="nav">
+                        <div class="sb-sidenav-menu-heading">Core</div>
+                        <a class="nav-link" href="admin.html">
+                            <div class="sb-nav-link-icon"><i class="fas fa-tachometer-alt"></i></div>
+                            Dashboard
+                        </a>
+                        <div class="sb-sidenav-menu-heading">Addons</div>
+                        <a class="nav-link" href="manageusers.html">
+                            <div class="sb-nav-link-icon"><i class="fas fa-chart-area"></i></div>
+                            Manage Users
+                        </a>
+                        <a class="nav-link" href="managetransactions.html">
+                            <div class="sb-nav-link-icon"><i class="fas fa-table"></i></div>
+                            Manage Transactions
+                        </a>
+                        <a class="nav-link" href="managebooklistings.html">
+                            <div class="sb-nav-link-icon"><i class="fas fa-table"></i></div>
+                            Manage Book Listings
+                        </a>
+                    </div>
+                </div>
+                <div class="sb-sidenav-footer">
+                    <div class="small">Logged in as:</div>
+                    Overview
+                </div>
+            </nav>
+        </div>
+        <div id="layoutSidenav_content">
+            <main>
+                <div class="container-xl">
+                    <div class="table-responsive">
+                        <div class="table-wrapper">
+                            <div class="table-title bg-dark">
+                                <div class="row">
+                                    <div class="col-sm-5">
+                                        <h2>Book Listings <b>Management</b></h2>
+                                    </div>
+                                    <div class="col-sm-7">
+                                        <a href="#" id="exportToCsvBtn" class="btn btn-secondary"><i class="material-icons">&#xE24D;</i> <span>Export to Excel</span></a>						
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- Add an ID to your table -->
+                            <table id="userTable" class="table table-striped table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Seller</th>
+                                        <th>Date Listed</th>
+                                        <th>Title</th>
+                                        <th>Genre</th>
+                                        <th>Price</th>
+                                        <th>Status</th>
+                                        <th>Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <!-- Rows will be inserted dynamically here -->
+                                </tbody>
+                            </table>                            
+                        </div>
+                    </div>
+                </div>
+                <!-- Book More Info Modal -->
+                <div class="modal fade" id="bookMoreInfoModal" tabindex="-1" aria-labelledby="moreInfoModalLabel" aria-hidden="true">
+                    <div class="modal-dialog modal-lg">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="moreInfoModalLabel">Book Details</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body">
+                                <div class="d-flex justify-content-center mb-3">
+                                    <img id="moreInfoBookImage" src="" alt="Book Image" class="img-fluid" style="max-width: 300px; max-height: 300px; border-radius: 8px;">
+                                </div>
+                                <ul class="list-group">
+                                    <li class="list-group-item">Title: <span id="moreInfoBookTitle"></span></li>
+                                    <li class="list-group-item">Author: <span id="moreInfoAuthor"></span></li>
+                                    <li class="list-group-item">Genre: <span id="moreInfoGenre"></span></li>
+                                    <li class="list-group-item">Condition: <span id="moreInfoCondition"></span></li>
+                                    <li class="list-group-item">Description: <span id="moreInfoDescription"></span></li>
+                                    <li class="list-group-item">Price: ₱<span id="moreInfoPrice"></span></li>
+                                    <li class="list-group-item">Status: <span id="moreInfoStatus"></span></li>
+                                </ul>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" id="approveListing" class="btn btn-success">Approve</button>
+                                <button type="button" id="rejectListing" class="btn btn-warning">Reject</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+<script type="module" src="js/admin.js"></script>
+<script type="module" src="js/managebooklistings.js"></script>
+<script src="js/scripts.js"></script>             
+<script src="https://cdn.jsdelivr.net/npm/simple-datatables-classic@latest" type="text/javascript"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script>   
+</body>
+</html>

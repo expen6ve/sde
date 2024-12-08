@@ -22,6 +22,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     const userId = user.uid;
 
     const subscribeAlert = document.getElementById('subscribeAlert');
+    const subscribeRejectedAlert = document.getElementById('subscribeRejectedAlert');
+    const whyRejectedLink = document.getElementById('whyRejectedLink');
+    const rejectionModal = new bootstrap.Modal(document.getElementById('rejectionModal'));  // Initialize the modal
 
     // Check subscription status
     try {
@@ -30,24 +33,41 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         if (snapshot.exists()) {
             const subscriptionData = snapshot.val();
-            const { subStatus } = subscriptionData;
+            const { subStatus, rejectionMessage } = subscriptionData;  // Assuming rejectionMessage is part of the subscription data
 
             if (subStatus === 'subscribed') {
-                // Hide the subscribe alert if the subscription is subscribed
+                // Hide the subscribe alert if the subscription is confirmed
+                subscribeAlert.classList.add('d-none');
+                subscribeRejectedAlert.classList.add('d-none');
+            } else if (subStatus === 'denied') {
+                // Show the denied subscription alert and hide the subscribe alert
+                subscribeRejectedAlert.classList.remove('d-none');
                 subscribeAlert.classList.add('d-none');
             } else {
-                // Show the subscribe alert (already visible by default in HTML)
+                // Show the subscribe alert (already visible by default in HTML) for other statuses
                 subscribeAlert.classList.remove('d-none');
+                subscribeRejectedAlert.classList.add('d-none');
+            }
+
+            // If the rejection link is clicked, show the rejection message modal
+            if (rejectionMessage && whyRejectedLink) {
+                whyRejectedLink.addEventListener('click', (event) => {
+                    event.preventDefault();  // Prevent default link behavior
+                    document.getElementById('rejectionMessageBody').textContent = rejectionMessage;  // Set the rejection message
+                    rejectionModal.show();  // Show the modal
+                });
             }
         } else {
-            // No subscription found, show the alert (default behavior)
+            // No subscription found, show the subscribe alert (default behavior)
             subscribeAlert.classList.remove('d-none');
+            subscribeRejectedAlert.classList.add('d-none');
         }
     } catch (error) {
         console.error('Error checking subscription status:', error);
         alert('Failed to verify subscription status. Please try again later.');
     }
 });
+
 
 document.addEventListener('DOMContentLoaded', async () => {
     const user = await checkAuth();
@@ -290,7 +310,8 @@ document.getElementById('confirmSubmissionBtn').addEventListener('click', async 
             price: parseFloat(priceInput.value).toFixed(2),
             imageUrl: imageUrl,
             userId: userId, // Associate the book with the logged-in user
-            dateListed: new Date().toISOString() // Add the current date and time
+            dateListed: new Date().toISOString(), // Add the current date and time
+            bookStatus: "pending"
         };
 
         // Save the data to Firebase Realtime Database

@@ -41,7 +41,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     return;
                 }
 
-                if (subStatus === "confirmed") {
+                if (subStatus === "subscribed") {
                     const subscriptionDate = new Date(timestamp);
                     const expirationDate = new Date(expireDate);
 
