@@ -668,6 +668,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         const verificationData = snapshot.val();
         const { verifyStatus, rejectionMessage } = verificationData;
 
+        // Only show the rejection alert if the verification status is "denied"
         if (verifyStatus === "denied") {
             // Show the rejection alert
             verifyRejectedAlert.classList.remove('d-none');
@@ -680,10 +681,12 @@ document.addEventListener('DOMContentLoaded', async () => {
                 rejectionModal.show();
             });
         } else {
-            // Hide the rejection alert if verification is not denied
+            // Hide the rejection alert if the verification status is not "denied"
             verifyRejectedAlert.classList.add('d-none');
         }
     } else {
+        // If no verification data exists, hide the rejection alert
+        verifyRejectedAlert.classList.add('d-none');
         console.error("Verification data not found.");
     }
 });
