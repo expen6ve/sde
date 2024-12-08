@@ -21,6 +21,24 @@ document.addEventListener('DOMContentLoaded', async () => {
     initializeNavbar(); // Initialize navbar as usual
 });
 
+// Select the password input fields and the checkbox
+const showPasswordsCheckbox = document.getElementById('showPasswords');
+const currentPasswordInput = document.getElementById('currentPassword');
+const newPasswordInput = document.getElementById('newPassword');
+const confirmPasswordInput = document.getElementById('confirmPassword');
+
+// Add event listener to toggle password visibility
+showPasswordsCheckbox.addEventListener('change', function () {
+    // Check if the checkbox is checked
+    const type = showPasswordsCheckbox.checked ? 'text' : 'password';
+    
+    // Toggle the input type for each password field
+    currentPasswordInput.type = type;
+    newPasswordInput.type = type;
+    confirmPasswordInput.type = type;
+});
+
+
 document.getElementById('savePassEmail').addEventListener('click', function () {
     const newEmail = document.getElementById('newEmail').value;
     const confirmEmail = document.getElementById('confirmEmail').value;
@@ -81,7 +99,10 @@ document.getElementById('savePassEmail').addEventListener('click', function () {
                                         update(userRef, {
                                             password: newPassword // Update the password in the database
                                         }).then(() => {
-                                            console.log("User password updated in the database.");
+                                            alert("User password updated in the database.");
+                                            currentPasswordInput.value = '';
+                                            newPasswordInput.value = '';
+                                            confirmPasswordInput.value = '';
                                         }).catch((error) => {
                                             alert("Error updating password in the database: " + error.message);
                                         });
@@ -102,6 +123,7 @@ document.getElementById('savePassEmail').addEventListener('click', function () {
                                             email: newEmail // Update the email field in the database
                                         }).then(() => {
                                             console.log("User email updated in the database.");
+                                            
                                         }).catch((error) => {
                                             alert("Error updating email in the database: " + error.message);
                                         });

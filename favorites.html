@@ -3,13 +3,14 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
-    <title>Change Password or Email</title>
+    <title>Favorites</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Bona+Nova+SC&display=swap" rel="stylesheet">
     <link href="css/bootstrap.min.css" rel="stylesheet" />
     <link href="css/userhome.css" rel="stylesheet" />
     <script defer src="js/bootstrap.bundle.min.js"></script>
+    <script type="module" src="js/favorites.js"></script>
 </head>
 <body>
 <!-- Responsive navbar -->
@@ -64,57 +65,75 @@
     </div>
 </nav>
 
-<div class="container py-5 rounded" style="background-color: #e0dccf; margin-top: 10rem;">
-    <div class="row mb-4">
-        <div class="col-md-6">
-            <h4>Change Password</h4>
-            <div class="mb-3">
-                <label for="currentPassword" class="form-label">Current Password</label>
-                <input type="password" class="form-control" id="currentPassword">
-            </div>
-            <div class="mb-3">
-                <label for="newPassword" class="form-label">New Password</label>
-                <input type="password" class="form-control" id="newPassword">
-            </div>
-            <div class="mb-3">
-                <label for="confirmPassword" class="form-label">Confirm New Password</label>
-                <input type="password" class="form-control" id="confirmPassword">
-            </div>
-            <!-- Show Password Checkbox -->
-            <div class="form-check">
-                <input class="form-check-input" type="checkbox" id="showPasswords">
-                <label class="form-check-label" for="showPasswords">
-                    Show Passwords
-                </label>
-            </div>
-        </div>
-        <div class="col-md-6">
-            <h4>Change Email</h4>
-            <div class="mb-3">
-                <label for="currentEmail" class="form-label">Current Email</label>
-                <input type="email" class="form-control" id="currentEmail">
-            </div>
-            <div class="mb-3">
-                <label for="newEmail" class="form-label">New Email</label>
-                <input type="email" class="form-control" id="newEmail">
-            </div>
-            <div class="mb-3">
-                <label for="confirmEmail" class="form-label">Confirm New Email</label>
-                <input type="email" class="form-control" id="confirmEmail">
-            </div>
+<!-- Page Content -->
+<div class="container px-4 px-lg-5 mt-5">
+    <div class=" my-5 py-0 text-center">
+        <div class="card-body">
+            <p id="genreHeading" class="display-6 text-dark m-0"></p>
         </div>
     </div>
+    <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
+        <!-- Search Form -->
+        <form class="d-flex me-3" role="search">
+            <input class="form-control me-2" type="search" placeholder="Search" aria-label="Search" id="searchInput">
+        </form>            
+        <!-- Sort By Dropdown -->
+        <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                Sort By
+            </a>
+            <ul class="dropdown-menu">
+                <li><a class="dropdown-item" href="#" id="sortLowestPrice">Lowest Price</a></li>
+                <li><hr class="dropdown-divider"></li>
+                <li><a class="dropdown-item" href="#" id="sortHighestPrice">Highest Price</a></li>
+                <li><hr class="dropdown-divider"></li>
+                <li><a class="dropdown-item" href="#" id="sortMostRecent">Most Recent</a></li>
+            </ul>
+        </li>                    
+    </ul>        
+    <!-- My Favorite Books Row -->
+    <div id="bookListContainer" class="row gx-4 gx-lg-5">
+        <!-- dynamically generated favorite books here -->
+    </div>
+        <!-- Send Message Modal -->
+        <div class="modal fade" id="messageModal" tabindex="-1" aria-labelledby="messageModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <!-- Modal Header -->
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="messageModalLabel">Send Message</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
 
-    <div class="d-grid gap-2 d-md-flex justify-content-md-end">
-        <button type="button" class="btn btn-secondary me-md-2">Cancel</button>
-        <button type="submit" class="btn btn-primary" id="savePassEmail">Save Changes</button>
-    </div>
+                    <!-- Modal Body -->
+                    <div class="modal-body">
+                        <!-- Seller Profile Section -->
+                        <div class="d-flex align-items-center mb-3">
+                            <a id="sellerProfileLink" href="#" class="me-3" style="text-decoration: none;">
+                                <img id="sellerProfileIcon" src="" alt="Seller Profile" 
+                                    class="rounded-circle" style="width: 50px; height: 50px; object-fit: cover;">
+                            </a>
+                            <a id="sellerNameLink" href="#" style="text-decoration: none; color: black;">
+                                <h6 id="sellerName" class="mb-0"></h6>
+                            </a>
+                        </div>
+
+                        <!-- Message Input -->
+                        <textarea id="messageInput" class="form-control" rows="3" placeholder="Type your message..."></textarea>
+                    </div>
+
+                    <!-- Modal Footer -->
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                        <button type="button" id="sendMessageBtn" class="btn btn-primary">Send</button>
+                    </div>
+                </div>
+            </div>
+        </div>   
 </div>
         <!-- Footer -->
-        <footer class="py-3" style="background-color: #e0dccf; margin-top: 175px;">
+        <footer class="py-3" style="background-color: #e0dccf; margin-top: 1px;">
             <p class="text-center p-0 m-0">© 2024 Eco-Reads, Inc. All rights reserved.</p>
         </footer> 
-<script type="module" src="js/changepass.js"></script>
 </body>
-
 </html>

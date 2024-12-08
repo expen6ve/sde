@@ -150,3 +150,40 @@ window.addEventListener('DOMContentLoaded', () => {
         });
     }
 });
+
+document.getElementById('exportToCsvBtn').addEventListener('click', function () {
+    exportTableToCSV('user_data.csv');
+});
+
+function exportTableToCSV(filename) {
+    const table = document.getElementById('userTable');
+    let csv = [];
+    
+    // Get table headers
+    const headers = table.querySelectorAll('th');
+    let headerRow = [];
+    headers.forEach(header => {
+        headerRow.push(header.innerText.trim());
+    });
+    csv.push(headerRow.join(',')); // Add header row to CSV
+
+    // Get table rows (excluding header)
+    const rows = table.querySelectorAll('tr');
+    rows.forEach(row => {
+        const cells = row.querySelectorAll('td');
+        let rowData = [];
+        cells.forEach(cell => {
+            rowData.push(cell.innerText.trim());
+        });
+        if (rowData.length > 0) {
+            csv.push(rowData.join(','));
+        }
+    });
+
+    // Create a CSV string and trigger download
+    const csvString = csv.join('\n');
+    const link = document.createElement('a');
+    link.href = 'data:text/csv;charset=utf-8,' + encodeURI(csvString);
+    link.download = filename;
+    link.click();
+}

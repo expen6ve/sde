@@ -196,7 +196,7 @@ window.addEventListener('DOMContentLoaded', () => {
                 }
 
                 // Add the rows after DataTable is initialized
-                table.rows().add(rows).draw();
+                table.rows().add(rows);
             } else {
                 console.log("No data available");
             }

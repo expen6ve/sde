@@ -155,9 +155,14 @@ function displayBooks(genre = null, searchTerm = null, sortBy = 'dateListed') {
                                             <div class="d-flex justify-content-center">
                                                 <img src="${book.imageUrl || 'images/default-book.png'}" class="img-fluid" alt="Book Image" style="height: 200px; object-fit: cover;">
                                             </div>
-                                            <div class="d-flex justify-content-center mt-3">
-                                                <button class="btn custom-btn">Add to Favorites</button>
-                                            </div>
+                                            <!-- Conditionally render Add to Favorites button -->
+                                            ${
+                                                book.userId !== currentUser.uid
+                                                    ? `<div class="d-flex justify-content-center mt-3">
+                                                        <button class="btn custom-btn" onclick="addToFave('${book.id}')">Add to Favorites</button>
+                                                    </div>`
+                                                    : ''
+                                            }
                                             <h4 class="card-title mt-3 fs-5">${book.title}</h4>
                                             <p class="card-text"><strong>Author:</strong> ${book.author}</p>
                                             <p class="card-text"><strong>Seller:</strong> ${userNames[book.userId] || 'Unknown'}</p>
@@ -227,3 +232,46 @@ document.getElementById('sendMessageBtn').addEventListener('click', () => {
     sendMessage(messageInput);  // Using function from contactseller.js
 });
 
+function addToFave(bookId) {
+    const favoriteBooksRef = ref(database, `favorite-books/${currentUser.uid}/${bookId}`);
+
+    // Check if the book already exists in favorites
+    get(favoriteBooksRef).then((snapshot) => {
+        if (snapshot.exists()) {
+            // Book already exists in favorites
+            alert('This book is already in your favorites!');
+        } else {
+            // If not, fetch the book details from the listings
+            const bookRef = ref(database, `book-listings/${bookId}`);
+            get(bookRef).then((bookSnapshot) => {
+                if (bookSnapshot.exists()) {
+                    const bookDetails = bookSnapshot.val();
+
+                    // Add the book to favorites
+                    set(favoriteBooksRef, {
+                        ...bookDetails,
+                    })
+                    .then(() => {
+                        alert('Book added to favorites!');
+                    })
+                    .catch((error) => {
+                        console.error('Error adding to favorites:', error);
+                        alert('Failed to add book to favorites.');
+                    });
+                } else {
+                    console.error('Book not found in listings');
+                    alert('Failed to find book details.');
+                }
+            }).catch((error) => {
+                console.error('Error fetching book details:', error);
+                alert('Failed to fetch book details.');
+            });
+        }
+    }).catch((error) => {
+        console.error('Error checking favorites:', error);
+        alert('Failed to check if the book is already in favorites.');
+    });
+}
+
+// Attach the function to the global window object
+window.addToFave = addToFave;

@@ -20,7 +20,7 @@ window.addEventListener('DOMContentLoaded', () => {
     if (datatablesSimple) {
         const table = new simpleDatatables.DataTable(datatablesSimple);
 
-        const booksRef = ref(database, 'book-listings');
+        const booksRef = ref(database, 'sold-books');
         get(booksRef).then(snapshot => {
             if (snapshot.exists()) {
                 const books = snapshot.val();
@@ -31,10 +31,10 @@ window.addEventListener('DOMContentLoaded', () => {
                     const book = books[key];
                     rows.push([
                         book.title,
-                        book.author,
-                        book.userId,
-                        book.condition,
-                        book.genre,
+                        book.buyerId,
+                        book.sellerId,
+                        book.dateSold,
+                        book.title,
                         `$${parseFloat(book.price).toFixed(2)}`
                     ]);
                 }
