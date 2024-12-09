@@ -30,7 +30,7 @@ window.addEventListener('DOMContentLoaded', () => {
                 for (const key in books) {
                     const book = books[key];
                     rows.push([
-                        book.title,
+                        book.bookId,
                         book.buyerId,
                         book.sellerId,
                         book.dateSold,

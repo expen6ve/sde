@@ -57,7 +57,6 @@ function setupGenreDropdown() {
     });
 }
 
-// Function to display recently listed books
 function displayRecentlyListedBooks() {
     const booksRef = query(ref(database, 'book-listings'), orderByChild('dateListed'));
 
@@ -67,7 +66,10 @@ function displayRecentlyListedBooks() {
         bookListContainer.innerHTML = ''; // Clear previous content
 
         if (bookData) {
-            const booksArray = Object.entries(bookData).reverse(); // Most recent first
+            const booksArray = Object.entries(bookData)
+                .filter(([_, book]) => book.bookStatus === 'approved') // Filter for approved books
+                .reverse(); // Most recent first
+
             const userNames = {};
 
             // Fetch user data to map seller IDs to names
@@ -82,31 +84,36 @@ function displayRecentlyListedBooks() {
                     // Loop through each book and display it
                     booksArray.forEach(([bookId, book]) => {
                         const bookHtml = `
-                                                    <div class="col-lg-3 col-md-6 mb-5">
-                            <div class="card h-100 d-flex flex-column">
-                                <div class="card-body d-flex flex-column">
-                                    <div class="d-flex justify-content-center">
-                                        <img src="${book.imageUrl || 'images/default-book.png'}" class="img-fluid" alt="Book Image" style="height: 200px; object-fit: cover;">
+                            <div class="col-lg-3 col-md-6 mb-5">
+                                <div class="card h-100 d-flex flex-column">
+                                    <div class="card-body d-flex flex-column">
+                                        <div class="d-flex justify-content-center">
+                                            <img src="${book.imageUrl || 'images/default-book.png'}" class="img-fluid" alt="Book Image" style="height: 200px; object-fit: cover;">
+                                        </div>
+                                        <div class="d-flex justify-content-center mt-3">
+                                            <button class="btn custom-btn">Add to Favorites</button>
+                                        </div>
+                                        <h4 class="card-title mt-3 fs-5">${book.title}</h4>
+                                        <p class="card-text"><strong>Author:</strong> ${book.author}</p>
+                                        <p class="card-text"><strong>Seller:</strong> ${userNames[book.userId] || 'Unknown'}</p>
+                                        <p class="card-text"><strong>Condition:</strong> ${book.condition}</p>
+                                        <p class="card-text"><strong>Price:</strong> ₱${book.price}</p>
+                                        
+                                        <!-- More Info button to open modal -->
+                                        <div class="mt-2 mb-2">
+                                            <button class="btn btn-primary w-100" onclick="openMoreInfoModal('${bookId}')">More Info</button>
+                                        </div>                
                                     </div>
-                                    <div class="d-flex justify-content-center mt-3">
-                                        <button class="btn custom-btn">Add to Favorites</button>
-                                    </div>
-                                    <h4 class="card-title mt-3 fs-5">${book.title}</h4>
-                                    <p class="card-text"><strong>Author:</strong> ${book.author}</p>
-                                    <p class="card-text"><strong>Seller:</strong> ${userNames[book.userId] || 'Unknown'}</p>
-                                    <p class="card-text"><strong>Condition:</strong> ${book.condition}</p>
-                                    <p class="card-text"><strong>Price:</strong> ₱${book.price}</p>
-                                    
-                                    <!-- More Info button to open modal -->
-                                    <div class="mt-2 mb-2">
-                                        <button class="btn btn-primary w-100" onclick="openMoreInfoModal('${bookId}')">More Info</button>
-                                    </div>                
                                 </div>
                             </div>
-                        </div>
                         `;
                         bookListContainer.innerHTML += bookHtml; // Append each book's HTML
                     });
+
+                    // Display a message if no approved books are available
+                    if (booksArray.length === 0) {
+                        bookListContainer.innerHTML = '<p>No approved books available for sale.</p>';
+                    }
                 }
             });
         } else {
@@ -114,6 +121,7 @@ function displayRecentlyListedBooks() {
         }
     });
 }
+
 
 // Set up all necessary listeners once DOM is fully loaded
 document.addEventListener('DOMContentLoaded', async () => {
