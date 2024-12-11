@@ -535,8 +535,6 @@ document.addEventListener('click', (event) => {
                 // Show basic user details in the modal
                 const showUserBasicDetails = () => {
                     document.getElementById('profilePicture').src = user.profilePicture;
-                    document.getElementById('email').value = user.email;
-                    document.getElementById('password').value = user.password;
                     document.getElementById('firstName').value = user.firstName;
                     document.getElementById('lastName').value = user.lastName;
                     document.getElementById('age').value = user.age;
@@ -554,8 +552,6 @@ document.addEventListener('click', (event) => {
                 // Handle the Edit button
                 document.getElementById('basicEditButton').addEventListener('click', () => {
                     // Enable the input fields for editing
-                    document.getElementById('email').disabled = false;
-                    document.getElementById('password').disabled = false;
                     document.getElementById('firstName').disabled = false;
                     document.getElementById('lastName').disabled = false;
                     document.getElementById('age').disabled = false;
@@ -572,8 +568,7 @@ document.addEventListener('click', (event) => {
                 document.getElementById('basicSaveButton').addEventListener('click', () => {
                     // Retrieve updated values from the form
                     const updatedUser = {
-                        email: document.getElementById('email').value,
-                        password: document.getElementById('password').value,
+
                         firstName: document.getElementById('firstName').value,
                         lastName: document.getElementById('lastName').value,
                         age: document.getElementById('age').value,
@@ -595,8 +590,6 @@ document.addEventListener('click', (event) => {
                                 const updatedUserData = snapshot.val();
                                 
                                 // Update the fields with the new data
-                                document.getElementById('email').value = updatedUserData.email;
-                                document.getElementById('password').value = updatedUserData.password;
                                 document.getElementById('firstName').value = updatedUserData.firstName;
                                 document.getElementById('lastName').value = updatedUserData.lastName;
                                 document.getElementById('age').value = updatedUserData.age;
@@ -608,8 +601,6 @@ document.addEventListener('click', (event) => {
                         });
 
                         // Disable the inputs and Save button again
-                        document.getElementById('email').disabled = true;
-                        document.getElementById('password').disabled = true;
                         document.getElementById('firstName').disabled = true;
                         document.getElementById('lastName').disabled = true;
                         document.getElementById('age').disabled = true;
