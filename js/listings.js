@@ -110,6 +110,20 @@ function sortBooks(a, b, sortBy) {
            new Date(b.dateListed) - new Date(a.dateListed);
 }
 
+// Function to return the sort order based on the active sorting button
+function getSortOrder() {
+    if (elements.sortButtons.low.classList.contains('active')) {
+        return 'priceLowToHigh';
+    } else if (elements.sortButtons.high.classList.contains('active')) {
+        return 'priceHighToLow';
+    } else if (elements.sortButtons.recent.classList.contains('active')) {
+        return 'dateListed';
+    } else {
+        return 'dateListed'; // Default sorting if no sort button is active
+    }
+}
+
+
 // Search functionality
 elements.searchInput.addEventListener('input', (e) => {
     const searchTerm = e.target.value.trim();
@@ -127,10 +141,17 @@ elements.genreDropdownItems.forEach(item => {
 // Sort buttons functionality
 Object.entries(elements.sortButtons).forEach(([key, button]) => {
     button.addEventListener('click', () => {
+        // Remove the 'active' class from all buttons
+        Object.values(elements.sortButtons).forEach(btn => btn.classList.remove('active'));
+
+        // Add the 'active' class to the clicked button
+        button.classList.add('active');
+
         const sortBy = key === 'low' ? 'priceLowToHigh' : key === 'high' ? 'priceHighToLow' : 'dateListed';
         if (currentUser) displayUserBooks(currentUser.uid, elements.searchInput.value.trim(), sortBy, selectedGenre);
     });
 });
+
 
 // Remove book functionality
 document.addEventListener('click', (event) => {
