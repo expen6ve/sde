@@ -114,11 +114,11 @@ function getLastMessage(chatMessages, currentUser) {
 
 async function loadChatList() {
     const chatList = document.getElementById('sellerChatTab');
-    chatList.innerHTML = ''; // Clear existing chat tabs
+    chatList.innerHTML = '';  // Clear existing chat tabs
 
     onValue(ref(database, 'chats/'), async (snapshot) => {
         const allChats = snapshot.val();
-        chatList.innerHTML = '';
+        chatList.innerHTML = '';  // Clear existing chats
 
         if (allChats) {
             const chatArray = Object.keys(allChats)
@@ -140,6 +140,7 @@ async function loadChatList() {
         }
     });
 }
+
 
 
 
@@ -427,3 +428,21 @@ window.redirectToReviewPage = function(sellerId) {
     }
 };
 
+document.querySelector('#search-addon').addEventListener('click', function() {
+    const searchTerm = document.querySelector('.form-control').value.toLowerCase();
+    filterChatList(searchTerm);
+});
+
+function filterChatList(searchTerm) {
+    const chatList = document.getElementById('sellerChatTab');
+    const allChats = document.querySelectorAll('#sellerChatTab li');  // Get all chat items
+
+    allChats.forEach(chatTab => {
+        const userName = chatTab.querySelector('.fw-bold').textContent.toLowerCase();  // Get the chat's user name
+        if (userName.includes(searchTerm)) {
+            chatTab.style.display = '';  // Show chat tab if it matches
+        } else {
+            chatTab.style.display = 'none';  // Hide chat tab if it doesn't match
+        }
+    });
+}

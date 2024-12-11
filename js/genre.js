@@ -157,10 +157,10 @@ function displayBooks(genre = null, searchTerm = null, sortBy = 'dateListed') {
                                             </div>
                                             <!-- Conditionally render Add to Favorites button -->
                                             ${
-                                                book.userId !== currentUser.uid
+                                                currentUser && book.userId !== currentUser.uid
                                                     ? `<div class="d-flex justify-content-center mt-3">
                                                         <button class="btn custom-btn" onclick="addToFave('${book.id}')">Add to Favorites</button>
-                                                    </div>`
+                                                      </div>`
                                                     : ''
                                             }
                                             <h4 class="card-title mt-3 fs-5">${book.title}</h4>
@@ -190,6 +190,7 @@ function displayBooks(genre = null, searchTerm = null, sortBy = 'dateListed') {
                             `;
                         }
                     });
+                    
 
                 } else {
                     bookListContainer.innerHTML = '<p>No books available.</p>';
@@ -233,21 +234,23 @@ document.getElementById('sendMessageBtn').addEventListener('click', () => {
 });
 
 function addToFave(bookId) {
+    if (!currentUser) {
+        alert('You must be logged in to add to favorites.');
+        return;
+    }
+
     const favoriteBooksRef = ref(database, `favorite-books/${currentUser.uid}/${bookId}`);
 
     // Check if the book already exists in favorites
     get(favoriteBooksRef).then((snapshot) => {
         if (snapshot.exists()) {
-            // Book already exists in favorites
             alert('This book is already in your favorites!');
         } else {
-            // If not, fetch the book details from the listings
             const bookRef = ref(database, `book-listings/${bookId}`);
             get(bookRef).then((bookSnapshot) => {
                 if (bookSnapshot.exists()) {
                     const bookDetails = bookSnapshot.val();
 
-                    // Add the book to favorites
                     set(favoriteBooksRef, {
                         ...bookDetails,
                     })
@@ -272,6 +275,7 @@ function addToFave(bookId) {
         alert('Failed to check if the book is already in favorites.');
     });
 }
+
 
 // Attach the function to the global window object
 window.addToFave = addToFave;
